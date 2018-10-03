@@ -20,8 +20,8 @@ class CategorizeOperations(Resource):
         return {"status" : result}
 
 
-class FetchOperations(Resource):
+class RefreshOperations(Resource):
 
     def get(self):
-        #refresh_data()
+        force_refresh()
         return {"status" : 'SUCCESS'}

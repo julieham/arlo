@@ -10,7 +10,8 @@ ipa = Api(app)
 
 ipa.add_resource(ListOperations, "/list")
 ipa.add_resource(CategorizeOperations, "/categorize")
-ipa.add_resource(FetchOperations, "/fetch")
+ipa.add_resource(RefreshOperations, "/refresh")
+
 
 if __name__ == '__main__':
     app.run(debug=True)
