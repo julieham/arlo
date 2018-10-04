@@ -23,5 +23,5 @@ class CategorizeOperations(Resource):
 class RefreshOperations(Resource):
 
     def get(self):
-        force_refresh()
-        return {"status" : 'SUCCESS'}
+        result = force_refresh()
+        return {"status" : result}

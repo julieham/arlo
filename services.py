@@ -21,8 +21,11 @@ pd.set_option("display.max_columns", 100)
 
 
 def get_transactions_as_df(account, limit):
-    df = pd.DataFrame(get_n_last_transactions(account, limit))
-    return dataframe_formatter(df, account)
+    valid, data = get_n_last_transactions(account, limit)
+    if not valid:
+        return False, None
+    df = pd.DataFrame(data)
+    return True, dataframe_formatter(df, account)
 
 
 # %% SERVICES
@@ -31,16 +34,24 @@ def refresh_data():
     print('REFRESHING ? ')
     if get_delay_since_last_update() > delay_refresh_minutes :
         print('YES')
-        force_refresh()
+        print(force_refresh())
     else:
         print('NO')
 
 
 def force_refresh():
-    df = [get_transactions_as_df(account, max_transactions_per_user) for account in login]
-    new_data = pd.concat(df).sort_values("date", ascending=False).reset_index(drop=True)
+    print('FORCE REFRESH')
+    all_valid, all_data = True, []
+    for account in login:
+        valid, data = get_transactions_as_df(account, max_transactions_per_user)
+        all_valid = all_valid and valid
+        all_data.append(data)
+    if not all_valid:
+        return 'FAIL'
+    new_data = pd.concat(all_data).sort_values("date", ascending=False).reset_index(drop=True)
     save_data(merge_data(new_data))
     change_last_update_to_now()
+    return 'SUCCESS'
 
 
 def list_data_json():
