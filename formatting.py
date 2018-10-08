@@ -1,6 +1,11 @@
-from datetime import datetime as dt
+import time
+from collections import defaultdict
+
+import pandas as pd
+
 from param import *
 from crud import read_data
+from autofill_name import *
 
 import numpy as np
 import hashlib
@@ -19,39 +24,51 @@ def parse_ids(transaction_ids):
 
 
 def convert_timestamp_to_datetime(timestamp):
-    return dt.fromtimestamp(timestamp // 1e3)
+    return pd.datetime.fromtimestamp(timestamp // 1e3)
 
 
-def make_name(row):
-    if not row['merchantName'].strip() == '':
-        return row['merchantName']
-    if not row['referenceText'].strip() == '':
-        spaces_virement = "From Main Account to "
-        if spaces_virement in row['referenceText']:
-            return 'Saving for ' + row['referenceText'][len(spaces_virement):]
+def make_bank_name(row):
+    merchant, partner, reference, trans_type = [row[u].strip() for u in ['merchantName', 'partnerName', 'referenceText', 'type']]
+    if merchant:
+        return merchant
+    if trans_type == 'DD':
+        return '#PRLV ' + partner
+    if reference:
         return row['referenceText'] + ' #VIR'
-    return '#VIR ' + ['to ', 'from '][row['amount']>0] + row["partnerName"]
+    return '#VIR ' + ['to ', 'from '][row['amount'] > 0] + partner
 
 
 def dataframe_formatter(df, account):
-    names = df[['merchantName', 'referenceText', 'partnerName', 'amount']].replace(np.NaN, '').apply(lambda row: make_name(row), axis=1)
-    df['bank_name'] = names
+    bank_names = df.replace(np.NaN, '').apply(lambda row: make_bank_name(row), axis=1)
+    df['bank_name'] = bank_names
+    readable_names = bank_names.apply(make_readable_name)
+    df['name'] = readable_names
     df['date'] = df['visibleTS'].apply(convert_timestamp_to_datetime)
     df['account'] = account
     df['category'] = '-'
     df['comment'] = '-'
     return df[column_names]
 
-def name_reducer(name):
-    return name#.replace(' to ',' > ').replace('From ','')
+
+def create_id(name, timestamp, amount, account):
+    letters_name = name
+    string = '*'.join([letters_name, str(int(timestamp * 1000000)), str(int(amount * 100)), account])
+    return hashlib.md5(string.encode()).hexdigest()
 
 
-def create_id(name, amount, timestamp):
-    id = ''.join(u * u.isalnum() for u in name) + '*' + str(int(timestamp * 1000000)) + '*' + str(amount).replace('.', '')
-    m = hashlib.md5()
-    m.update(str.encode(id))
-    return str(m.hexdigest())
+def make_a_csv_line(transaction_fields):
+    timestamp = pd.datetime.timestamp(pd.datetime.now())
+    name, amount, account = [transaction_fields[u] for u in mandatory_fields]
 
-#def get_all_balances():
- #   balances = dict()
-  #  for n
+    transaction_fields['id'] = create_id(name, timestamp, amount, account)
+
+    if 'date' not in transaction_fields:
+        transaction_fields['date'] = convert_timestamp_to_datetime(1000 * timestamp)
+    if 'category' not in transaction_fields:
+        transaction_fields['category'] = '-'
+
+    fields = defaultdict(lambda: "")
+    for u in transaction_fields:
+        fields[u] = transaction_fields[u]
+
+    return ','.join(str(fields[col]) for col in column_names)

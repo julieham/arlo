@@ -11,6 +11,7 @@ ipa = Api(app)
 ipa.add_resource(ListOperations, "/list")
 ipa.add_resource(CategorizeOperations, "/categorize")
 ipa.add_resource(RefreshOperations, "/refresh")
+ipa.add_resource(CreateManualTransaction, "/create")
 
 
 if __name__ == '__main__':

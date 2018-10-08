@@ -1,4 +1,5 @@
 import json
+import time
 
 from param import *
 from clean_n26 import get_n_last_transactions
@@ -58,7 +59,7 @@ def list_data_json():
     refresh_data()
     data = read_data().head(20)
     data['pending'] = data['type'] == 'AA'
-    data['bank_name'] = data['bank_name'].apply(name_reducer)
+    data['bank_name'] = data['bank_name']
     data = data[['id','bank_name', 'amount', 'category', 'pending']]
     return data.to_json(orient="records")
 
@@ -72,16 +73,25 @@ def categorize(transaction_ids, category_name):
     return 'SUCCESS'
 
 
+def edit_field(transaction_ids, field_name, field_value):
+    error_message, transaction_ids = parse_ids(transaction_ids)
+    if error_message:
+        return error_message
+
+    change_one_field_on_ids(transaction_ids, field_name, field_value)
+    return 'SUCCESS'
+
+
 def create_manual_transaction(json_input):
-    transaction_fields = json.loads(json_input)
+    transaction_fields = json_input
 
-    timestamp = pd.datetime.timestamp(pd.datetime.now())
-    transaction_fields['date'] = convert_timestamp_to_datetime(1000*timestamp)
+    if not all(u in transaction_fields for u in mandatory_fields):
+        return 'FAIL'
 
-    transaction_fields['id'] = create_id(transaction_fields['bank_name'], timestamp, transaction_fields['amount'])
+    line = make_a_csv_line(transaction_fields)
+    add_data_line(line)
 
-    data = read_data().append(pd.DataFrame(transaction_fields, index=[0]), ignore_index=True, sort=False)
-    save_data(data)
+    return 'SUCCESS'
 
 
 #%% RUN
