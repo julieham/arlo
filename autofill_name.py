@@ -7,7 +7,7 @@ def read_dico(filename):
     for line in f:
         try:
             line = line.replace('\n', '')
-            a, *b = line.split(',')
+            a, b = line.split(',')
             dictionary[a] = b
         except ValueError:
             pass
@@ -31,8 +31,15 @@ def find_from_pattern(name, patterns_dict):
     return False
 
 
-def make_readable_name(s):
-    translation = find_from_pattern(s, read_dico('data/dico_sorted.csv'))
+def autofill_name(s):
+    translation = find_from_pattern(s, read_dico('data/autofill_name.csv'))
     if translation:
         return translation
     return '** ' + s + ' **'
+
+
+def autofill_cat(name):
+    dico_categories = read_dico('data/autofill_category.csv')
+    if name in dico_categories:
+        return dico_categories[name]
+    return '-'

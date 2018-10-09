@@ -51,13 +51,11 @@ def remove_original_currency(row):
 
 
 def dataframe_formatter(df, account):
-    bank_names = df.replace(np.NaN, '').apply(lambda row: make_bank_name(row), axis=1)
-    df['bank_name'] = bank_names
-    readable_names = bank_names.apply(make_readable_name)
-    df['name'] = readable_names
+    df['bank_name'] = df.replace(np.NaN, '').apply(lambda row: make_bank_name(row), axis=1)
+    df['name'] = df['bank_name'].apply(autofill_name)
     df['date'] = df['visibleTS'].apply(convert_timestamp_to_datetime)
     df['account'] = account
-    df['category'] = '-'
+    df['category'] = df['name'].apply(autofill_cat)
     df['comment'] = '-'
     df['originalAmount'] = df[['originalAmount', 'originalCurrency']].apply(lambda row: remove_original_amount(row), axis=1)
     df['originalCurrency'] = df[['originalAmount', 'originalCurrency']].apply(lambda row: remove_original_currency(row), axis=1)

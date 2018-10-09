@@ -42,16 +42,19 @@ def refresh_data():
 
 def force_refresh():
     print('FORCE REFRESH')
+    t = time.time()
     all_valid, all_data = True, []
     for account in login:
         valid, data = get_transactions_as_df(account, max_transactions_per_user)
         all_valid = all_valid and valid
         all_data.append(data)
     if not all_valid:
+        print('REFRESH FAILED')
         return 'FAIL'
     new_data = pd.concat(all_data).sort_values("date", ascending=False).reset_index(drop=True)
     save_data(merge_data(new_data))
     change_last_update_to_now()
+    print(time.time() - t, max_transactions_per_user)
     return 'SUCCESS'
 
 
