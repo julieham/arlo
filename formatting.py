@@ -38,6 +38,18 @@ def make_bank_name(row):
     return '#VIR ' + ['to ', 'from '][row['amount'] > 0] + partner
 
 
+def remove_original_amount(row):
+    if row['originalCurrency'] == 'EUR':
+        return ''
+    return row['originalAmount']
+
+
+def remove_original_currency(row):
+    if row['originalCurrency'] == 'EUR':
+        return ''
+    return row['originalCurrency']
+
+
 def dataframe_formatter(df, account):
     bank_names = df.replace(np.NaN, '').apply(lambda row: make_bank_name(row), axis=1)
     df['bank_name'] = bank_names
@@ -47,6 +59,8 @@ def dataframe_formatter(df, account):
     df['account'] = account
     df['category'] = '-'
     df['comment'] = '-'
+    df['originalAmount'] = df[['originalAmount', 'originalCurrency']].apply(lambda row: remove_original_amount(row), axis=1)
+    df['originalCurrency'] = df[['originalAmount', 'originalCurrency']].apply(lambda row: remove_original_currency(row), axis=1)
     return df[column_names]
 
 

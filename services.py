@@ -55,12 +55,12 @@ def force_refresh():
     return 'SUCCESS'
 
 
-def list_data_json():
-    refresh_data()
-    data = read_data().head(20)
+def list_data_json(refresh = True):
+    if refresh:
+        refresh_data()
+    data = read_data().head(100)
     data['pending'] = data['type'] == 'AA'
-    data['bank_name'] = data['bank_name']
-    data = data[['id','bank_name', 'amount', 'category', 'pending']]
+    data = data[['id','name', 'amount', 'category', 'pending', 'originalAmount', 'originalCurrency']]
     return data.to_json(orient="records")
 
 
@@ -87,7 +87,7 @@ def create_manual_transaction(json_input):
 
     if not all(u in transaction_fields for u in mandatory_fields):
         return 'FAIL'
-
+    transaction_fields['amount'] = float(transaction_fields['amount'])
     line = make_a_csv_line(transaction_fields)
     add_data_line(line)
 
