@@ -1,4 +1,5 @@
-column_names = ['name', 'bank_name', 'amount', 'originalAmount', 'originalCurrency', 'date', 'category', 'account', 'type', 'id', 'comment']
+column_names = ['name', 'bank_name', 'amount', 'originalAmount', 'originalCurrency', 'date', 'category', 'account',
+                'type', 'id', 'comment', 'link']
 delay_refresh_minutes = 10
 virement_charges = ['ENGIE', ]
 mandatory_fields = ['name', 'amount', 'account']

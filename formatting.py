@@ -57,6 +57,7 @@ def dataframe_formatter(df, account):
     df['account'] = account
     df['category'] = df['name'].apply(autofill_cat)
     df['comment'] = '-'
+    df['link'] = ''
     df['originalAmount'] = df[['originalAmount', 'originalCurrency']].apply(lambda row: remove_original_amount(row), axis=1)
     df['originalCurrency'] = df[['originalAmount', 'originalCurrency']].apply(lambda row: remove_original_currency(row), axis=1)
     return df[column_names]

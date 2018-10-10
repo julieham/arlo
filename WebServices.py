@@ -37,3 +37,12 @@ class RefreshOperations(Resource):
     def get():
         result = force_refresh()
         return {"status": result}
+
+
+class LinkTwoTransactions(Resource):
+
+    @staticmethod
+    def post():
+        ids = request.json['transaction_ids']
+        result = link_two_ids(ids)
+        return {"status": result}

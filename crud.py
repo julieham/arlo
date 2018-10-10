@@ -7,6 +7,7 @@ filename = "./data/data.csv"
 def read_data():
     data = pd.read_csv(filename)[column_names]
     data['date'] = pd.to_datetime(data['date'])
+    data['pending'] = data['type'] == 'AA' and data['link'].isnull()
     return data
 
 

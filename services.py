@@ -58,11 +58,13 @@ def force_refresh():
     return 'SUCCESS'
 
 
-def list_data_json(refresh = True):
+def list_data_json(refresh = False, hide_linked = True):
     if refresh:
         refresh_data()
     data = read_data().head(100)
-    data['pending'] = data['type'] == 'AA'
+    print(data['link'])
+    if hide_linked:
+        data = data[data['link'].isnull()]
     data = data[['id','name', 'amount', 'category', 'pending', 'originalAmount', 'originalCurrency']]
     return data.to_json(orient="records")
 
@@ -97,5 +99,27 @@ def create_manual_transaction(json_input):
     return 'SUCCESS'
 
 
-#%% RUN
-#refresh_data()
+def link_two_ids(ids):
+    if len(ids) < 2:
+        return 'FAIL not enough transactions'
+    if len(ids) > 2:
+        return 'FAIL too many transactions'
+    id1, id2 = ids
+    data = read_data()
+    if len({id1, id2} & set(data['id'])) != 2:
+        return 'FAIL transactions not found'
+
+    trans1, trans2 = data.loc[data['id'] == id1], data.loc[data['id'] == id2]
+    if not(all(trans1['link'].isnull()) and all(trans2['link'].isnull())):
+        return 'FAIL transaction already linked'
+    if float(trans1['amount']) != - float(trans2['amount']):
+        return 'FAIL amounts are not equal'
+
+    data.loc[data['id'] == id1, ['link']] = id2
+    data.loc[data['id'] == id2, ['link']] = id1
+    save_data(data)
+    return 'SUCCESS'
+
+
+
+
