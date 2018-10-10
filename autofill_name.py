@@ -1,18 +1,7 @@
 import re
 
 
-def read_dico(filename):
-    dictionary = dict()
-    f = open(filename, 'r')
-    for line in f:
-        try:
-            line = line.replace('\n', '')
-            a, b = line.split(',')
-            dictionary[a] = b
-        except ValueError:
-            pass
-    f.close()
-    return dictionary
+
 
 
 def sort_and_rewrite_dico(filename):

@@ -50,6 +50,10 @@ def remove_original_currency(row):
     return row['originalCurrency']
 
 
+def is_pending(row):
+    return row['type'] == 'AA' and row['link'] == '-'
+
+
 def dataframe_formatter(df, account):
     df['bank_name'] = df.replace(np.NaN, '').apply(lambda row: make_bank_name(row), axis=1)
     df['name'] = df['bank_name'].apply(autofill_name)
@@ -57,10 +61,11 @@ def dataframe_formatter(df, account):
     df['account'] = account
     df['category'] = df['name'].apply(autofill_cat)
     df['comment'] = '-'
-    df['link'] = ''
+    df['link'] = '-'
+    df['pending'] = df.apply(lambda row:is_pending(row), axis=1)
     df['originalAmount'] = df[['originalAmount', 'originalCurrency']].apply(lambda row: remove_original_amount(row), axis=1)
     df['originalCurrency'] = df[['originalAmount', 'originalCurrency']].apply(lambda row: remove_original_currency(row), axis=1)
-    return df[column_names]
+    return df
 
 
 def create_id(name, timestamp, amount, account):

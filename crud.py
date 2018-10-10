@@ -1,14 +1,26 @@
 import pandas as pd
-from param import column_names
 
 filename = "./data/data.csv"
 
 
 def read_data():
-    data = pd.read_csv(filename)[column_names]
+    data = pd.read_csv(filename)
     data['date'] = pd.to_datetime(data['date'])
-    data['pending'] = data['type'] == 'AA' and data['link'].isnull()
     return data
+
+
+def read_dico(filename):
+    dictionary = dict()
+    f = open(filename, 'r')
+    for line in f:
+        try:
+            line = line.replace('\n', '')
+            a, b = line.split(',')
+            dictionary[a] = b
+        except ValueError:
+            pass
+    f.close()
+    return dictionary
 
 
 def save_data(data):

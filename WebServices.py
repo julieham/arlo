@@ -46,3 +46,12 @@ class LinkTwoTransactions(Resource):
         ids = request.json['transaction_ids']
         result = link_two_ids(ids)
         return {"status": result}
+
+
+class GetRecap(Resource):
+
+    @staticmethod
+    def get():
+        recap = get_recap_categories()
+        return json.loads(recap)
+

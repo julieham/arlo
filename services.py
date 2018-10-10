@@ -11,6 +11,7 @@ import pandas as pd
 import numpy as np
 
 # %% PANDAS PRINT PARAMETERS
+from recap_by_category import get_categories_recap, get_trip_data
 
 desired_width = 10000
 pd.set_option('display.width', desired_width)
@@ -62,9 +63,8 @@ def list_data_json(refresh = False, hide_linked = True):
     if refresh:
         refresh_data()
     data = read_data().head(100)
-    print(data['link'])
     if hide_linked:
-        data = data[data['link'].isnull()]
+        data = data[data['link'] == '-']
     data = data[['id','name', 'amount', 'category', 'pending', 'originalAmount', 'originalCurrency']]
     return data.to_json(orient="records")
 
@@ -121,5 +121,10 @@ def link_two_ids(ids):
     return 'SUCCESS'
 
 
+def get_recap_categories(initial_date_str="2018-10-01"):
+    this_trip_data = get_trip_data(initial_date_str)
+    recap = get_categories_recap(this_trip_data)
+
+    return recap.to_json(orient="records")
 
 
