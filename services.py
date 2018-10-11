@@ -55,7 +55,6 @@ def force_refresh():
     new_data = pd.concat(all_data).sort_values("date", ascending=False).reset_index(drop=True)
     save_data(merge_data(new_data))
     change_last_update_to_now()
-    print(time.time() - t, max_transactions_per_user)
     return 'SUCCESS'
 
 

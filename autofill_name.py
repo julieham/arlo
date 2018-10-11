@@ -1,15 +1,6 @@
 import re
 
-
-
-
-
-def sort_and_rewrite_dico(filename):
-    dictionary = read_dico(filename)
-    f = open(filename, 'w')
-    for d in sorted(dictionary, key=lambda k: dictionary[k][1].lower() + dictionary[k][0].lower()):
-        f.write(d + "," + ','.join(dictionary[d]) + '\n')
-    f.close()
+from crud import read_dico
 
 
 def find_from_pattern(name, patterns_dict):

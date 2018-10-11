@@ -62,9 +62,9 @@ def dataframe_formatter(df, account):
     df['category'] = df['name'].apply(autofill_cat)
     df['comment'] = '-'
     df['link'] = '-'
-    df['pending'] = df.apply(lambda row:is_pending(row), axis=1)
-    df['originalAmount'] = df[['originalAmount', 'originalCurrency']].apply(lambda row: remove_original_amount(row), axis=1)
-    df['originalCurrency'] = df[['originalAmount', 'originalCurrency']].apply(lambda row: remove_original_currency(row), axis=1)
+    df['pending'] = df['type'] == 'AA'
+    df['originalAmount'] = df.apply(lambda row: remove_original_amount(row), axis=1)
+    df['originalCurrency'] = df.apply(lambda row: remove_original_currency(row), axis=1)
     return df
 
 

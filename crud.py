@@ -1,11 +1,14 @@
 import pandas as pd
 
-filename = "./data/data.csv"
+from formatting import is_pending
+
+data_file = "./data/data.csv"
 
 
 def read_data():
-    data = pd.read_csv(filename)
+    data = pd.read_csv(data_file)
     data['date'] = pd.to_datetime(data['date'])
+    data['pending'] = data.apply(lambda row: is_pending(row), axis=1)
     return data
 
 
@@ -23,13 +26,20 @@ def read_dico(filename):
     return dictionary
 
 
+def write_sorted_dico(dico, filename):
+    f = open(filename, 'w')
+    for d in sorted(dico, key=lambda k: dico[k][1].lower() + dico[k][0].lower()):
+        f.write(d + "," + ','.join(dico[d]) + '\n')
+    f.close()
+
+
 def save_data(data):
     data = data.sort_values("date", ascending=False).reset_index(drop=True)
-    data.to_csv(filename, index=False)
+    data.to_csv(data_file, index=False)
 
 
 def merge_data(new_data):
-    old_data = read_data()
+    # old_data = read_data()
     return new_data
     # new = new_data[new_data['id'].isin(list(old_data['id'])) == False]
     # gone = old_data[old_data['id'].isin(list(new_data['id'])) is False]
@@ -63,7 +73,7 @@ def get_delay_since_last_update():
 
 
 def add_data_line(line):
-    with open(filename, 'r+') as f:
+    with open(data_file, 'r+') as f:
         content = f.readlines()
         content.insert(1, line + "\n")
         f.seek(0)
