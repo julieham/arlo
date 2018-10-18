@@ -1,3 +1,9 @@
-Home,1000
-Transports,10
-Food,100
+NY_Home,900
+NY_Plane,850
+NY_Transp,700
+NY_Food,2000
+NY_Drinks,150
+NY_Shopping,1000
+NY_Sody,500
+NY_Apple,500
+NY_Sports,400

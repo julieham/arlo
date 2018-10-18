@@ -14,6 +14,7 @@ ipa.add_resource(RefreshOperations, "/refresh")
 ipa.add_resource(CreateManualTransaction, "/create")
 ipa.add_resource(LinkTwoTransactions, "/link")
 ipa.add_resource(GetRecap, "/recap")
+ipa.add_resource(GetBalances, "/balances")
 
 
 if __name__ == '__main__':

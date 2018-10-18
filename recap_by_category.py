@@ -30,6 +30,8 @@ def get_trip_data(initial_date_str):
     initial_date = pd.datetime.strptime(initial_date_str, '%Y-%m-%d')
     data = read_data()
     this_trip_data = data[data['date'] >= initial_date]
+    if this_trip_data.shape[0] == 0:
+        return this_trip_data
     exchange_rate = get_exchange_rate(this_trip_data)
     euro_amounts = this_trip_data.apply(lambda row: get_euro_amount(row, exchange_rate), axis=1)
     this_trip_data = this_trip_data.assign(euro_amount=euro_amounts)
@@ -42,5 +44,5 @@ def get_categories_recap(this_trip_data):
     recap = recap[recap['category'] != '-']
 
     budgets = get_budgets()
-    recap['total_budget'] = recap['category'].map(budgets).fillna(0)
+    recap['total_budget'] = recap['category'].map(budgets).fillna(0).astype(float)
     return recap

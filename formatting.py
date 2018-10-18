@@ -1,3 +1,4 @@
+import math
 import time
 from collections import defaultdict
 
@@ -50,9 +51,6 @@ def remove_original_currency(row):
     return row['originalCurrency']
 
 
-def is_pending(row):
-    return row['type'] == 'AA' and row['link'] == '-'
-
 
 def dataframe_formatter(df, account):
     df['bank_name'] = df.replace(np.NaN, '').apply(lambda row: make_bank_name(row), axis=1)
@@ -65,7 +63,20 @@ def dataframe_formatter(df, account):
     df['pending'] = df['type'] == 'AA'
     df['originalAmount'] = df.apply(lambda row: remove_original_amount(row), axis=1)
     df['originalCurrency'] = df.apply(lambda row: remove_original_currency(row), axis=1)
-    return df
+    return df[column_names]
+
+
+def type_to_method(row):
+    type = row['type']
+    amount = row['amount']
+    account = row['account']
+    if type in ['PT', 'AA', 'AE']:
+        return 'card'
+    if type in ['DT', 'CT']:
+        return 'transfer'
+    if math.isnan(amount) or account == 'Cash':
+        return 'cash'
+    return 'card'
 
 
 def create_id(name, timestamp, amount, account):
@@ -80,6 +91,7 @@ def make_a_csv_line(transaction_fields):
 
     transaction_fields['id'] = create_id(name, timestamp, amount, account)
 
+
     if 'date' not in transaction_fields:
         transaction_fields['date'] = convert_timestamp_to_datetime(1000 * timestamp)
     if 'category' not in transaction_fields:
@@ -88,5 +100,6 @@ def make_a_csv_line(transaction_fields):
     fields = defaultdict(lambda: "")
     for u in transaction_fields:
         fields[u] = transaction_fields[u]
+    print(column_names)
 
     return ','.join(str(fields[col]) for col in column_names)

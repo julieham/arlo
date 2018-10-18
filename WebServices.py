@@ -55,3 +55,11 @@ class GetRecap(Resource):
         recap = get_recap_categories()
         return json.loads(recap)
 
+
+class GetBalances(Resource):
+
+    @staticmethod
+    def get():
+        recap = get_balances().reset_index()
+        print(recap)
+        return json.loads(recap.to_json(orient="records"))

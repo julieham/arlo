@@ -1,6 +1,8 @@
+import codecs
+import json
+
 import pandas as pd
 
-from formatting import is_pending
 
 data_file = "./data/data.csv"
 
@@ -8,13 +10,13 @@ data_file = "./data/data.csv"
 def read_data():
     data = pd.read_csv(data_file)
     data['date'] = pd.to_datetime(data['date'])
-    data['pending'] = data.apply(lambda row: is_pending(row), axis=1)
+    data['pending'] = data.apply(lambda row: row['type'] == 'AA' and row['link'] == '-', axis=1)
     return data
 
 
 def read_dico(filename):
     dictionary = dict()
-    f = open(filename, 'r')
+    f = codecs.open(filename,'r',encoding='utf8')
     for line in f:
         try:
             line = line.replace('\n', '')
@@ -38,16 +40,9 @@ def save_data(data):
     data.to_csv(data_file, index=False)
 
 
-def merge_data(new_data):
-    # old_data = read_data()
-    return new_data
-    # new = new_data[new_data['id'].isin(list(old_data['id'])) == False]
-    # gone = old_data[old_data['id'].isin(list(new_data['id'])) is False]
-    # if gone.shape[0] > 0:
-    #     print('-'*40 + '\n' + 'DISAPPEARED TRANSACTIONS' + '\n' + '-'*40)
-    #     print(gone)
-    # TODO : make this smarter
-    # return new_data
+def merge_data(old_data, new_data):
+    other_accounts = old_data[old_data['account'].str.endswith('_N26') == False]
+    return pd.concat([new_data, other_accounts]).sort_values("date", ascending=False).reset_index(drop=True)
 
 
 def change_one_field_on_ids(transaction_ids, field_name, field_value):
@@ -62,6 +57,7 @@ def change_last_update_to_now():
 
 
 def get_delay_since_last_update():
+    print('BEGIN DELAY')
     try:
         with open("last_update.txt", mode='r') as file:
             last_update = file.read()
@@ -78,3 +74,15 @@ def add_data_line(line):
         content.insert(1, line + "\n")
         f.seek(0)
         f.write("".join(content))
+
+
+def write_json_dict(filename, dico):
+    with open(filename, 'w') as f:
+        json.dump(dico, f, separators=[",\n", ":"])
+
+
+def read_json_dict(filename):
+    with open(filename, "r") as read_file:
+        data = json.load(read_file)
+    return data
+
