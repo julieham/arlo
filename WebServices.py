@@ -61,5 +61,4 @@ class GetBalances(Resource):
     @staticmethod
     def get():
         recap = get_balances().reset_index()
-        print(recap)
         return json.loads(recap.to_json(orient="records"))

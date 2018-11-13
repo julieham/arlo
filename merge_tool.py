@@ -6,18 +6,14 @@ from df_operations import *
 def add_link_id(df):
     pd.options.mode.chained_assignment = None
 
-    print(df['originalAmount'])
-    df['originalAmount'] = df['originalAmount'].astype(float)
-
     df.loc[:, 'theSign'] = np.where(df['amount'] >= 0, '+', '-')
-    df.loc[:, 'theAmount'] = (100*np.where(pd.isnull(df['originalAmount']), df['amount'].abs(),df['originalAmount'].abs())).astype(int).astype(str)
-    df.loc[:, 'theCurrency'] = np.where(pd.isnull(df['originalAmount']), 'EUR', df['originalCurrency'])
+    df.loc[:, 'theAmount'] = (100*df['amount']).abs().astype(int).astype(str)
 
-    df.loc[:, 'linkID'] = df['theSign'].str.cat(df[['theAmount', 'theCurrency', 'bank_name', 'account']], sep='*')
-    df.loc[:, 'linkIDnoName'] = df['theSign'].str.cat(df[['theAmount', 'theCurrency', 'account']], sep='*')
-    df.loc[:, 'linkIDnoAmount'] = df['theSign'].str.cat(df[['theCurrency', 'bank_name', 'account']], sep='*')
+    df.loc[:, 'linkID'] = df['theSign'].str.cat(df[['theAmount', 'bank_name', 'account']], sep='*')
+    df.loc[:, 'linkIDnoName'] = df['theSign'].str.cat(df[['theAmount', 'account']], sep='*')
+    df.loc[:, 'linkIDnoAmount'] = df['theSign'].str.cat(df[['bank_name', 'account']], sep='*')
 
-    df.drop(['theAmount', 'theCurrency', 'theSign'], inplace=True, axis=1)
+    df.drop(['theAmount', 'theSign'], inplace=True, axis=1)
 
 
 def match_gone_transactions(gone, candidates, processed_transactions, id_field_name):
@@ -52,19 +48,13 @@ def identify_old_new_data(old_data, new_data):
 
 def associate_pending_gone(old_data, new_data):
     (gone, old, new) = identify_old_new_data(old_data, new_data)
-    print('NEW')
-    print(new[['bank_name', 'originalAmount']])
+
     add_link_id(new)
-    print('GONE')
-    print(gone['originalAmount'])
     add_link_id(gone)
-    print('LINK ID DONE')
 
     gone = match_gone_transactions(gone, new, old, 'linkID')
     gone = match_gone_transactions(gone, new, old, 'linkIDnoAmount')
     gone = match_gone_transactions(gone, new, old, 'linkIDnoName')
-
-    print('MATCH DONE')
 
     if len(gone):
         print('LOST TRANSACTIONS : ', len(gone))
@@ -79,12 +69,12 @@ def opposite_sign_linkID(linkID):
 
 def find_the_associated_refund(pending_transactions, pending_source, refund_transactions, refunds_source):
     for index_pending, pending_trans in pending_transactions.iterrows():
-        candidates = filter_df_one_value(refunds_source, 'linkID', opposite_sign_linkID(pending_trans['linkID']))
+        candidates = filter_df_one_value(refund_transactions, 'linkID', opposite_sign_linkID(pending_trans['linkID']))
         if df_is_not_empty(candidates):
             chosen_index = min(candidates.index)
             pending_source.loc[index_pending, ['link', 'pending']] = [refunds_source.loc[chosen_index, 'id'], False]
             refunds_source.loc[chosen_index, ['link', 'pending']] = [pending_source.loc[index_pending, 'id'], False]
-            extract_line_from_df(chosen_index, refunds_source)
+            extract_line_from_df(chosen_index, refund_transactions)
 
 
 def associate_pending_with_refund(old_data, new_data):
@@ -105,8 +95,6 @@ def associate_pending_with_refund(old_data, new_data):
 
 def merge_n26_data(old_data, new_data):
     (old_data, new_data) = associate_pending_gone(old_data, new_data)
-
-    print("nike ta mère on s'en branle")
 
     return associate_pending_with_refund(old_data, new_data)
 
