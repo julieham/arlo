@@ -1,14 +1,18 @@
 import codecs
 import json
-
 import pandas as pd
+
 
 
 data_file = "./data/data.csv"
 
 
+def sort_df_by_descending_date(df):
+    return df.sort_values("date", ascending=False).reset_index(drop=True)
+
+
 def read_data():
-    data = pd.read_csv(data_file)
+    data = pd.read_csv(data_file, na_values=' ')
     data['date'] = pd.to_datetime(data['date'])
     data['pending'] = data.apply(lambda row: row['type'] == 'AA' and row['link'] == '-', axis=1)
     return data
@@ -35,20 +39,15 @@ def write_sorted_dico(dico, filename):
     f.close()
 
 
-def save_data(data):
-    data = data.sort_values("date", ascending=False).reset_index(drop=True)
+def save_data(data_file, data):
+    data = sort_df_by_descending_date(data)
     data.to_csv(data_file, index=False)
-
-
-def merge_data(old_data, new_data):
-    other_accounts = old_data[old_data['account'].str.endswith('_N26') == False]
-    return pd.concat([new_data, other_accounts]).sort_values("date", ascending=False).reset_index(drop=True)
 
 
 def change_one_field_on_ids(transaction_ids, field_name, field_value):
     data = read_data()
     data.loc[data['id'].isin(transaction_ids), [field_name]] = field_value
-    save_data(data)
+    save_data(data_file, data)
 
 
 def change_last_update_to_now():

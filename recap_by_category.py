@@ -1,12 +1,14 @@
+import math
+
 import pandas as pd
 
 from crud import read_data, read_dico
 
 
 def get_euro_amount(row, exchange_rate):
-    if not row.loc['amount'] == 0:
-        return row.loc['amount']
-    return row.loc['originalAmount'] * exchange_rate
+    if math.isnan(row.loc['amount']):
+        return row.loc['originalAmount'] * exchange_rate
+    return row.loc['amount']
 
 
 def get_budgets():
@@ -35,14 +37,22 @@ def get_trip_data(initial_date_str):
     exchange_rate = get_exchange_rate(this_trip_data)
     euro_amounts = this_trip_data.apply(lambda row: get_euro_amount(row, exchange_rate), axis=1)
     this_trip_data = this_trip_data.assign(euro_amount=euro_amounts)
-    this_trip_data = this_trip_data[['date', 'euro_amount', 'category']]
+    this_trip_data = this_trip_data[['date', 'euro_amount', 'category', 'pending']]
     return this_trip_data
 
 
 def get_categories_recap(this_trip_data):
-    recap = this_trip_data.groupby(['category']).sum().apply(abs).reset_index()
-    recap = recap[recap['category'] != '-']
+    data = this_trip_data.groupby(['category']).sum().apply(abs).reset_index()
+    data = data[data['category'] != '-']
 
     budgets = get_budgets()
-    recap['total_budget'] = recap['category'].map(budgets).fillna(0).astype(float)
-    return recap
+    data['total_budget'] = data['category'].map(budgets).fillna(0).astype(float)
+
+    data = data[data['category'].str.startswith('NY')]
+
+    to_sum_data = data[data['category'] != 'NY_Input']
+    total = to_sum_data.sum(numeric_only=True)
+    total['category'] = 'TOTAL'
+    data = data.append(total, ignore_index=True)
+
+    return data

@@ -1,5 +1,4 @@
 import math
-import time
 from collections import defaultdict
 
 import pandas as pd
@@ -41,7 +40,7 @@ def make_bank_name(row):
 
 def remove_original_amount(row):
     if row['originalCurrency'] == 'EUR':
-        return ''
+        return np.NaN
     return row['originalAmount']
 
 
@@ -87,10 +86,17 @@ def create_id(name, timestamp, amount, account):
 
 def make_a_csv_line(transaction_fields):
     timestamp = pd.datetime.timestamp(pd.datetime.now())
-    name, amount, account = [transaction_fields[u] for u in mandatory_fields]
+    name, account = [transaction_fields[u] for u in mandatory_fields]
+
+    if transaction_fields['amount'] == '':
+        amount = transaction_fields['originalAmount']
+    else:
+        amount = transaction_fields['amount']
 
     transaction_fields['id'] = create_id(name, timestamp, amount, account)
 
+    if 'originalAmount' in transaction_fields and 'originalCurrency' not in transaction_fields:
+        transaction_fields['originalCurrency'] = "USD"
 
     if 'date' not in transaction_fields:
         transaction_fields['date'] = convert_timestamp_to_datetime(1000 * timestamp)
@@ -100,6 +106,5 @@ def make_a_csv_line(transaction_fields):
     fields = defaultdict(lambda: "")
     for u in transaction_fields:
         fields[u] = transaction_fields[u]
-    print(column_names)
 
     return ','.join(str(fields[col]) for col in column_names)

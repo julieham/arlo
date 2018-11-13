@@ -307,12 +307,12 @@ save_data()
 
 
 
-# CT = incoming transfer
+
 # PT = card transaction
 # DT = direct transfer (outgoing)
 # CT = transfer (incoming)
 # AA = authorisation
-# AE = authorisation refund
+# AE/AV = authorisation refund
 
 
 """

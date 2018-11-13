@@ -1,15 +1,12 @@
-import json
-import math
-import time
-
-from param import *
 from clean_n26 import get_n_last_transactions
 from formatting import *
 from credentials import *
 from crud import *
+from merge_tool import merge_data
 
 import pandas as pd
 import numpy as np
+
 
 # %% PANDAS PRINT PARAMETERS
 from recap_by_category import get_categories_recap, get_trip_data
@@ -35,7 +32,7 @@ def get_transactions_as_df(account, limit):
 
 def refresh_data():
     print('REFRESHING ? ')
-    if get_delay_since_last_update() > delay_refresh_minutes :
+    if get_delay_since_last_update() > delay_refresh_minutes:
         print('YES')
         print(force_refresh())
     else:
@@ -43,29 +40,38 @@ def refresh_data():
 
 
 def force_refresh():
+
     print('FORCE REFRESH')
     all_valid, all_data = True, []
     for account in login:
         valid, data = get_transactions_as_df(account, max_transactions_per_user)
         all_valid = all_valid and valid
         all_data.append(data)
+    all_valid = True
+
     if not all_valid:
         print('REFRESH FAILED')
         return 'FAIL'
+
     new_data = pd.concat(all_data).sort_values("date", ascending=False).reset_index(drop=True)
-    save_data(merge_data(read_data(), new_data))
+    new_data.to_csv("./data/9_nov_data.csv", index=False)
+
+    #new_data = pd.read_csv("./data/9_nov_data.csv")
+
+    save_data(data_file, merge_data(read_data(), new_data))
     change_last_update_to_now()
+
     return 'SUCCESS'
 
 
-def list_data_json(refresh = False, hide_linked = True):
+def list_data_json(refresh=False, hide_linked=True):
     if refresh:
         refresh_data()
-    data = read_data().head(100)
+    data = read_data().head(400)
     if hide_linked:
         data = data[data['link'] == '-']
     data['method'] = data.apply(lambda row: type_to_method(row), axis=1)
-    data = data[['id','name', 'amount', 'category', 'pending', 'originalAmount', 'originalCurrency', 'method']]
+    data = data[['id', 'name', 'amount', 'category', 'pending', 'originalAmount', 'originalCurrency', 'method']]
     return data.to_json(orient="records")
 
 
@@ -90,14 +96,14 @@ def edit_field(transaction_ids, field_name, field_value):
 def create_manual_transaction(json_input):
     transaction_fields = json_input
 
-    print(transaction_fields)
     transaction_fields['link'] = '-'
 
     if not all(u in transaction_fields for u in mandatory_fields):
         return 'FAIL'
-    transaction_fields['amount'] = float(transaction_fields['amount'])
+    if transaction_fields['amount'] == transaction_fields['originalAmount'] == '':
+        return 'FAIL'
+
     line = make_a_csv_line(transaction_fields)
-    print(line)
     add_data_line(line)
 
     return 'SUCCESS'
@@ -119,8 +125,8 @@ def link_two_ids(ids):
     if float(trans1['amount']) != - float(trans2['amount']):
         return 'FAIL amounts are not equal'
 
-    data.loc[data['id'] == id1, ['link']] = id2
-    data.loc[data['id'] == id2, ['link']] = id1
+    data.loc[data['id'] == id1, ['link', 'pending']] = [id2, False]
+    data.loc[data['id'] == id2, ['link', 'pending']] = [id1, False]
     save_data(data)
     return 'SUCCESS'
 
@@ -132,11 +138,10 @@ def get_recap_categories(initial_date_str="2018-10-01"):
     return recap.to_json(orient="records")
 
 
-
 def get_final_amount(row):
     if math.isnan(row['amount']):
-        return round(row['originalAmount'],2)
-    return round(row['amount'],2)
+        return round(row['originalAmount'], 2)
+    return round(row['amount'], 2)
 
 
 def get_final_currency(row):
@@ -155,7 +160,6 @@ def get_balances():
     data_other_accounts.loc[:, 'originalCurrency'] = original_curr
 
     recap = data_other_accounts.groupby(['account', 'originalCurrency']).apply(lambda x: x.sum(skipna=False))
-    print(recap)
     recap = recap[['amount', 'originalAmount']].reset_index()
     recap['finalCurrency'] = recap.apply(lambda row: get_final_currency(row), axis=1)
     recap['finalAmount'] = recap.apply(lambda row: get_final_amount(row), axis=1)

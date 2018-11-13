@@ -6,7 +6,7 @@ from crud import read_dico
 def find_from_pattern(name, patterns_dict):
     for pattern, translation in patterns_dict.items():
         regex_pattern = '.*'+pattern+'.*'
-        if re.match(regex_pattern, name):
+        if re.match(regex_pattern.lower(), name.lower()):
             return translation
     return False
 
