@@ -7,7 +7,7 @@ class ListOperations (Resource):
 
     @staticmethod
     def get():
-        #refresh = request.
+        #refresh = request.???
         operations = list_data_json()
         return json.loads(operations)
 

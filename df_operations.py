@@ -37,10 +37,6 @@ def df_is_not_empty(df):
     return df.shape[0] > 0
 
 
-def add_line_to_df(line, df):
-    df.loc[len(df)] = line
-
-
 def extract_line_from_df(index, df):
     line = df.loc[index]
     df.drop(index, inplace=True)
