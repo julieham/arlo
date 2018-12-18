@@ -11,8 +11,8 @@ def sort_df_by_descending_date(df):
     return df.sort_values("date", ascending=False).reset_index(drop=True)
 
 
-def read_data():
-    data = pd.read_csv(data_file, na_values=' ')
+def read_data(filename = data_file):
+    data = pd.read_csv(filename, na_values=' ')
     data['date'] = pd.to_datetime(data['date'])
     data['pending'] = data.apply(lambda row: row['type'] == 'AA' and row['link'] == '-', axis=1)
     return data
@@ -39,9 +39,9 @@ def write_sorted_dico(dico, filename):
     f.close()
 
 
-def save_data(data_file, data):
+def save_data(data, filename = data_file):
     data = sort_df_by_descending_date(data)
-    data.to_csv(data_file, index=False)
+    data.to_csv(filename, index=False)
 
 
 def change_one_field_on_ids(transaction_ids, field_name, field_value):

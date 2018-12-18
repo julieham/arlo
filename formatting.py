@@ -50,6 +50,11 @@ def remove_original_currency(row):
     return row['originalCurrency']
 
 
+def make_cycle(row):
+    month = str(row['date'].month_name())
+    year = str(row['date'].year)
+    return month[:3]+year[-2:]
+
 
 def dataframe_formatter(df, account):
     df['bank_name'] = df.replace(np.NaN, '').apply(lambda row: make_bank_name(row), axis=1)
@@ -62,6 +67,7 @@ def dataframe_formatter(df, account):
     df['pending'] = df['type'] == 'AA'
     df['originalAmount'] = df.apply(lambda row: remove_original_amount(row), axis=1)
     df['originalCurrency'] = df.apply(lambda row: remove_original_currency(row), axis=1)
+    df['cycle'] = df.apply(lambda row: make_cycle(row), axis=1)
     return df[column_names]
 
 

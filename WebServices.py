@@ -8,7 +8,8 @@ class ListOperations (Resource):
     @staticmethod
     def get():
         #refresh = request.???
-        operations = list_data_json()
+        cycle = request.args.get('cycle')
+        operations = list_data_json(cycle=cycle)
         return json.loads(operations)
 
 

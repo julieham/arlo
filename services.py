@@ -9,7 +9,7 @@ import numpy as np
 
 
 # %% PANDAS PRINT PARAMETERS
-from recap_by_category import get_categories_recap, get_trip_data
+from recap_by_category import get_categories_recap
 
 desired_width = 10000
 pd.set_option('display.width', desired_width)
@@ -39,6 +39,7 @@ def refresh_data():
         print('NO')
 
 
+
 def force_refresh():
 
     print('FORCE REFRESH')
@@ -58,20 +59,22 @@ def force_refresh():
 
     #new_data = pd.read_csv("./data/9_nov_data.csv")
 
-    save_data(data_file, merge_data(read_data(), new_data))
+    save_data(merge_data(read_data(), new_data))
     change_last_update_to_now()
 
     return 'SUCCESS'
 
 
-def list_data_json(refresh=False, hide_linked=True):
+def list_data_json(refresh=False, hide_linked=True, cycle="all"):
     if refresh:
         refresh_data()
     data = read_data().head(400)
     if hide_linked:
         data = data[data['link'] == '-']
     data['method'] = data.apply(lambda row: type_to_method(row), axis=1)
-    data = data[['id', 'name', 'amount', 'category', 'pending', 'originalAmount', 'originalCurrency', 'method']]
+    data = data[['id', 'name', 'amount', 'category', 'pending', 'originalAmount', 'originalCurrency', 'method', 'cycle']]
+    if cycle != "all":
+        data = data[data['cycle'] == cycle]
     return data.to_json(orient="records")
 
 
@@ -131,9 +134,11 @@ def link_two_ids(ids):
     return 'SUCCESS'
 
 
-def get_recap_categories(initial_date_str="2018-10-01"):
-    this_trip_data = get_trip_data(initial_date_str)
-    recap = get_categories_recap(this_trip_data)
+def get_recap_categories(cycle_name='NY'):
+    cycle_name = 'NY18'
+    data = read_data()
+    data = data[data['cycle'] == cycle_name]
+    recap = get_categories_recap(data)
 
     return recap.to_json(orient="records")
 

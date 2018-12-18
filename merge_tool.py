@@ -20,26 +20,17 @@ def match_gone_transactions(gone, candidates, processed_transactions, id_field_n
     recup_columns = ['name', 'category', 'comment']
 
     not_found = make_empty_dataframe_based_on_this(gone)
-    print('GONE TRANSACTIONS')
     for _, row in gone.iterrows():
         replacement_transactions = filter_df_one_value(candidates, id_field_name, row[id_field_name])
-        print(row['name'], row['amount'])
 
         if df_is_not_empty(replacement_transactions):
             chosen_index = min(replacement_transactions.index)
             the_transaction = extract_line_from_df(chosen_index, candidates)
             the_transaction[recup_columns] = row[recup_columns]
-            print(the_transaction)
-            print('FOUND')
-            print(processed_transactions.shape)
             the_transaction = the_transaction.drop(labels=['linkID', 'linkIDnoAmount', 'linkIDnoName'])
             processed_transactions = processed_transactions.append(the_transaction)
-            #add_line_to_df(the_transaction, processed_transactions)
-            print(processed_transactions.shape)
         else:
-            print('NOT FOUND')
-            not_found = not_found.append(the_transaction)
-            #add_line_to_df(row, not_found)
+            not_found = not_found.append(row)
 
     return not_found, processed_transactions
 
@@ -52,18 +43,11 @@ def identify_old_new_data(old_data, new_data):
     new = filter_df_several_values(new_data, 'id', new_ids - old_ids)
     gone = filter_df_several_values(old_data, 'id', old_ids - new_ids)
 
-    return (gone, unchanged, new)
+    return gone, unchanged, new
 
 
 def associate_pending_gone(old_data, new_data):
     (gone, old, new) = identify_old_new_data(old_data, new_data)
-    print('GONE')
-    print(gone.shape)
-    print('OLD')
-    print(old.shape)
-    print('NEW')
-    print(new.shape)
-    print('ASSOCIATING PENDING GONE WITH NEW')
     add_link_id(new)
     add_link_id(gone)
 
@@ -74,11 +58,7 @@ def associate_pending_gone(old_data, new_data):
     if len(gone):
         print('LOST TRANSACTIONS : ', len(gone))
 
-    print('OLD')
-    print(old.shape)
-    print('NEW')
-    print(new.shape)
-    return (old, new)
+    return old, new
 
 
 def opposite_sign_linkID(linkID):
@@ -88,14 +68,40 @@ def opposite_sign_linkID(linkID):
 
 def find_the_associated_refund(pending_transactions, pending_source, refund_transactions, refunds_source):
 
-    for index_pending, pending_trans in pending_transactions.iterrows():
-        candidates = filter_df_one_value(refund_transactions, 'linkID', opposite_sign_linkID(pending_trans['linkID']))
-        if df_is_not_empty(candidates):
-            chosen_index = min(candidates.index)
-            pending_source.loc[index_pending, ['link', 'pending']] = [refunds_source.loc[chosen_index, 'id'], False]
-            refunds_source.loc[chosen_index, ['link', 'pending']] = [pending_source.loc[index_pending, 'id'], False]
-            extract_line_from_df(chosen_index, refund_transactions)
+    links_names = ['linkID', 'linkIDnoAmount', 'linkIDnoName']
 
+
+    while pending_transactions.shape[0]>0 and links_names:
+        not_found = []
+        link_name = links_names.pop(0)
+        for index_pending, pending_trans in pending_transactions.iterrows():
+            candidates = filter_df_one_value(refund_transactions, link_name, opposite_sign_linkID(pending_trans[link_name]))
+
+            if candidates.shape[0]:
+                print('CANDIDATES')
+                print(candidates['date'])
+                print(list(candidates['date'])[0])
+                print(type(list(candidates['date'])[0]))
+
+                print('PENDING')
+                print(pending_trans['date'])
+                print(type(pending_trans['date']))
+                print()
+
+            #candidates = candidates[candidates['date'] >= pending_trans['date']]
+
+            if df_is_not_empty(candidates):
+                chosen_index = min(candidates.index)
+                pending_source.loc[index_pending, ['link', 'pending']] = [refunds_source.loc[chosen_index, 'id'], False]
+                refunds_source.loc[chosen_index, ['link', 'pending']] = [pending_source.loc[index_pending, 'id'], False]
+                extract_line_from_df(chosen_index, refund_transactions)
+            else:
+                not_found.append(index_pending)
+        pending_transactions = pending_transactions.loc[not_found]
+
+    print('PENDING NO REFUND FOUND :')
+    print(pending_transactions)
+    print(refund_transactions)
 
 
 def associate_pending_with_refund(old_data, new_data):
@@ -108,6 +114,7 @@ def associate_pending_with_refund(old_data, new_data):
     add_link_id(new_pending)
     add_link_id(refunds)
 
+
     find_the_associated_refund(old_pending, old_data, refunds, new_data)
     find_the_associated_refund(new_pending, new_data, refunds, new_data)
 
@@ -116,6 +123,8 @@ def associate_pending_with_refund(old_data, new_data):
 
 def merge_n26_data(old_data, new_data):
     (old_data, new_data) = associate_pending_gone(old_data, new_data)
+    old_data = old_data.sort_values("date", ascending=True).reset_index(drop=True)
+    new_data = new_data.sort_values("date", ascending=True).reset_index(drop=True)
 
     return associate_pending_with_refund(old_data, new_data)
 
@@ -127,5 +136,3 @@ def merge_data(old_data, new_data):
     all_n26 = merge_n26_data(old_n26, new_data)
 
     return pd.concat([all_n26, other_accounts]).sort_values("date", ascending=False).reset_index(drop=True)
-
-
