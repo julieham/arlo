@@ -3,6 +3,7 @@ from formatting import *
 from credentials import *
 from crud import *
 from merge_tool import merge_data
+from df_operations import *
 
 import pandas as pd
 import numpy as np
@@ -134,11 +135,14 @@ def link_two_ids(ids):
     return 'SUCCESS'
 
 
-def get_recap_categories(cycle_name='NY'):
-    cycle_name = 'NY18'
+def get_recap_categories(cycle_name='all'):
     data = read_data()
-    data = data[data['cycle'] == cycle_name]
-    recap = get_categories_recap(data)
+    if cycle_name != 'all':
+        data = data[data['cycle'] == cycle_name]
+    if df_is_not_empty(data):
+        recap = get_categories_recap(data)
+    else:
+        recap = pd.DataFrame()
 
     return recap.to_json(orient="records")
 
