@@ -200,7 +200,6 @@ def get_and_save_recap():
     valid_data = valid_data[valid_data["category"] != "Input"]
     spendings = valid_data.groupby(["category"]).sum()["amount"].round(2).abs()
     print(spendings)
-    spendings.to_csv('recap.csv')
     f = plt.figure(figsize=(4,4))
     spendings.plot.pie(autopct=make_percentages(spendings))
     f.show()

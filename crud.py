@@ -11,7 +11,11 @@ def sort_df_by_descending_date(df):
     return df.sort_values("date", ascending=False).reset_index(drop=True)
 
 
-def read_data(filename = data_file):
+def read_data():
+    return read_data_from_file(data_file)
+
+
+def read_data_from_file(filename):
     data = pd.read_csv(filename, na_values=' ')
     data['date'] = pd.to_datetime(data['date'])
     data['pending'] = data.apply(lambda row: row['type'] == 'AA' and row['link'] == '-', axis=1)
@@ -39,15 +43,20 @@ def write_sorted_dico(dico, filename):
     f.close()
 
 
-def save_data(data, filename = data_file):
+def save_data(data):
+    save_data_in_file(data, data_file)
+
+
+def save_data_in_file(data, filename):
     data = sort_df_by_descending_date(data)
     data.to_csv(filename, index=False)
+
 
 
 def change_one_field_on_ids(transaction_ids, field_name, field_value):
     data = read_data()
     data.loc[data['id'].isin(transaction_ids), [field_name]] = field_value
-    save_data(data_file, data)
+    save_data(data)
 
 
 def change_last_update_to_now():

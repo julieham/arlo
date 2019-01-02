@@ -7,9 +7,9 @@ class ListOperations (Resource):
 
     @staticmethod
     def get():
-        #refresh = request.???
+        refresh = request.args.get('refresh')
         cycle = request.args.get('cycle')
-        operations = list_data_json(cycle=cycle)
+        operations = list_data_json(cycle=cycle, refresh=refresh)
         return json.loads(operations)
 
 
@@ -53,7 +53,8 @@ class GetRecap(Resource):
 
     @staticmethod
     def get():
-        recap = get_recap_categories()
+        cycle = request.args.get('cycle')
+        recap = get_recap_categories(cycle=cycle)
         return json.loads(recap)
 
 

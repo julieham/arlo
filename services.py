@@ -56,9 +56,8 @@ def force_refresh():
         return 'FAIL'
 
     new_data = pd.concat(all_data).sort_values("date", ascending=False).reset_index(drop=True)
-    new_data.to_csv("./data/9_nov_data.csv", index=False)
 
-    #new_data = pd.read_csv("./data/9_nov_data.csv")
+    #new_data = pd.read_csv("./data/data_backup_18_dec.csv")
 
     save_data(merge_data(read_data(), new_data))
     change_last_update_to_now()
@@ -66,7 +65,7 @@ def force_refresh():
     return 'SUCCESS'
 
 
-def list_data_json(refresh=False, hide_linked=True, cycle="all"):
+def list_data_json(refresh=None, hide_linked=None, cycle="all"):
     if refresh:
         refresh_data()
     data = read_data().head(400)
@@ -135,10 +134,10 @@ def link_two_ids(ids):
     return 'SUCCESS'
 
 
-def get_recap_categories(cycle_name='all'):
+def get_recap_categories(cycle='all'):
     data = read_data()
-    if cycle_name != 'all':
-        data = data[data['cycle'] == cycle_name]
+    if cycle != 'all':
+        data = data[data['cycle'] == cycle]
     if df_is_not_empty(data):
         recap = get_categories_recap(data)
     else:

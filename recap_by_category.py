@@ -28,6 +28,19 @@ def get_exchange_rate(data):
         print('WRONG EXCHANGE RATE : NO CASH WITHDRAWN')
         return 1
 
+def summary_on_field(data, field_name, cycle='all'):
+    if cycle != 'all':
+        data = data[data['cycle'] == cycle]
+    exchange_rate = get_exchange_rate(data)
+    euro_amounts = data.apply(lambda row: get_euro_amount(row, exchange_rate), axis=1)
+    data = data.assign(euro_amount=euro_amounts)
+    fields = list({'amount', 'originalAmount', 'category', 'account', field_name})
+    data = data[fields]
+    summary = (data.groupby([field_name]).sum().reset_index())
+
+    budgets = get_budgets()
+    summary['total_budget'] = summary['category'].map(budgets).fillna(0).astype(float)
+
 
 def get_categories_recap(data):
     exchange_rate = get_exchange_rate(data)
