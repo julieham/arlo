@@ -1,14 +1,10 @@
 import codecs
 import json
-import pandas as pd
-
+from df_operations import *
+from date_operations import *
 
 
 data_file = "./data/data.csv"
-
-
-def sort_df_by_descending_date(df):
-    return df.sort_values("date", ascending=False).reset_index(drop=True)
 
 
 def read_data():
@@ -17,8 +13,7 @@ def read_data():
 
 def read_data_from_file(filename):
     data = pd.read_csv(filename, na_values=' ')
-    data['date'] = pd.to_datetime(data['date'])
-    data['pending'] = data.apply(lambda row: row['type'] == 'AA' and row['link'] == '-', axis=1)
+    apply_function_to_field(data, 'date', pd.to_datetime)
     return data
 
 
@@ -52,10 +47,9 @@ def save_data_in_file(data, filename):
     data.to_csv(filename, index=False)
 
 
-
-def change_one_field_on_ids(transaction_ids, field_name, field_value):
+def set_field_to_value_on_ids(ids, field_name, field_value):
     data = read_data()
-    data.loc[data['id'].isin(transaction_ids), [field_name]] = field_value
+    change_field_on_ids_to_value(data, ids, field_name, field_value)
     save_data(data)
 
 
@@ -64,14 +58,11 @@ def change_last_update_to_now():
         file.write("%s" % pd.datetime.now())
 
 
-def get_delay_since_last_update():
-    print('BEGIN DELAY')
+def minutes_since_last_update():
     try:
         with open("last_update.txt", mode='r') as file:
-            last_update = file.read()
-            delta = pd.datetime.now() - pd.datetime.strptime(last_update, '%Y-%m-%d %H:%M:%S.%f')
-            print(delta)
-            return delta.total_seconds()//60
+            last_update = to_datetime(file.read())
+            return time_since(last_update).total_seconds()//60
     except FileNotFoundError:
         return 1000000
 

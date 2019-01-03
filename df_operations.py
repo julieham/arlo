@@ -1,6 +1,10 @@
 import pandas as pd
 
 
+def sort_df_by_descending_date(df):
+    return df.sort_values("date", ascending=False).reset_index(drop=True)
+
+
 def make_empty_dataframe_based_on_this(df):
     column_names = list(df.head(0))
     data_types = df.dtypes
@@ -19,6 +23,10 @@ def get_refund_transactions(df):
     refunds = df[df['type'].isin(['AV', 'AE'])]
     refunds = refunds[refunds['link'] == '-']
     return refunds
+
+
+def apply_function_to_field(data, field, function):
+    data[field] = function(data[field])
 
 
 def get_ids(df):
@@ -41,5 +49,9 @@ def extract_line_from_df(index, df):
     line = df.loc[index]
     df.drop(index, inplace=True)
     return line
+
+
+def change_field_on_ids_to_value(df, ids, field_name, field_value):
+    df.loc[df['id'].isin(ids), [field_name]] = field_value
 
 

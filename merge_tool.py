@@ -114,7 +114,6 @@ def associate_pending_with_refund(old_data, new_data):
     add_link_id(new_pending)
     add_link_id(refunds)
 
-
     find_the_associated_refund(old_pending, old_data, refunds, new_data)
     find_the_associated_refund(new_pending, new_data, refunds, new_data)
 
@@ -134,5 +133,6 @@ def merge_data(old_data, new_data):
     old_n26 = old_data[old_data['account'].str.endswith('N26')]
 
     all_n26 = merge_n26_data(old_n26, new_data)
+    all_n26['pending'] = all_n26.apply(lambda row: row['type'] == 'AA' and row['link'] == '-', axis=1)
 
     return pd.concat([all_n26, other_accounts]).sort_values("date", ascending=False).reset_index(drop=True)

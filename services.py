@@ -33,7 +33,7 @@ def get_transactions_as_df(account, limit):
 
 def refresh_data():
     print('REFRESHING ? ')
-    if get_delay_since_last_update() > delay_refresh_minutes:
+    if minutes_since_last_update() > delay_refresh_minutes:
         print('YES')
         print(force_refresh())
     else:
@@ -83,16 +83,7 @@ def categorize(transaction_ids, category_name):
     if error_message:
         return error_message
 
-    change_one_field_on_ids(transaction_ids, 'category', category_name)
-    return 'SUCCESS'
-
-
-def edit_field(transaction_ids, field_name, field_value):
-    error_message, transaction_ids = parse_ids(transaction_ids)
-    if error_message:
-        return error_message
-
-    change_one_field_on_ids(transaction_ids, field_name, field_value)
+    set_field_to_value_on_ids(transaction_ids, 'category', category_name)
     return 'SUCCESS'
 
 
