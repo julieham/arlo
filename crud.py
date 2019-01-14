@@ -1,11 +1,11 @@
 import codecs
 import json
-from df_operations import *
-from date_operations import *
-
+from format.df_operations import *
+from format.date_operations import *
+from param import *
 
 data_file = "./data/data.csv"
-
+last_update_file = "last_update.txt"
 
 def read_data():
     return read_data_from_file(data_file)
@@ -13,7 +13,7 @@ def read_data():
 
 def read_data_from_file(filename):
     data = pd.read_csv(filename, na_values=' ')
-    apply_function_to_field(data, 'date', pd.to_datetime)
+    apply_function_to_field_overrule(data, 'date', pd.to_datetime)
     return data
 
 
@@ -54,25 +54,21 @@ def set_field_to_value_on_ids(ids, field_name, field_value):
 
 
 def change_last_update_to_now():
-    with open("last_update.txt", mode='w') as file:
+    with open(last_update_file, mode='w') as file:
         file.write("%s" % pd.datetime.now())
 
 
-def minutes_since_last_update():
+def get_last_update_string():
     try:
-        with open("last_update.txt", mode='r') as file:
-            last_update = to_datetime(file.read())
-            return time_since(last_update).total_seconds()//60
+        with open(last_update_file, mode='r') as file:
+            return file.read()
     except FileNotFoundError:
-        return 1000000
+        return "1900-01-01 01:00:00.0"
 
 
-def add_data_line(line):
-    with open(data_file, 'r+') as f:
-        content = f.readlines()
-        content.insert(1, line + "\n")
-        f.seek(0)
-        f.write("".join(content))
+def minutes_since_last_update():
+    last_update = string_to_datetime(get_last_update_string())
+    return time_since(last_update).total_seconds()//60
 
 
 def write_json_dict(filename, dico):
@@ -85,3 +81,8 @@ def read_json_dict(filename):
         data = json.load(read_file)
     return data
 
+
+def add_to_data(transaction_df):
+    data = read_data()
+    data = pd.concat([transaction_df, data], sort=False).sort_values("date", ascending=False).reset_index(drop=True)
+    save_data(data[column_names])

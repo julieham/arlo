@@ -1,9 +1,12 @@
 from clean_n26 import get_n_last_transactions
+from format.data_operations import set_amounts_to_numeric
+from format.transaction_operations import fields_make_valid_transaction, add_default_values_if_absent
+from format.types_operations import dict_to_df
 from formatting import *
 from credentials import *
 from crud import *
 from merge_tool import merge_data
-from df_operations import *
+from format.df_operations import *
 
 import pandas as pd
 import numpy as np
@@ -87,18 +90,17 @@ def categorize(transaction_ids, category_name):
     return 'SUCCESS'
 
 
-def create_manual_transaction(json_input):
-    transaction_fields = json_input
-
-    transaction_fields['link'] = '-'
-
-    if not all(u in transaction_fields for u in mandatory_fields):
-        return 'FAIL'
-    if transaction_fields['amount'] == transaction_fields['originalAmount'] == '':
+def create_manual_transaction(transaction_fields):
+    add_default_values_if_absent(transaction_fields)
+    if not fields_make_valid_transaction(transaction_fields):
         return 'FAIL'
 
-    line = make_a_csv_line(transaction_fields)
-    add_data_line(line)
+    transaction_df = dict_to_df(transaction_fields)
+
+    set_amounts_to_numeric(transaction_df)
+    calculate_universal_fields(transaction_df)
+
+    add_to_data(transaction_df[list(set(column_names) & set(transaction_df.columns.values))])
 
     return 'SUCCESS'
 
@@ -166,3 +168,9 @@ def get_balances():
     recap = recap.groupby('account').agg({'finalAmount': "sum", 'finalCurrency': "first"})
 
     return recap
+
+
+def create_recurring_transaction(name, amount, account):
+    transaction_fields = dict({'name': name, 'amount': amount, 'account': account, 'type': 'REC'})
+    result = create_manual_transaction(transaction_fields)
+    return result

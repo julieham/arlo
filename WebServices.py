@@ -64,3 +64,20 @@ class GetBalances(Resource):
     def get():
         recap = get_balances().reset_index()
         return json.loads(recap.to_json(orient="records"))
+
+
+class MakeRecurring(Resource):
+    @staticmethod
+    def get():
+        name = request.args.get('name')
+        amount = request.args.get('amount')
+        account = request.args.get('account')
+        default_amounts = dict({'Washer': ('-4', 'Cash'), 'Dryer': ('-1', 'Cash'), 'Parking': ('-1.5', 'J_N26')})
+        if name in default_amounts:
+            default_amount, default_account = default_amounts[name]
+            if amount == None:
+                amount = default_amount
+            if account == None:
+                account = default_account
+        result = create_recurring_transaction(name, amount, account)
+        return {"status": result}

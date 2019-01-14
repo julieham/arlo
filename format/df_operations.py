@@ -25,8 +25,25 @@ def get_refund_transactions(df):
     return refunds
 
 
-def apply_function_to_field(data, field, function):
-    data[field] = function(data[field])
+def apply_function_to_field_no_overrule(df, field, function, destination=''):
+    if not destination:
+        destination = field
+
+    calculated_values = df[field].apply(function)
+
+    if destination not in df.columns.values:
+        df[destination] = calculated_values
+    else:
+        df.loc[(pd.isnull(df[destination]), destination)] = calculated_values
+
+
+def apply_function_to_field_overrule(df, field, function):
+    df[field] = df[field].apply(function)
+
+
+
+def add_field_with_default_value(df, field, value):
+    df[field] = value
 
 
 def get_ids(df):
