@@ -26,3 +26,7 @@ def dict_add_value_if_not_present(dictionary, key, value):
 
 def df_field_to_numeric(df, field):
     df[field] = pd.to_numeric(df[field])
+
+
+def series_to_dict(serie):
+    return dict({a: serie[a] for a in serie.index})

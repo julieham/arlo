@@ -12,14 +12,14 @@ def find_from_pattern(name, patterns_dict):
 
 
 def autofill_name(s):
-    translation = find_from_pattern(s, read_dico('data/autofill_name.csv'))
+    translation = find_from_pattern(s, read_dico('arlo/data/autofill_name.csv'))
     if translation:
         return translation
     return '** ' + s + ' **'
 
 
 def autofill_cat(name):
-    dico_categories = read_dico('data/autofill_category.csv')
+    dico_categories = read_dico('arlo/data/autofill_category.csv')
     if name in dico_categories:
         return dico_categories[name]
     return '-'

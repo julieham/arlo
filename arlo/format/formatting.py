@@ -1,10 +1,12 @@
 import math
-from arlo.format.data_operations import calculate_universal_fields
-from arlo.read_write.crud import read_data
-from arlo.tools.autofill import *
+
 
 import numpy as np
 import hashlib
+
+from arlo.format.data_operations import calculate_universal_fields
+from arlo.read_write.crud import read_data
+from arlo.tools.autofill import autofill_name
 
 
 def parse_ids(transaction_ids):

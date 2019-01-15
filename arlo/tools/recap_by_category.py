@@ -1,6 +1,9 @@
 import math
 
-from arlo.read_write.crud import read_dico
+from arlo.format.df_operations import read_file_to_df
+from arlo.format.types_operations import series_to_dict
+
+budgets_filename = './arlo/data/budgets.csv'
 
 
 def get_euro_amount(row, exchange_rate):
@@ -9,8 +12,15 @@ def get_euro_amount(row, exchange_rate):
     return row.loc['amount']
 
 
-def get_budgets():
-    return read_dico('./arlo/data/budgets.txt')
+def get_budgets(cycle):
+    budgets = read_file_to_df(budgets_filename)
+
+    if cycle != 'all':
+        budgets = budgets[budgets['cycle'] == cycle]
+
+    budgets = budgets.groupby('category').apply(sum)['amount']
+
+    return series_to_dict(budgets)
 
 
 def get_exchange_rate(data):
@@ -40,7 +50,7 @@ def summary_on_field(data, field_name, cycle='all'):
     summary['total_budget'] = summary['category'].map(budgets).fillna(0).astype(float)
 
 
-def get_categories_recap(data):
+def get_categories_recap(data, cycle):
     exchange_rate = get_exchange_rate(data)
     euro_amounts = data.apply(lambda row: get_euro_amount(row, exchange_rate), axis=1)
     data = data.assign(euro_amount=euro_amounts)
@@ -48,7 +58,7 @@ def get_categories_recap(data):
 
     data = data.groupby(['category']).sum().apply(abs).reset_index()
 
-    budgets = get_budgets()
+    budgets = get_budgets(cycle)
     data['total_budget'] = data['category'].map(budgets).fillna(0).astype(float)
 
     to_sum_data = data[data['category'].str.endswith('Input') == False]

@@ -1,6 +1,7 @@
 from flask import json, request
 from flask_restful import Resource
-from arlo.web_interface.services import *
+
+from arlo.web.services import *
 
 
 class ListOperations (Resource):

@@ -72,3 +72,5 @@ def change_field_on_ids_to_value(df, ids, field_name, field_value):
     df.loc[df['id'].isin(ids), [field_name]] = field_value
 
 
+def read_file_to_df(filename):
+    return pd.read_csv(filename)

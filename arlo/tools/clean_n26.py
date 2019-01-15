@@ -1,6 +1,7 @@
 import requests
-from arlo.parameters.param import *
-from arlo.parameters.credentials import *
+
+from arlo.parameters.credentials import login
+from arlo.parameters.param import n26_url
 
 
 def get_token(name):

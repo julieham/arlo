@@ -1,20 +1,23 @@
-from arlo.tools.clean_n26 import get_n_last_transactions
-from arlo.format.data_operations import set_amounts_to_numeric
-from arlo.format.transaction_operations import fields_make_valid_transaction, add_default_values_if_absent
-from arlo.format.types_operations import dict_to_df
-from arlo.format.formatting import *
-from arlo.parameters.credentials import *
-from arlo.read_write.crud import *
-from arlo.tools.merge_data import merge_data
-from arlo.tools.finder import has_default_fields, get_default_fields
-from arlo.format.df_operations import *
+import math
 
 import pandas as pd
 import numpy as np
 
+from arlo.tools.recap_by_category import get_categories_recap
+from arlo.format.data_operations import calculate_universal_fields, set_amounts_to_numeric
+from arlo.format.df_operations import df_is_not_empty
+from arlo.format.formatting import dataframe_formatter, type_to_method, parse_ids
+from arlo.format.transaction_operations import add_default_values_if_absent, fields_make_valid_transaction
+from arlo.format.types_operations import dict_to_df
+from arlo.parameters.credentials import login
+from arlo.parameters.param import *
+from arlo.read_write.crud import save_data, read_data, change_last_update_to_now, add_to_data, minutes_since_last_update, \
+    set_field_to_value_on_ids
+from arlo.tools.clean_n26 import get_n_last_transactions
+from arlo.tools.finder import has_default_fields, get_default_fields
+from arlo.tools.merge_data import merge_data
 
 # %% PANDAS PRINT PARAMETERS
-from arlo.tools.recap_by_category import get_categories_recap
 
 desired_width = 10000
 pd.set_option('display.width', desired_width)
@@ -58,7 +61,7 @@ def force_refresh():
         print('REFRESH FAILED')
         return 'FAIL'
 
-    new_data = pd.concat(all_data).sort_values("date", ascending=False).reset_index(drop=True)
+    new_data = pd.concat(all_data, sort=False).sort_values("date", ascending=False).reset_index(drop=True)
 
     save_data(merge_data(read_data(), new_data))
     change_last_update_to_now()
@@ -130,7 +133,7 @@ def get_recap_categories(cycle='all'):
     if cycle != 'all':
         data = data[data['cycle'] == cycle]
     if df_is_not_empty(data):
-        recap = get_categories_recap(data)
+        recap = get_categories_recap(data, cycle)
     else:
         recap = pd.DataFrame()
 

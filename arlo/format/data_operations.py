@@ -1,7 +1,7 @@
-from arlo.tools.autofill import autofill_cat
 from arlo.format.date_operations import timestamp_to_datetime, date_to_cycle
 from arlo.format.df_operations import apply_function_to_field_no_overrule, add_field_with_default_value
-from arlo.format.types_operations import string_is_AA, df_field_to_numeric
+from arlo.format.types_operations import df_field_to_numeric, string_is_AA
+from arlo.tools.autofill import autofill_cat
 
 
 def calculate_universal_fields(df):
