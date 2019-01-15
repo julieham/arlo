@@ -1,20 +1,20 @@
-from tools.clean_n26 import get_n_last_transactions
-from format.data_operations import set_amounts_to_numeric
-from format.transaction_operations import fields_make_valid_transaction, add_default_values_if_absent
-from format.types_operations import dict_to_df
-from formatting import *
-from credentials import *
-from crud import *
-from tools.merge_data import merge_data
-from tools.finder import has_default_fields, get_default_fields
-from format.df_operations import *
+from arlo.tools.clean_n26 import get_n_last_transactions
+from arlo.format.data_operations import set_amounts_to_numeric
+from arlo.format.transaction_operations import fields_make_valid_transaction, add_default_values_if_absent
+from arlo.format.types_operations import dict_to_df
+from arlo.format.formatting import *
+from arlo.parameters.credentials import *
+from arlo.read_write.crud import *
+from arlo.tools.merge_data import merge_data
+from arlo.tools.finder import has_default_fields, get_default_fields
+from arlo.format.df_operations import *
 
 import pandas as pd
 import numpy as np
 
 
 # %% PANDAS PRINT PARAMETERS
-from recap_by_category import get_categories_recap
+from arlo.tools.recap_by_category import get_categories_recap
 
 desired_width = 10000
 pd.set_option('display.width', desired_width)

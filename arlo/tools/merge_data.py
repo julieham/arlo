@@ -1,5 +1,5 @@
 import numpy as np
-from format.df_operations import *
+from arlo.format.df_operations import *
 
 
 def add_link_id(df):

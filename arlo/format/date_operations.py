@@ -13,7 +13,7 @@ def get_timestamp_now():
 
 
 def timestamp_to_datetime(timestamp):
-    return pd.datetime.fromtimestamp(int(timestamp))
+    return pd.datetime.fromtimestamp(int(timestamp)/1000)
 
 
 def date_to_cycle(date):

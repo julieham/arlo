@@ -1,9 +1,0 @@
-Home,1385
-Plane,910
-Transp,810
-Food,2240
-Shopping,1210
-Sody,175
-Apple,625
-Sports,250
-Christmas,240

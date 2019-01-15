@@ -2,7 +2,5 @@
 __pycache__/*
 venv/*
 *.csv
-
-sandbox.py
-credentials.py
-
+parameters/*
+sandbox/*

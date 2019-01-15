@@ -1,8 +1,6 @@
 import math
 
-import pandas as pd
-
-from crud import read_data, read_dico
+from arlo.read_write.crud import read_dico
 
 
 def get_euro_amount(row, exchange_rate):
@@ -12,7 +10,7 @@ def get_euro_amount(row, exchange_rate):
 
 
 def get_budgets():
-    return read_dico('./data/budgets.txt')
+    return read_dico('./arlo/data/budgets.txt')
 
 
 def get_exchange_rate(data):

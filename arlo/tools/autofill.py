@@ -1,6 +1,6 @@
 import re
 
-from crud import read_dico
+from arlo.read_write.crud import read_dico
 
 
 def find_from_pattern(name, patterns_dict):

@@ -2,7 +2,7 @@ from flask import Flask
 from flask_restful import Api
 from flask_cors import CORS
 
-from WebServices import *
+from arlo.web_interface.WebServices import *
 
 app = Flask(__name__)
 CORS(app)

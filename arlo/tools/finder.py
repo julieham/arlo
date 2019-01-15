@@ -1,6 +1,6 @@
-from crud import read_dictionary
+from arlo.read_write.crud import read_dictionary
 
-recurring_filename = './data/recurring.txt'
+recurring_filename = './arlo/data/recurring.txt'
 
 default_fields = read_dictionary(recurring_filename)
 
