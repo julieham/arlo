@@ -1,11 +1,12 @@
-from clean_n26 import get_n_last_transactions
+from tools.clean_n26 import get_n_last_transactions
 from format.data_operations import set_amounts_to_numeric
 from format.transaction_operations import fields_make_valid_transaction, add_default_values_if_absent
 from format.types_operations import dict_to_df
 from formatting import *
 from credentials import *
 from crud import *
-from merge_tool import merge_data
+from tools.merge_data import merge_data
+from tools.finder import has_default_fields, get_default_fields
 from format.df_operations import *
 
 import pandas as pd
@@ -43,7 +44,6 @@ def refresh_data():
         print('NO')
 
 
-
 def force_refresh():
 
     print('FORCE REFRESH')
@@ -59,8 +59,6 @@ def force_refresh():
         return 'FAIL'
 
     new_data = pd.concat(all_data).sort_values("date", ascending=False).reset_index(drop=True)
-
-    #new_data = pd.read_csv("./data/data_backup_18_dec.csv")
 
     save_data(merge_data(read_data(), new_data))
     change_last_update_to_now()
@@ -171,6 +169,14 @@ def get_balances():
 
 
 def create_recurring_transaction(name, amount, account):
+
+    if has_default_fields(name):
+        default_fields = get_default_fields(name)
+        if amount is None:
+            amount = default_fields['amount']
+        if account is None:
+            account = default_fields['account']
+
     transaction_fields = dict({'name': name, 'amount': amount, 'account': account, 'type': 'REC'})
     result = create_manual_transaction(transaction_fields)
     return result

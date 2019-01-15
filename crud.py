@@ -5,7 +5,7 @@ from format.date_operations import *
 from param import *
 
 data_file = "./data/data.csv"
-last_update_file = "last_update.txt"
+last_update_file = "./data/last_update.txt"
 
 def read_data():
     return read_data_from_file(data_file)
@@ -86,3 +86,20 @@ def add_to_data(transaction_df):
     data = read_data()
     data = pd.concat([transaction_df, data], sort=False).sort_values("date", ascending=False).reset_index(drop=True)
     save_data(data[column_names])
+
+
+def read_dictionary(filename):
+    dictionary = dict()
+    f = codecs.open(filename, 'r', encoding='utf8')
+    for line in f:
+        try:
+            line = line.replace('\n','').split(',')
+            key = line.pop(0)
+            if len(line) > 1:
+                dictionary[key] = line
+            else:
+                dictionary[key] = line[0]
+        except ValueError:
+            pass
+    f.close()
+    return dictionary

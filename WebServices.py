@@ -69,15 +69,6 @@ class GetBalances(Resource):
 class MakeRecurring(Resource):
     @staticmethod
     def get():
-        name = request.args.get('name')
-        amount = request.args.get('amount')
-        account = request.args.get('account')
-        default_amounts = dict({'Washer': ('-4', 'Cash'), 'Dryer': ('-1', 'Cash'), 'Parking': ('-1.5', 'J_N26')})
-        if name in default_amounts:
-            default_amount, default_account = default_amounts[name]
-            if amount == None:
-                amount = default_amount
-            if account == None:
-                account = default_account
+        name, amount, account = [request.args.get(field) for field in ['name', 'amount', 'account']]
         result = create_recurring_transaction(name, amount, account)
         return {"status": result}

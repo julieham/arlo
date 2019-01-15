@@ -71,7 +71,7 @@ def type_to_method(row):
         return 'card'
     if type in ['DT', 'CT']:
         return 'transfer'
-    if math.isnan(amount) or account == 'Cash':
+    if math.isnan(amount) or account.startswith('Cash'):
         return 'cash'
     return 'card'
 
