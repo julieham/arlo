@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 from arlo.format.df_operations import get_ids, filter_df_several_values, filter_df_one_value, df_is_not_empty, \
-    extract_line_from_df, get_pending_transactions, get_refund_transactions, make_empty_dataframe_based_on_this
+    extract_line_from_df, get_pending_transactions, get_refund_transactions, make_empty_dataframe_based_on_this, how_many_rows
 
 
 def add_link_id(df):
@@ -70,40 +70,33 @@ def opposite_sign_linkID(linkID):
 
 def find_the_associated_refund(pending_transactions, pending_source, refund_transactions, refunds_source):
 
+    print('starting refund process')
     links_names = ['linkID', 'linkIDnoAmount', 'linkIDnoName']
-
 
     while pending_transactions.shape[0]>0 and links_names:
         not_found = []
         link_name = links_names.pop(0)
+        print(pending_transactions.shape)
         for index_pending, pending_trans in pending_transactions.iterrows():
             candidates = filter_df_one_value(refund_transactions, link_name, opposite_sign_linkID(pending_trans[link_name]))
 
-            if candidates.shape[0]:
-                print('CANDIDATES')
-                print(candidates['date'])
-                print(list(candidates['date'])[0])
-                print(type(list(candidates['date'])[0]))
-
-                print('PENDING')
-                print(pending_trans['date'])
-                print(type(pending_trans['date']))
-                print()
-
-            #candidates = candidates[candidates['date'] >= pending_trans['date']]
-
             if df_is_not_empty(candidates):
                 chosen_index = min(candidates.index)
+                print('refund', index_pending, chosen_index)
                 pending_source.loc[index_pending, ['link', 'pending']] = [refunds_source.loc[chosen_index, 'id'], False]
                 refunds_source.loc[chosen_index, ['link', 'pending']] = [pending_source.loc[index_pending, 'id'], False]
                 extract_line_from_df(chosen_index, refund_transactions)
             else:
                 not_found.append(index_pending)
+
         pending_transactions = pending_transactions.loc[not_found]
 
-    print('PENDING NO REFUND FOUND :')
-    print(pending_transactions)
-    print(refund_transactions)
+    if df_is_not_empty(pending_transactions):
+        print('PENDING NO REFUND FOUND :')
+        print(how_many_rows(pending_transactions))
+    if df_is_not_empty(refund_transactions):
+        print('REFUNDS remaining')
+        print(how_many_rows(refund_transactions))
 
 
 def associate_pending_with_refund(old_data, new_data):

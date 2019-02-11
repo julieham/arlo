@@ -24,6 +24,6 @@ def add_default_values_if_absent(fields):
     dict_add_value_if_not_present(fields, 'originalAmount', '')
     dict_add_value_if_not_present(fields, 'originalCurrency', '')
     dict_add_value_if_not_present(fields, 'amount', '')
-    dict_add_value_if_not_present(fields, 'visibleTS', get_timestamp_now())
+    dict_add_value_if_not_present(fields, 'visibleTS', 1000*get_timestamp_now())
     dict_add_value_if_not_present(fields, 'type', 'MAN')
     dict_add_value_if_not_present(fields, 'id', create_id(fields))

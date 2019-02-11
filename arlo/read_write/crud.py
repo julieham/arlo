@@ -4,11 +4,12 @@ import json
 import pandas as pd
 
 from arlo.format.date_operations import string_to_datetime, time_since
-from arlo.format.df_operations import apply_function_to_field_overrule, sort_df_by_descending_date, change_field_on_ids_to_value
-from arlo.parameters.param import column_names
+from arlo.format.df_operations import apply_function_to_field_overrule, sort_df_by_descending_date, change_field_on_several_ids_to_value
+from arlo.parameters.param import column_names, directory
 
-data_file = "./arlo/data/data.csv"
-last_update_file = "./arlo/data/last_update.txt"
+data_file = directory + "data.csv"
+last_update_file = directory + "last_update.txt"
+
 
 def read_data():
     return read_data_from_file(data_file)
@@ -35,8 +36,8 @@ def read_dico(filename):
 
 
 def write_sorted_dico(dico, filename):
-    f = open(filename, 'w')
-    for d in sorted(dico, key=lambda k: dico[k][1].lower() + dico[k][0].lower()):
+    f = open(filename, 'w+')
+    for d in sorted(dico, key=lambda k: ''.join(dico[k][::-1]).lower() + k):
         f.write(d + "," + ','.join(dico[d]) + '\n')
     f.close()
 
@@ -46,13 +47,13 @@ def save_data(data):
 
 
 def save_data_in_file(data, filename):
-    data = sort_df_by_descending_date(data)
+    data = sort_df_by_descending_date(data)[column_names]
     data.to_csv(filename, index=False)
 
 
 def set_field_to_value_on_ids(ids, field_name, field_value):
     data = read_data()
-    change_field_on_ids_to_value(data, ids, field_name, field_value)
+    change_field_on_several_ids_to_value(data, ids, field_name, field_value)
     save_data(data)
 
 
@@ -75,7 +76,7 @@ def minutes_since_last_update():
 
 
 def write_json_dict(filename, dico):
-    with open(filename, 'w') as f:
+    with open(filename, 'w+') as f:
         json.dump(dico, f, separators=[",\n", ":"])
 
 

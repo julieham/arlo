@@ -1,9 +1,11 @@
 import math
 
-from arlo.format.df_operations import read_file_to_df
+from arlo.format.date_operations import decode_cycle
+from arlo.format.df_operations import read_file_to_df, df_is_not_empty
 from arlo.format.types_operations import series_to_dict
+from arlo.parameters.param import directory
 
-budgets_filename = './arlo/data/budgets.csv'
+budgets_filename = directory + 'budgets.csv'
 
 
 def get_euro_amount(row, exchange_rate):
@@ -18,27 +20,30 @@ def get_budgets(cycle):
     if cycle != 'all':
         budgets = budgets[budgets['cycle'] == cycle]
 
-    budgets = budgets.groupby('category').apply(sum)['amount']
+    if df_is_not_empty(budgets):
 
-    return series_to_dict(budgets)
+        budgets = budgets.groupby('category').apply(sum)['amount']
+        return series_to_dict(budgets)
+
+    return dict()
 
 
 def get_exchange_rate(data):
     cash_withdrawals = data[data['type'] == 'CW']
     if cash_withdrawals.shape[0] == 0:
-        print('WRONG EXCHANGE RATE : NO CASH WITHDRAWN')
+        print('WRONG EXCHANGE RATE : NO WITHDRAWAL FOUND')
         return 1
     sum_currency = data['originalAmount'].sum()
     sum_euro = data['amount'].sum()
     try:
         return sum_euro / sum_currency
     except ZeroDivisionError:
-        print('WRONG EXCHANGE RATE : NO CASH WITHDRAWN')
+        print('WRONG EXCHANGE RATE : TOTAL CASH WITHDRAWN = 0')
         return 1
 
-def summary_on_field(data, field_name, cycle='all'):
-    if cycle != 'all':
-        data = data[data['cycle'] == cycle]
+def summary_on_field(data, field_name, cycle):
+    cycle = decode_cycle(cycle)
+
     exchange_rate = get_exchange_rate(data)
     euro_amounts = data.apply(lambda row: get_euro_amount(row, exchange_rate), axis=1)
     data = data.assign(euro_amount=euro_amounts)
@@ -60,10 +65,6 @@ def get_categories_recap(data, cycle):
 
     budgets = get_budgets(cycle)
     data['total_budget'] = data['category'].map(budgets).fillna(0).astype(float)
-
-    to_sum_data = data[data['category'].str.endswith('Input') == False]
-    total = to_sum_data.sum(numeric_only=True)
-    total['category'] = 'TOTAL'
-    data = data.append(total, ignore_index=True)
+    data = data[data['category'] != "Input"]
 
     return data

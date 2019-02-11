@@ -19,9 +19,31 @@ class CategorizeOperations(Resource):
     @staticmethod
     def post():
         ids = request.json['transaction_ids']
-        category = request.json['category']
+        category = request.json['field_value']
         result = categorize(ids, category)
         return {"status": result}
+
+
+
+class NameOperations(Resource):
+
+    @staticmethod
+    def post():
+        ids = request.json['transaction_ids']
+        category = request.json['field_value']
+        result = name(ids, category)
+        return {"status": result}
+
+
+class changeCycle(Resource):
+
+    @staticmethod
+    def post():
+        ids = request.json['transaction_ids']
+        category = request.json['field_value']
+        result = change_cycle(ids, category)
+        return {"status": result}
+
 
 
 class CreateManualTransaction(Resource):
@@ -46,7 +68,7 @@ class LinkTwoTransactions(Resource):
     @staticmethod
     def post():
         ids = request.json['transaction_ids']
-        result = link_two_ids(ids)
+        result = link_ids(ids)
         return {"status": result}
 
 
@@ -73,3 +95,10 @@ class MakeRecurring(Resource):
         name, amount, account = [request.args.get(field) for field in ['name', 'amount', 'account']]
         result = create_recurring_transaction(name, amount, account)
         return {"status": result}
+
+
+class GetAllCycles(Resource):
+    @staticmethod
+    def get():
+        return json.loads(all_cycles())
+

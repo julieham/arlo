@@ -49,7 +49,7 @@ def dataframe_formatter(df, account):
     df['originalAmount'] = df.apply(lambda row: remove_original_amount_when_euro(row), axis=1)
     df['originalCurrency'] = df.apply(lambda row: remove_original_currency_when_euro(row), axis=1)
     df['name'] = df['bank_name'].apply(autofill_name)
-    df['category'] = '-'
+    df['category'] = np.nan
     df['account'] = account
 
     calculate_universal_fields(df)
@@ -61,6 +61,8 @@ def type_to_method(row):
     type = row['type']
     amount = row['amount']
     account = row['account']
+    if account == "SUL":
+        return 'hotel'
     if type in ['PT', 'AA', 'AE']:
         return 'card'
     if type in ['DT', 'CT']:
@@ -73,6 +75,10 @@ def type_to_method(row):
 def create_id(fields):
     name, amount, account, timestamp = [fields[u] for u in ['name', 'amount', 'account', 'visibleTS']]
 
-    string = '*'.join([name, str(int(timestamp) * 1000000), str(int(float('0'+str(amount)) * 100)), account])
+    str_amount = str(amount)
+    if str_amount == '':
+        str_amount = '0'
+
+    string = '*'.join([name, str(int(timestamp) * 1000000), str(int(float(str_amount) * 100)), account])
     return hashlib.md5(string.encode()).hexdigest()
 

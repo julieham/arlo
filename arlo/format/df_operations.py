@@ -1,5 +1,7 @@
 import pandas as pd
 
+from arlo.format.date_operations import date_to_cycle, date_now
+
 
 def sort_df_by_descending_date(df):
     return df.sort_values("date", ascending=False).reset_index(drop=True)
@@ -37,9 +39,12 @@ def apply_function_to_field_no_overrule(df, field, function, destination=''):
         df.loc[(pd.isnull(df[destination]), destination)] = calculated_values
 
 
+def set_field_value_no_overrule(df, field, value):
+    df.loc[(pd.isnull(df[field]))] = value
+
+
 def apply_function_to_field_overrule(df, field, function):
     df[field] = df[field].apply(function)
-
 
 
 def add_field_with_default_value(df, field, value):
@@ -68,9 +73,32 @@ def extract_line_from_df(index, df):
     return line
 
 
-def change_field_on_ids_to_value(df, ids, field_name, field_value):
+def change_field_on_several_ids_to_value(df, ids, field_name, field_value):
     df.loc[df['id'].isin(ids), [field_name]] = field_value
+
+
+def change_field_on_single_id_to_value(df, id, field_name, field_value):
+    df.loc[df['id'] == id, [field_name]] = field_value
 
 
 def read_file_to_df(filename):
     return pd.read_csv(filename)
+
+
+def result_function_applied_to_field(df, field_name, function):
+    return function(df[field_name])
+
+
+def get_one_field(df, field_name):
+    return df[field_name]
+
+
+def how_many_rows(df):
+    return df.shape[0]
+
+
+def filter_df_on_cycle(df, cycle):
+    if cycle == 'all':
+        return df
+
+    return df[df['cycle'] == cycle]

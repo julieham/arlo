@@ -15,7 +15,7 @@ def autofill_name(s):
     translation = find_from_pattern(s, read_dico('arlo/data/autofill_name.csv'))
     if translation:
         return translation
-    return '** ' + s + ' **'
+    return '**' + s.title() + '**'
 
 
 def autofill_cat(name):
