@@ -19,7 +19,7 @@ def add_link_id(df):
 
 
 def match_gone_transactions(gone, candidates, processed_transactions, id_field_name):
-    recup_columns = ['name', 'category', 'comment']
+    recup_columns = ['name', 'category', 'comment', 'link']
 
     not_found = make_empty_dataframe_based_on_this(gone)
     for _, row in gone.iterrows():
@@ -69,6 +69,7 @@ def opposite_sign_linkID(linkID):
 
 
 def find_the_associated_refund(pending_transactions, pending_source, refund_transactions, refunds_source):
+    #TODO use link function
 
     print('starting refund process')
     links_names = ['linkID', 'linkIDnoAmount', 'linkIDnoName']

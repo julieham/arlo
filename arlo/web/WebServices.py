@@ -85,7 +85,8 @@ class GetBalances(Resource):
 
     @staticmethod
     def get():
-        recap = get_balances().reset_index()
+        cycle = request.args.get('cycle')
+        recap = get_balances(cycle=cycle).reset_index()
         return json.loads(recap.to_json(orient="records"))
 
 

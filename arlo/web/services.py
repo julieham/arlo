@@ -9,7 +9,7 @@ from arlo.tools.recap_by_category import get_categories_recap
 from arlo.format.data_operations import calculate_universal_fields, set_amounts_to_numeric
 from arlo.format.df_operations import df_is_not_empty, change_field_on_single_id_to_value, get_one_field, \
     result_function_applied_to_field, how_many_rows, filter_df_several_values, apply_function_to_field_no_overrule, \
-    filter_df_on_cycle
+    filter_df_on_cycle, change_field_on_several_ids_to_value
 from arlo.format.formatting import dataframe_formatter, type_to_method, parse_ids
 from arlo.format.transaction_operations import add_default_values_if_absent, fields_make_valid_transaction
 from arlo.format.types_operations import dict_to_df, sorted_set
@@ -17,7 +17,7 @@ from arlo.parameters.credentials import login
 from arlo.parameters.param import *
 from arlo.read_write.crud import save_data, read_data, change_last_update_to_now, add_to_data, minutes_since_last_update, \
     set_field_to_value_on_ids
-from arlo.tools.clean_n26 import get_n_last_transactionsg
+from arlo.tools.clean_n26 import get_n_last_transactions
 from arlo.tools.finder import has_default_fields, get_default_fields
 from arlo.tools.merge_data import merge_data
 
@@ -80,7 +80,7 @@ def list_data_json(refresh=None, hide_linked=False, cycle="now"):
     #TODO recup link disappearing transactions
 
     if hide_linked:
-        data = data[data['link'] == '-']
+        data = data[data['category'] != 'Link']
 
     data['method'] = data.apply(lambda row: type_to_method(row), axis=1)
     data = data[['id', 'name', 'amount', 'category', 'pending', 'originalAmount', 'originalCurrency', 'method', 'cycle']]
@@ -123,9 +123,9 @@ def change_cycle(transaction_ids, name):
 def create_manual_transaction(transaction_fields):
     print(transaction_fields)
 
-    if transaction_fields["date"] != "" and transaction_fields["date"] != None:
-        transaction_fields["visibleTS"] = angular_string_to_timestamp(transaction_fields["date"])
-    del transaction_fields["date"]
+    if transaction_fields["angular_date"] != "" and transaction_fields["angular_date"] != None:
+        transaction_fields["visibleTS"] = angular_string_to_timestamp(transaction_fields["angular_date"])
+    del transaction_fields["angular_date"]
 
     print(transaction_fields)
 
@@ -152,21 +152,31 @@ def link_ids(ids):
         return error_message
 
     if len(ids) < 2:
-        return 'FAIL not enough transactions'
+        message = 'FAIL not enough transactions'
+        print(message)
+        return message
 
     data = read_data()
+    change_field_on_several_ids_to_value(data, ids, "category", "Link")
     data_ids = filter_df_several_values(data, 'id', ids)
 
     if how_many_rows(data_ids) != len(ids):
-        return 'FAIL at least one transaction missing'
+        message = 'FAIL at least one transaction missing'
+        print(message)
+        return message
 
     if result_function_applied_to_field(data_ids, 'amount', sum) != 0:
-        return 'FAIL transactions do not cancel each other out'
+        message = 'FAIL transactions do not cancel each other out'
+        print(message)
+        return message
+
 
     present_links = set(get_one_field(data_ids, 'link'))
 
     if present_links != {'-'}:
-        return 'FAIL one or more transaction already linked'
+        message = 'FAIL one or more transaction already linked'
+        print(message)
+        return message
 
     ids_link = ids[1:]+ [ids[0]]
     for id, id_link in zip(ids, ids_link):
@@ -219,6 +229,7 @@ def get_balances(cycle='now'):
 
     all = pd.concat([data, data_this_cycle], axis=1, sort=False).fillna(0)
     all["currency"] = "EUR"
+    all.index.names = ['account_name']
 
     return(all)
 
