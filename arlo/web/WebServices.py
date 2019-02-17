@@ -92,11 +92,15 @@ class GetBalances(Resource):
 
 class MakeRecurring(Resource):
     @staticmethod
-    def get():
-        name, amount, account = [request.args.get(field) for field in ['name', 'amount', 'account']]
-        result = create_recurring_transaction(name, amount, account)
+    def post():
+        #name, amount, account = [request.json[field] for field in ['name', 'amount', 'account']]
+        result = create_recurring_transaction(request.json['name'])
         return {"status": result}
 
+class GetRecurring(Resource):
+    @staticmethod
+    def get():
+        return json.loads(json.dumps(['Washer', 'Dryer']))
 
 class GetAllCycles(Resource):
     @staticmethod

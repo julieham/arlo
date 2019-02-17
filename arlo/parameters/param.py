@@ -8,3 +8,4 @@ directory = './arlo/data/'
 max_transactions_per_user = 1500
 
 n26_url = 'https://api.tech26.de'
+lunchr_url = "https://api.lunchr.fr"

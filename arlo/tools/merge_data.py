@@ -131,4 +131,4 @@ def merge_data(old_data, new_data):
     all_n26 = merge_n26_data(old_n26, new_data)
     all_n26['pending'] = all_n26.apply(lambda row: row['type'] == 'AA' and row['link'] == '-', axis=1)
 
-    return pd.concat([all_n26, other_accounts]).sort_values("date", ascending=False).reset_index(drop=True)
+    return pd.concat([all_n26, other_accounts], sort=False).sort_values("date", ascending=False).reset_index(drop=True)

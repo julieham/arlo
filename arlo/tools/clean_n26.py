@@ -1,11 +1,11 @@
 import requests
 
-from arlo.parameters.credentials import login
+from arlo.parameters.credentials import login_N26
 from arlo.parameters.param import n26_url
 
 
 def get_token(name):
-    values_token = {'grant_type': 'password', 'username': login[name].username, 'password': login[name].password}
+    values_token = {'grant_type': 'password', 'username': login_N26[name].username, 'password': login_N26[name].password}
     headers_token = {'Authorization': 'Basic YW5kcm9pZDpzZWNyZXQ='}
     response_token = requests.post(n26_url + '/oauth/token', data=values_token, headers=headers_token)
     token_info = response_token.json()
@@ -15,7 +15,7 @@ def get_token(name):
 
 
 def get_balance(name):
-    if name not in login:
+    if name not in login_N26:
         return False
     valid_token, access_token = get_token(name)
     headers = {'Authorization': 'bearer' + str(access_token)}
@@ -24,7 +24,7 @@ def get_balance(name):
 
 
 def get_n_last_transactions(name, limit=10):
-    if name not in login:
+    if name not in login_N26:
         return False
     valid_token, access_token = get_token(name)
     if not valid_token:

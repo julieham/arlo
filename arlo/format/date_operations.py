@@ -43,3 +43,6 @@ def decode_cycle(cycle):
     if cycle == 'now':
         return date_to_cycle(date_now())
     return cycle
+
+def lunchr_date_to_datetime(date):
+    return pd.datetime.strptime(date[:-10], '%Y-%m-%dT%H:%M:%S')

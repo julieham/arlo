@@ -1,7 +1,5 @@
 import pandas as pd
 
-from arlo.format.date_operations import date_to_cycle, date_now
-
 
 def sort_df_by_descending_date(df):
     return df.sort_values("date", ascending=False).reset_index(drop=True)
@@ -27,11 +25,11 @@ def get_refund_transactions(df):
     return refunds
 
 
-def apply_function_to_field_no_overrule(df, field, function, destination=''):
+def apply_function_to_field_no_overrule(df, field, function_to_apply, destination=''):
     if not destination:
         destination = field
 
-    calculated_values = df[field].apply(function)
+    calculated_values = df[field].apply(function_to_apply)
 
     if destination not in df.columns.values:
         df[destination] = calculated_values
@@ -43,8 +41,8 @@ def set_field_value_no_overrule(df, field, value):
     df.loc[(pd.isnull(df[field]))] = value
 
 
-def apply_function_to_field_overrule(df, field, function):
-    df[field] = df[field].apply(function)
+def apply_function_to_field_overrule(df, field, function_to_apply):
+    df[field] = df[field].apply(function_to_apply)
 
 
 def add_field_with_default_value(df, field, value):
@@ -77,16 +75,16 @@ def change_field_on_several_ids_to_value(df, ids, field_name, field_value):
     df.loc[df['id'].isin(ids), [field_name]] = field_value
 
 
-def change_field_on_single_id_to_value(df, id, field_name, field_value):
-    df.loc[df['id'] == id, [field_name]] = field_value
+def change_field_on_single_id_to_value(df, id_value, field_name, field_value):
+    df.loc[df['id'] == id_value, [field_name]] = field_value
 
 
-def read_file_to_df(filename):
-    return pd.read_csv(filename)
+def read_file_to_df(filename, sep=','):
+    return pd.read_csv(filename,sep=sep)
 
 
-def result_function_applied_to_field(df, field_name, function):
-    return function(df[field_name])
+def result_function_applied_to_field(df, field_name, function_to_apply):
+    return function_to_apply(df[field_name])
 
 
 def get_one_field(df, field_name):
@@ -102,3 +100,22 @@ def filter_df_on_cycle(df, cycle):
         return df
 
     return df[df['cycle'] == cycle]
+
+
+def horizontal_concat(df1, df2):
+    return pd.concat([df1, df2], axis=1, sort=False).fillna(0)
+
+
+def vertical_concat(df1, df2):
+    return pd.concat([df1, df2], axis=0, sort=False).fillna(0)
+
+
+def make_a_df_from_dict(dico):
+    return pd.DataFrame(data=dico).drop_duplicates()
+
+
+def get_last_id_from_account(data, account_name):
+    data_lunchr = data[data['account'] == account_name]
+    if data_lunchr.shape[0] == 0:
+        return None
+    return data_lunchr['id'].iloc[0]

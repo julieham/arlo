@@ -15,7 +15,7 @@ def get_euro_amount(row, exchange_rate):
 
 
 def get_budgets(cycle):
-    budgets = read_file_to_df(budgets_filename)
+    budgets = read_file_to_df(budgets_filename, sep=';')
 
     if cycle != 'all':
         budgets = budgets[budgets['cycle'] == cycle]

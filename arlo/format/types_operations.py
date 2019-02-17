@@ -38,10 +38,5 @@ def series_to_dict(serie):
 
 
 def sorted_set(list):
-    found = set()
-    sorted_found = []
-    for value in list:
-        if value not in found:
-            found.add(value)
-            sorted_found.append(value)
-    return sorted_found
+    seen = set()
+    return [x for x in list if not (x in seen or seen.add(x))]

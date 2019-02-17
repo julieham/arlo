@@ -27,7 +27,7 @@ def read_dico(filename):
     for line in f:
         try:
             line = line.replace('\n', '')
-            a, b = line.split(',')
+            a, b = line.split(';')
             dictionary[a] = b
         except ValueError:
             pass
@@ -97,7 +97,7 @@ def read_dictionary(filename):
     f = codecs.open(filename, 'r', encoding='utf8')
     for line in f:
         try:
-            line = line.replace('\n','').split(',')
+            line = line.replace('\n','').split(';')
             key = line.pop(0)
             if len(line) > 1:
                 dictionary[key] = line

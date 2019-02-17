@@ -1,7 +1,5 @@
-import math
-
-
-import numpy as np
+from math import isnan
+from numpy import NaN
 import hashlib
 
 from arlo.format.data_operations import calculate_universal_fields
@@ -34,7 +32,7 @@ def make_bank_name(row):
 
 def remove_original_amount_when_euro(row):
     if row['originalCurrency'] == 'EUR':
-        return np.NaN
+        return NaN
     return row['originalAmount']
 
 
@@ -45,11 +43,12 @@ def remove_original_currency_when_euro(row):
 
 
 def dataframe_formatter(df, account):
-    df['bank_name'] = df.replace(np.NaN, '').apply(lambda row: make_bank_name(row), axis=1)
-    df['originalAmount'] = df.apply(lambda row: remove_original_amount_when_euro(row), axis=1)
-    df['originalCurrency'] = df.apply(lambda row: remove_original_currency_when_euro(row), axis=1)
+    if account.endswith('N26'):
+        df['bank_name'] = df.replace(NaN, '').apply(lambda row: make_bank_name(row), axis=1)
+        df['originalAmount'] = df.apply(lambda row: remove_original_amount_when_euro(row), axis=1)
+        df['originalCurrency'] = df.apply(lambda row: remove_original_currency_when_euro(row), axis=1)
     df['name'] = df['bank_name'].apply(autofill_name)
-    df['category'] = np.nan
+    df['category'] = NaN
     df['account'] = account
 
     calculate_universal_fields(df)
@@ -67,7 +66,7 @@ def type_to_method(row):
         return 'card'
     if type in ['DT', 'CT']:
         return 'transfer'
-    if math.isnan(amount) or account.startswith('Cash'):
+    if isnan(amount) or account.startswith('Cash'):
         return 'cash'
     return 'card'
 

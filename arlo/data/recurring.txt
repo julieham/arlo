@@ -1,2 +1,2 @@
-Washer,4,Cash €
-Dryer,1,Cash €
+Washer;4;Cash €
+Dryer;1;Cash €

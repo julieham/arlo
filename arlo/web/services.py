@@ -5,15 +5,16 @@ import numpy as np
 import json
 
 from arlo.format.date_operations import decode_cycle, angular_string_to_timestamp
+from arlo.tools.clean_lunchr import get_data_lunchr_since_last_id
 from arlo.tools.recap_by_category import get_categories_recap
 from arlo.format.data_operations import calculate_universal_fields, set_amounts_to_numeric
 from arlo.format.df_operations import df_is_not_empty, change_field_on_single_id_to_value, get_one_field, \
-    result_function_applied_to_field, how_many_rows, filter_df_several_values, apply_function_to_field_no_overrule, \
-    filter_df_on_cycle, change_field_on_several_ids_to_value
+    result_function_applied_to_field, how_many_rows, filter_df_several_values, \
+    filter_df_on_cycle, change_field_on_several_ids_to_value, get_last_id_from_account
 from arlo.format.formatting import dataframe_formatter, type_to_method, parse_ids
 from arlo.format.transaction_operations import add_default_values_if_absent, fields_make_valid_transaction
 from arlo.format.types_operations import dict_to_df, sorted_set
-from arlo.parameters.credentials import login
+from arlo.parameters.credentials import login_N26
 from arlo.parameters.param import *
 from arlo.read_write.crud import save_data, read_data, change_last_update_to_now, add_to_data, minutes_since_last_update, \
     set_field_to_value_on_ids
@@ -54,8 +55,10 @@ def refresh_data():
 def force_refresh():
 
     print('FORCE REFRESH')
+    #refresh_lunchr()
+
     all_valid, all_data = True, []
-    for account in login:
+    for account in login_N26:
         valid, data = get_transactions_as_df(account, max_transactions_per_user)
         all_valid = all_valid and valid
         all_data.append(data)
@@ -73,14 +76,23 @@ def force_refresh():
     return 'SUCCESS'
 
 
-def list_data_json(refresh=None, hide_linked=False, cycle="now"):
+def refresh_lunchr():
+    data = read_data()
+    last_id = get_last_id_from_account(data, 'lunchr')
+    df = get_data_lunchr_since_last_id(last_id)
+    df['bank_name'].fillna('')
+    data = pd.concat([data, df], join='outer', sort=False)
+    save_data(data)
+
+
+def list_data_json(refresh=None, hide_linked=True, cycle="now"):
     if refresh:
         refresh_data()
     data = read_data()
     #TODO recup link disappearing transactions
 
     if hide_linked:
-        data = data[data['category'] != 'Link']
+        data = data[data['category'] != "Link"]
 
     data['method'] = data.apply(lambda row: type_to_method(row), axis=1)
     data = data[['id', 'name', 'amount', 'category', 'pending', 'originalAmount', 'originalCurrency', 'method', 'cycle']]
@@ -105,7 +117,6 @@ def name(transaction_ids, name):
     if error_message:
         return error_message
     set_field_to_value_on_ids(transaction_ids, 'name', name)
-    # apply_function_to_field_no_overrule()
 
     return 'SUCCESS'
 
@@ -115,7 +126,6 @@ def change_cycle(transaction_ids, name):
     if error_message:
         return error_message
     set_field_to_value_on_ids(transaction_ids, 'cycle', name)
-    # apply_function_to_field_no_overrule()
 
     return 'SUCCESS'
 
@@ -123,9 +133,10 @@ def change_cycle(transaction_ids, name):
 def create_manual_transaction(transaction_fields):
     print(transaction_fields)
 
-    if transaction_fields["angular_date"] != "" and transaction_fields["angular_date"] != None:
-        transaction_fields["visibleTS"] = angular_string_to_timestamp(transaction_fields["angular_date"])
-    del transaction_fields["angular_date"]
+    if "angular_date" in transaction_fields:
+        if transaction_fields["angular_date"] != "" and transaction_fields["angular_date"] != None:
+            transaction_fields["visibleTS"] = angular_string_to_timestamp(transaction_fields["angular_date"])
+        del transaction_fields["angular_date"]
 
     print(transaction_fields)
 
@@ -137,7 +148,10 @@ def create_manual_transaction(transaction_fields):
 
     transaction_df = dict_to_df(transaction_fields)
 
-    set_amounts_to_numeric(transaction_df, transaction_fields["isCredit"] == "true")
+    if "isCredit" in transaction_fields:
+        set_amounts_to_numeric(transaction_df, transaction_fields["isCredit"] == "true")
+    else:
+        set_amounts_to_numeric(transaction_df, False)
     calculate_universal_fields(transaction_df)
 
     add_to_data(transaction_df[list(set(column_names) & set(transaction_df.columns.values))])
@@ -192,10 +206,14 @@ def get_recap_categories(cycle='now'):
     cycle = decode_cycle(cycle)
     data = filter_df_on_cycle(data, cycle)
 
+    #TODO make generic function with balances
+
     recap = pd.DataFrame()
 
     if df_is_not_empty(data):
         recap = get_categories_recap(data, cycle)
+
+    recap = recap[recap['category'] != "Link"]
 
     return recap.to_json(orient="records")
 
@@ -234,7 +252,7 @@ def get_balances(cycle='now'):
     return(all)
 
 
-def create_recurring_transaction(name, amount, account):
+def create_recurring_transaction(name, amount=None, account=None):
 
     if has_default_fields(name):
         default_fields = get_default_fields(name)
@@ -253,3 +271,15 @@ def all_cycles():
     all_cycles_with_duplicates = list(data['cycle'])
     set_cycles = sorted_set(all_cycles_with_duplicates)
     return json.dumps(['-'] + set_cycles)
+
+
+def get_budgets_from_cycle(cycle):
+    cycle = decode_cycle(cycle)
+
+    budgets = pd.read_csv('./arlo/data/' + 'budgets.csv', sep=";")
+    budgets = budgets[budgets['cycle'] == cycle]
+
+    budgets = budgets.rename(columns={"amount": "budget"})
+    budgets = budgets.set_index('category')
+
+    return budgets[['budget']]
