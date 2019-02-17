@@ -1,2 +1,3 @@
-Washer;4;Cash €
-Dryer;1;Cash €
+name;amount;account
+Washer;4;Cash
+Dryer;1;Cash

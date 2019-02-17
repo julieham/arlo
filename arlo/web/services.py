@@ -19,7 +19,7 @@ from arlo.parameters.param import *
 from arlo.read_write.crud import save_data, read_data, change_last_update_to_now, add_to_data, minutes_since_last_update, \
     set_field_to_value_on_ids
 from arlo.tools.clean_n26 import get_n_last_transactions
-from arlo.tools.finder import has_default_fields, get_default_fields
+from arlo.tools.finder import has_default_fields, get_default_fields, get_possible_recurring
 from arlo.tools.merge_data import merge_data
 
 # %% PANDAS PRINT PARAMETERS
@@ -131,20 +131,16 @@ def change_cycle(transaction_ids, name):
 
 
 def create_manual_transaction(transaction_fields):
-    print(transaction_fields)
 
     if "angular_date" in transaction_fields:
         if transaction_fields["angular_date"] != "" and transaction_fields["angular_date"] != None:
             transaction_fields["visibleTS"] = angular_string_to_timestamp(transaction_fields["angular_date"])
         del transaction_fields["angular_date"]
 
-    print(transaction_fields)
 
     add_default_values_if_absent(transaction_fields)
     if not fields_make_valid_transaction(transaction_fields):
         return 'FAIL'
-
-    print(transaction_fields)
 
     transaction_df = dict_to_df(transaction_fields)
 
@@ -283,3 +279,7 @@ def get_budgets_from_cycle(cycle):
     budgets = budgets.set_index('category')
 
     return budgets[['budget']]
+
+
+def get_list_recurring(cycle):
+    return get_possible_recurring(cycle)

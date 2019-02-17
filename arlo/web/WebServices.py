@@ -97,10 +97,13 @@ class MakeRecurring(Resource):
         result = create_recurring_transaction(request.json['name'])
         return {"status": result}
 
+
 class GetRecurring(Resource):
     @staticmethod
     def get():
-        return json.loads(json.dumps(['Washer', 'Dryer']))
+        cycle = request.args.get('cycle')
+        return json.loads(json.dumps(get_list_recurring(cycle)))
+
 
 class GetAllCycles(Resource):
     @staticmethod

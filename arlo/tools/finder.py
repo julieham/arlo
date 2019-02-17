@@ -1,15 +1,17 @@
-from arlo.read_write.crud import read_dictionary
+import pandas as pd
 
 recurring_filename = './arlo/data/recurring.txt'
 
-default_fields = read_dictionary(recurring_filename)
-
 
 def has_default_fields(name):
-    return name in default_fields
+    return name in pd.read_csv(recurring_filename, sep=";", index_col=0).index
 
 
 def get_default_fields(name):
-    if name in default_fields:
-        amount_str, account = default_fields[name]
-        return dict({'amount': amount_str, 'account': account})
+    default = pd.read_csv(recurring_filename, sep=";", index_col=0)
+    if name in default.index:
+        return dict({'amount': default.at[name, 'amount'], 'account': default.at[name, 'account']})
+
+
+def get_possible_recurring(cycle):
+    return list(pd.read_csv(recurring_filename, sep=";", index_col=0).index)
