@@ -24,7 +24,6 @@ class CategorizeOperations(Resource):
         return {"status": result}
 
 
-
 class NameOperations(Resource):
 
     @staticmethod
@@ -35,7 +34,7 @@ class NameOperations(Resource):
         return {"status": result}
 
 
-class changeCycle(Resource):
+class ChangeCycle(Resource):
 
     @staticmethod
     def post():
@@ -43,7 +42,6 @@ class changeCycle(Resource):
         category = request.json['field_value']
         result = change_cycle(ids, category)
         return {"status": result}
-
 
 
 class CreateManualTransaction(Resource):
@@ -93,7 +91,7 @@ class GetBalances(Resource):
 class MakeRecurring(Resource):
     @staticmethod
     def post():
-        #name, amount, account = [request.json[field] for field in ['name', 'amount', 'account']]
+        # name, amount, account = [request.json[field] for field in ['name', 'amount', 'account']]
         result = create_recurring_transaction(request.json['name'])
         return {"status": result}
 
@@ -109,4 +107,3 @@ class GetAllCycles(Resource):
     @staticmethod
     def get():
         return json.loads(all_cycles())
-

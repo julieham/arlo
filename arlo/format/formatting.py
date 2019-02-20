@@ -3,8 +3,8 @@ from numpy import NaN
 import hashlib
 
 from arlo.format.data_operations import calculate_universal_fields
-from arlo.read_write.crud import read_data
-from arlo.tools.autofill import autofill_name
+from arlo.format.df_operations import add_autofilled_column
+from arlo.read_write.fileManager import read_data
 
 
 def parse_ids(transaction_ids):
@@ -47,24 +47,24 @@ def dataframe_formatter(df, account):
         df['bank_name'] = df.replace(NaN, '').apply(lambda row: make_bank_name(row), axis=1)
         df['originalAmount'] = df.apply(lambda row: remove_original_amount_when_euro(row), axis=1)
         df['originalCurrency'] = df.apply(lambda row: remove_original_currency_when_euro(row), axis=1)
-    df['name'] = df['bank_name'].apply(autofill_name)
-    df['category'] = NaN
+
     df['account'] = account
 
     calculate_universal_fields(df)
+    add_autofilled_column(df, 'name', 'category', 'autofill_category.csv')
 
     return df
 
 
 def type_to_method(row):
-    type = row['type']
+    transaction_type = row['type']
     amount = row['amount']
     account = row['account']
     if account == "SUL":
         return 'hotel'
-    if type in ['PT', 'AA', 'AE']:
+    if transaction_type in ['PT', 'AA', 'AE']:
         return 'card'
-    if type in ['DT', 'CT']:
+    if transaction_type in ['DT', 'CT']:
         return 'transfer'
     if isnan(amount) or account.startswith('Cash'):
         return 'cash'
@@ -80,4 +80,3 @@ def create_id(fields):
 
     string = '*'.join([name, str(int(timestamp) * 1000000), str(int(float(str_amount) * 100)), account])
     return hashlib.md5(string.encode()).hexdigest()
-

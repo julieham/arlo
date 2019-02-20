@@ -23,7 +23,7 @@ ipa.add_resource(MakeRecurring, "/create/recurring")
 ipa.add_resource(LinkTwoTransactions, "/set-fields/link")
 ipa.add_resource(CategorizeOperations, "/set-fields/category")
 ipa.add_resource(NameOperations, "/set-fields/name")
-ipa.add_resource(changeCycle, "/set-fields/cycle")
+ipa.add_resource(ChangeCycle, "/set-fields/cycle")
 
 
 if __name__ == '__main__':

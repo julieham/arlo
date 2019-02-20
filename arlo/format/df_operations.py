@@ -1,16 +1,16 @@
 import pandas as pd
 
+from arlo.parameters.param import directory
+from arlo.read_write.reader import read_df_file
+
 
 def sort_df_by_descending_date(df):
     return df.sort_values("date", ascending=False).reset_index(drop=True)
 
 
 def make_empty_dataframe_based_on_this(df):
-    column_names = list(df.head(0))
-    data_types = df.dtypes
-
     empty_df = pd.DataFrame(index=None)
-    for col, dtype in zip(column_names, data_types):
+    for col, dtype in zip(df.columns, df.dtypes):
         empty_df[col] = pd.Series(dtype=dtype)
     return empty_df
 
@@ -79,10 +79,6 @@ def change_field_on_single_id_to_value(df, id_value, field_name, field_value):
     df.loc[df['id'] == id_value, [field_name]] = field_value
 
 
-def read_file_to_df(filename, sep=','):
-    return pd.read_csv(filename,sep=sep)
-
-
 def result_function_applied_to_field(df, field_name, function_to_apply):
     return function_to_apply(df[field_name])
 
@@ -119,3 +115,14 @@ def get_last_id_from_account(data, account_name):
     if data_lunchr.shape[0] == 0:
         return None
     return data_lunchr['id'].iloc[0]
+
+
+def autofill_series(series, dictioname, star_fill=False):
+    dictionary = read_df_file(directory + dictioname, sep=';', index_col=0, squeeze=True)
+    default_fill = '**' + series.str.title() + '**' if star_fill else '-'
+    return series.str.title().map(dictionary).fillna(default_fill)
+
+
+def add_autofilled_column(data, column_from, column_to, dictioname, star_fill=False):
+    data[column_to] = autofill_series(data[column_from], dictioname, star_fill)
+

@@ -1,6 +1,4 @@
 import pandas as pd
-from time import localtime
-from datetime import timedelta
 
 def string_to_datetime(date):
     return pd.datetime.strptime(date, '%Y-%m-%d %H:%M:%S.%f')
