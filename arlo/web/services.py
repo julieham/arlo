@@ -4,22 +4,23 @@ import numpy as np
 import json
 
 from arlo.format.date_operations import decode_cycle, angular_string_to_timestamp
-from arlo.tools.clean_lunchr import get_data_lunchr_since_last_id
+from arlo.tools.clean_lunchr import get_latest_lunchr, get_token_info, how_many_pages, format_lunchr_df, lunchr_df_page_num
 from arlo.tools.recap_by_category import get_categories_recap
 from arlo.format.data_operations import calculate_universal_fields, set_amounts_to_numeric
 from arlo.format.df_operations import df_is_not_empty, change_field_on_single_id_to_value, get_one_field, \
     result_function_applied_to_field, how_many_rows, filter_df_several_values, \
-    filter_df_on_cycle, change_field_on_several_ids_to_value, get_last_id_from_account, add_autofilled_column
+    filter_df_on_cycle, change_field_on_several_ids_to_value, add_autofilled_column, vertical_concat
 from arlo.format.formatting import dataframe_formatter, type_to_method, parse_ids
 from arlo.format.transaction_operations import add_default_values_if_absent, fields_make_valid_transaction
 from arlo.format.types_operations import dict_to_df, sorted_set
-from arlo.parameters.credentials import login_N26
+from arlo.parameters.credentials import login_N26, login_lunchr
 from arlo.parameters.param import *
-from arlo.read_write.fileManager import save_data, read_data, change_last_update_to_now, add_to_data, minutes_since_last_update, \
-    set_field_to_value_on_ids
+from arlo.read_write.fileManager import save_data, read_data, change_last_update_to_now, minutes_since_last_update, \
+    set_field_to_value_on_ids, add_new_data
 from arlo.tools.clean_n26 import get_n_last_transactions
 from arlo.tools.finder import has_default_fields, get_default_fields, get_possible_recurring
 from arlo.tools.merge_data import merge_data
+
 
 # %% PANDAS PRINT PARAMETERS
 
@@ -30,7 +31,6 @@ pd.set_option("display.max_columns", 100)
 
 
 # %% API CALLS
-
 
 def get_transactions_as_df(account, limit):
     valid, data = get_n_last_transactions(account, limit)
@@ -57,7 +57,7 @@ def force_refresh():
 
     all_valid, all_data = True, []
     for account in login_N26:
-        valid, data = get_transactions_as_df(account, max_transactions_per_user)
+        valid, data = get_transactions_as_df(account, n26_max_transactions_per_user)
         all_valid = all_valid and valid
         all_data.append(data)
     all_valid = True
@@ -72,15 +72,6 @@ def force_refresh():
     change_last_update_to_now()
 
     return 'SUCCESS'
-
-
-def refresh_lunchr():
-    data = read_data()
-    last_id = get_last_id_from_account(data, 'lunchr')
-    df = get_data_lunchr_since_last_id(last_id)
-    df['bank_name'].fillna('')
-    data = pd.concat([data, df], join='outer', sort=False)
-    save_data(data)
 
 
 def list_data_json(refresh=None, hide_linked=True, cycle="now"):
@@ -151,9 +142,9 @@ def create_manual_transaction(transaction_fields):
     calculate_universal_fields(transaction_df)
 
     if 'category' not in transaction_df.columns:
-        add_autofilled_column(transaction_df, 'name', 'category', 'autofill_category.csv')
+        add_autofilled_column(transaction_df, 'name', 'category')
 
-    add_to_data(transaction_df[list(set(column_names) & set(transaction_df.columns.values))])
+    add_new_data(transaction_df[list(set(column_names) & set(transaction_df.columns.values))])
 
     return 'SUCCESS'
 
@@ -272,3 +263,7 @@ def all_cycles():
 
 def get_list_recurring(cycle):
     return get_possible_recurring(cycle)
+
+
+def refresh_lunchr():
+    add_new_data(get_latest_lunchr())

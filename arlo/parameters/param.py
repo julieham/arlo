@@ -1,15 +1,30 @@
 delay_refresh_minutes = 10
 
 mandatory_fields = ['name', 'account']
-dash_fields = ['category', 'link', 'comment']
 
 column_names = 'name,amount,category,account,cycle,date,type,comment,' \
                'pending,bank_name,originalAmount,originalCurrency,id,link'.split(',')
 directory = './arlo/data/'
+budgets_filename = directory + 'budgets.csv'
 
-max_transactions_per_user = 1500
+
+#%% N26
 
 n26_url = 'https://api.tech26.de'
-lunchr_url = "https://api.lunchr.fr"
+n26_max_transactions_per_user = 1500
 
-budgets_filename = directory + 'budgets.csv'
+
+#%% LUNCHR
+
+lunchr_url = "https://api.lunchr.fr"
+lunchr_id_prefix = 'lunchr-T-'
+lunchr_account_name = 'lunchr'
+
+lunchr_dictionary = dict({'create'
+                          'd_at': 'date',
+                          'amount_value': 'amount',
+                          'transaction_number': 'id',
+                          'name': 'bank_name',
+                          'type':  'lunchr_type'})
+
+lunchr_fields = ['id', 'amount', 'bank_name', 'date', 'lunchr_type']

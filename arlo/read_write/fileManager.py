@@ -1,8 +1,6 @@
-import pandas as pd
-
-from arlo.format.date_operations import string_to_datetime, time_since
-from arlo.format.df_operations import apply_function_to_field_overrule, sort_df_by_descending_date,\
-    change_field_on_several_ids_to_value
+from arlo.format.date_operations import string_to_datetime, time_since, now
+from arlo.format.df_operations import apply_function_to_field_overrule, sort_df_by_descending_date, \
+    change_field_on_several_ids_to_value, vertical_concat
 from arlo.parameters.param import column_names, directory
 from arlo.read_write.reader import read_df_file
 
@@ -25,8 +23,10 @@ def save_data(data):
 
 
 def save_data_in_file(data, filename):
-    data = sort_df_by_descending_date(data)[column_names]
-    data.to_csv(filename, index=False)
+    data.dropna(how='all', inplace=True)
+    data.drop_duplicates(inplace=True)
+    sort_df_by_descending_date(data)
+    data[column_names].to_csv(filename, index=False)
 
 
 def set_field_to_value_on_ids(ids, field_name, field_value):
@@ -37,7 +37,7 @@ def set_field_to_value_on_ids(ids, field_name, field_value):
 
 def change_last_update_to_now():
     with open(last_update_file, mode='w') as file:
-        file.write("%s" % pd.datetime.now())
+        file.write("%s" % now())
 
 
 def get_last_update_string():
@@ -53,7 +53,11 @@ def minutes_since_last_update():
     return time_since(last_update).total_seconds()//60
 
 
-def add_to_data(transaction_df):
+def add_new_data(new_data):
+    data = vertical_concat([read_data(), new_data])
+    save_data(data)
+
+
+def get_field_data(field_name):
     data = read_data()
-    data = pd.concat([transaction_df, data], sort=False).sort_values("date", ascending=False).reset_index(drop=True)
-    save_data(data[column_names])
+    return data[field_name]

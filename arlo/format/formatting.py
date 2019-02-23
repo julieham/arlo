@@ -51,7 +51,9 @@ def dataframe_formatter(df, account):
     df['account'] = account
 
     calculate_universal_fields(df)
-    add_autofilled_column(df, 'name', 'category', 'autofill_category.csv')
+
+    add_autofilled_column(df, 'bank_name', 'name')
+    add_autofilled_column(df, 'name', 'category')
 
     return df
 

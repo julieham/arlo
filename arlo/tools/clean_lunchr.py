@@ -1,11 +1,12 @@
 import json
 import requests
 
-from arlo.format.date_operations import lunchr_date_to_datetime
-from arlo.format.df_operations import make_a_df_from_dict
-from arlo.format.formatting import dataframe_formatter
+from arlo.format.data_operations import remove_already_present_id
+from arlo.format.df_operations import vertical_concat
+from arlo.format.types_operations import layered_dict_to_df
 from arlo.parameters.credentials import login_lunchr
 from arlo.parameters.param import lunchr_url
+from arlo.tools.uniform_data_maker import format_lunchr_df
 
 
 def get_token_info(login):
@@ -24,46 +25,40 @@ def get_content_page_number(access_token, num_page):
     return json.loads(response.content.decode('utf8'))
 
 
-def content_to_total_count(content):
-    return int(content["pagination"]['total_count'])
+def how_many_pages(access_token):
+    content = get_content_page_number(access_token, 100000)
+    return content['pagination']['pages_count']
 
 
-def content_to_df_fields(content, dictionary, last_id):
-    a = set()
-    for t in content["payments_history"]:
-        if t['type'] != 'PAYMENT_ATTEMPT':
-            a.add(t['type'])
-            t['transaction_number'] = 'lunchr-T-' + t['transaction_number']
-            if t['transaction_number'] == last_id:
-                print(a)
-                return False
-            dictionary['amount'].append(round(float(t['amount']['value']), 2))
-            dictionary['bank_name'].append(t['name'])
-            dictionary['date'].append(lunchr_date_to_datetime(t['executed_at']))
-            dictionary['id'].append(t['transaction_number'])
-    print(a)
-    return True
+def extract_lunchr_refunds(transactions_list):
+    refunds_transactions = []
+    for transaction in transactions_list:
+        if 'refunding_transaction' in transaction:
+            refunds_transactions.append(transaction['refunding_transaction'])
+            del transaction['refunding_transaction']
+
+    return refunds_transactions + transactions_list
 
 
-def get_data_lunchr_since_last_id(last_id=None):
-    num_page = -1
-    total_count = 1
-    keep_going = True
+def lunchr_df_page_num(access_token, num_page):
+    content = get_content_page_number(access_token, num_page)
+    payments = content['payments_history']
+    payments = extract_lunchr_refunds(payments)
 
+    return layered_dict_to_df(payments)
+
+
+def get_latest_lunchr():
     access_token = get_token_info(login_lunchr)
+    lunchr_df = lunchr_df_page_num(access_token, 0)
+    format_lunchr_df(lunchr_df)
+    account = list(lunchr_df['account'])[0]
+    return remove_already_present_id(lunchr_df, account, limit=30)
 
-    dico = dict({'bank_name': [], 'amount': [], 'date': [], 'id': []})
 
-    while (num_page + 1) * 30 < total_count and keep_going:
-        num_page += 1
-        content = get_content_page_number(access_token, num_page)
-
-        keep_going = content_to_df_fields(content, dico, last_id)
-
-        if (num_page == 0 and last_id is None) or (keep_going and total_count == 1):
-            total_count = content_to_total_count(content)
-
-    lunchr_data = make_a_df_from_dict(dico)
-    lunchr_data['type'] = 'LRP'
-
-    return dataframe_formatter(lunchr_data, 'lunchr')
+def get_all_lunchr_data():
+    access_token = get_token_info(login_lunchr)
+    num_pages = how_many_pages(access_token)
+    all_content = [format_lunchr_df(lunchr_df_page_num(access_token, page_num)) for page_num in range(num_pages)]
+    all_data = vertical_concat(all_content)
+    return all_data.drop_duplicates()
