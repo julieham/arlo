@@ -1,7 +1,13 @@
 import pandas as pd
 
-from arlo.parameters.param import directory
-from arlo.read_write.reader import read_df_file
+from arlo.format.date_operations import decode_cycle
+
+
+def set_pandas_print_parameters():
+    desired_width = 10000
+    pd.set_option('display.width', desired_width)
+    pd.np.set_printoptions(linewidth=desired_width)
+    pd.set_option("display.max_columns", 100)
 
 
 def enable_chained_assigment_warning():
@@ -79,6 +85,10 @@ def filter_df_one_value(df, field_name, field_value):
     return df[df[field_name] == field_value]
 
 
+def filter_df_not_this_value(df, field_name, field_value):
+    return df[df[field_name] != field_value]
+
+
 def filter_df_several_values(df, field_name, field_values):
     return df[df[field_name].isin(field_values)]
 
@@ -114,6 +124,7 @@ def how_many_rows(df):
 
 
 def filter_df_on_cycle(df, cycle):
+    cycle = decode_cycle(cycle)
     if cycle == 'all':
         return df
 
@@ -132,16 +143,9 @@ def make_a_df_from_dict(dictionary):
     return pd.DataFrame(data=dictionary).drop_duplicates()
 
 
-def autofill_series(series, dictioname, star_fill=False):
-    dictionary = read_df_file(directory + dictioname, sep=';', index_col=0, squeeze=True)
-    default_fill = '**' + series.str.title() + '**' if star_fill else '-'
-    return series.str.title().map(dictionary).fillna(default_fill)
-
-
-def add_autofilled_column(data, column_from, column_to, star_fill=False):
-    dictioname = "autofill-" + column_from + '-to-' + column_to + ".csv"
+def assign_new_column(df, column_name, column_content):
     disable_chained_assigment_warning()
-    data[column_to] = autofill_series(data[column_from], dictioname, star_fill)
+    df[column_name] = column_content
     enable_chained_assigment_warning()
 
 
@@ -153,5 +157,10 @@ def drop_other_columns(df, fields):
 def remove_invalid_ids(df):
     invalid_ids = pd.isnull(df['id'])
     invalid_ids = invalid_ids[invalid_ids == True]
-    invalid_ids = list(invalid_ids.index)
-    df.drop(invalid_ids, inplace=True)
+    df.drop(list(invalid_ids.index), inplace=True)
+
+
+def series_dictioname(dictionary):
+    source = dictionary.index.name
+    destination = dictionary.name
+    return source + '-to-' + destination

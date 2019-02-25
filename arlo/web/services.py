@@ -1,33 +1,26 @@
 from math import isnan
 import pandas as pd
-import numpy as np
 import json
 
-from arlo.format.date_operations import decode_cycle, angular_string_to_timestamp
-from arlo.tools.clean_lunchr import get_latest_lunchr, get_token_info, how_many_pages, format_lunchr_df, lunchr_df_page_num
+from arlo.format.autofill import add_autofilled_column
+from arlo.format.date_operations import decode_cycle, angular_string_to_timestamp, get_timestamp_now
+from arlo.tools.clean_lunchr import get_latest_lunchr
 from arlo.tools.recap_by_category import get_categories_recap
-from arlo.format.data_operations import calculate_universal_fields, set_amounts_to_numeric
+from arlo.format.data_operations import set_amounts_to_numeric
 from arlo.format.df_operations import df_is_not_empty, change_field_on_single_id_to_value, get_one_field, \
     result_function_applied_to_field, how_many_rows, filter_df_several_values, \
-    filter_df_on_cycle, change_field_on_several_ids_to_value, add_autofilled_column, vertical_concat
-from arlo.format.formatting import dataframe_formatter, type_to_method, parse_ids
-from arlo.format.transaction_operations import add_default_values_if_absent, fields_make_valid_transaction
-from arlo.format.types_operations import dict_to_df, sorted_set
-from arlo.parameters.credentials import login_N26, login_lunchr
+    filter_df_on_cycle, change_field_on_several_ids_to_value, filter_df_not_this_value
+from arlo.format.formatting import parse_ids, create_id
+from arlo.format.transaction_operations import fields_make_valid_transaction
+from arlo.format.types_operations import dict_to_df, sorted_set, dict_add_value_if_not_present
+from arlo.parameters.credentials import login_N26
 from arlo.parameters.param import *
 from arlo.read_write.fileManager import save_data, read_data, change_last_update_to_now, minutes_since_last_update, \
     set_field_to_value_on_ids, add_new_data
 from arlo.tools.clean_n26 import get_n_last_transactions
 from arlo.tools.finder import has_default_fields, get_default_fields, get_possible_recurring
 from arlo.tools.merge_data import merge_data
-
-
-# %% PANDAS PRINT PARAMETERS
-
-desired_width = 10000
-pd.set_option('display.width', desired_width)
-np.set_printoptions(linewidth=desired_width)
-pd.set_option("display.max_columns", 100)
+from arlo.tools.uniform_data_maker import dataframe_formatter, calculate_universal_fields
 
 
 # %% API CALLS
@@ -77,48 +70,39 @@ def force_refresh():
 def list_data_json(refresh=None, hide_linked=True, cycle="now"):
     if refresh:
         refresh_data()
+
     data = read_data()
     # TODO recup link disappearing transactions
 
-    if hide_linked:
-        data = data[data['category'] != "Link"]
-
-    data['method'] = data.apply(lambda row: type_to_method(row), axis=1)
-    data['linked'] = data['link'] != '-'
-    data = data[['id', 'name', 'amount', 'category', 'pending', 'originalAmount',
-                 'originalCurrency', 'method', 'cycle', 'linked']]
-
-    cycle = decode_cycle(cycle)
     data = filter_df_on_cycle(data, cycle)
+    if hide_linked:
+        data = filter_df_not_this_value(data, 'category', 'Link')
 
-    return data.head(400).to_json(orient="records")
+    add_autofilled_column(data, 'type', 'method')
+    data['linked'] = data['link'] != '-'
+    data = data[column_names_for_front]
+
+    return data.to_json(orient="records")
 
 
-def categorize(transaction_ids, category_name):
+def set_field_on_ids(transaction_ids, field_name, field_value):
     error_message, transaction_ids = parse_ids(transaction_ids)
     if error_message:
         return error_message
-
-    set_field_to_value_on_ids(transaction_ids, 'category', category_name)
+    set_field_to_value_on_ids(transaction_ids, field_name, field_value)
     return 'SUCCESS'
 
 
 def name(transaction_ids, transaction_name):
-    error_message, transaction_ids = parse_ids(transaction_ids)
-    if error_message:
-        return error_message
-    set_field_to_value_on_ids(transaction_ids, 'name', transaction_name)
-
-    return 'SUCCESS'
+    return set_field_on_ids(transaction_ids, 'name', transaction_name)
 
 
-def change_cycle(transaction_ids, transaction_name):
-    error_message, transaction_ids = parse_ids(transaction_ids)
-    if error_message:
-        return error_message
-    set_field_to_value_on_ids(transaction_ids, 'cycle', transaction_name)
+def change_cycle(transaction_ids, cycle_value):
+    return set_field_on_ids(transaction_ids, 'cycle', cycle_value)
 
-    return 'SUCCESS'
+
+def categorize(transaction_ids, category_value):
+    return set_field_on_ids(transaction_ids, 'category', category_value)
 
 
 def create_manual_transaction(transaction_fields):
@@ -129,7 +113,13 @@ def create_manual_transaction(transaction_fields):
             transaction_fields["visibleTS"] = angular_string_to_timestamp(transaction_fields["angular_date"])
         del transaction_fields["angular_date"]
 
-    add_default_values_if_absent(transaction_fields)
+    dict_add_value_if_not_present(transaction_fields, 'originalAmount', '')
+    dict_add_value_if_not_present(transaction_fields, 'originalCurrency', '')
+    dict_add_value_if_not_present(transaction_fields, 'amount', '')
+    dict_add_value_if_not_present(transaction_fields, 'visibleTS', 1000 * get_timestamp_now())
+    dict_add_value_if_not_present(transaction_fields, 'type', 'MAN')
+    dict_add_value_if_not_present(transaction_fields, 'id', create_id(transaction_fields))
+
     if not fields_make_valid_transaction(transaction_fields):
         return 'FAIL'
 
@@ -192,7 +182,6 @@ def link_ids(ids):
 def get_recap_categories(cycle='now'):
     data = read_data()
 
-    cycle = decode_cycle(cycle)
     data = filter_df_on_cycle(data, cycle)
 
     # TODO make generic function with balances

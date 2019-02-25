@@ -59,6 +59,9 @@ def get_latest_lunchr():
 def get_all_lunchr_data():
     access_token = get_token_info(login_lunchr)
     num_pages = how_many_pages(access_token)
-    all_content = [format_lunchr_df(lunchr_df_page_num(access_token, page_num)) for page_num in range(num_pages)]
+
+    all_content = [lunchr_df_page_num(access_token, page_num) for page_num in range(num_pages)]
     all_data = vertical_concat(all_content)
+    format_lunchr_df(all_data)
+
     return all_data.drop_duplicates()

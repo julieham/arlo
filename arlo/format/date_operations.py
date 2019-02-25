@@ -11,8 +11,8 @@ def string_to_datetime(date):
 
 def angular_string_to_timestamp(date):
     timestamp = pd.to_datetime(date).timestamp()
-    now = now()
-    hour_offset = 3600 * (now.hour) + 60 * (now.minute) + (now.second)
+    time_now = now()
+    hour_offset = 3600 * (time_now.hour) + 60 * (time_now.minute) + (time_now.second)
     return 1000 * (timestamp + hour_offset)
 
 
