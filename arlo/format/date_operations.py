@@ -6,18 +6,17 @@ def now():
 
 
 def string_to_datetime(date):
-    return pd.datetime.strptime(date, '%Y-%m-%d %H:%M:%S.%f')
+    date = date.replace(date[10], ' ')
+    return pd.datetime.strptime(date[:19], '%Y-%m-%d %H:%M:%S')
 
 
 def angular_string_to_timestamp(date):
+    if pd.isnull(date):
+        return 1000*get_timestamp_now()
     timestamp = pd.to_datetime(date).timestamp()
     time_now = now()
-    hour_offset = 3600 * (time_now.hour) + 60 * (time_now.minute) + (time_now.second)
+    hour_offset = 3600 * time_now.hour + 60 * time_now.minute + time_now.second
     return 1000 * (timestamp + hour_offset)
-
-
-def lunchr_date_to_datetime(date):
-    return pd.datetime.strptime(date[:-10], '%Y-%m-%dT%H:%M:%S')
 
 
 def time_since(date):

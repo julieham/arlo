@@ -9,7 +9,7 @@ from arlo.parameters.param import lunchr_url
 from arlo.tools.uniform_data_maker import format_lunchr_df
 
 
-def get_token_info(login):
+def get_token(login):
     values_token = {'grant_type': 'password', 'username': login.username, 'password': login.password,
                     "client_id": login.client_id}
     response_token = requests.post(lunchr_url + '/oauth/token', data=values_token)
@@ -49,7 +49,7 @@ def lunchr_df_page_num(access_token, num_page):
 
 
 def get_latest_lunchr():
-    access_token = get_token_info(login_lunchr)
+    access_token = get_token(login_lunchr)
     lunchr_df = lunchr_df_page_num(access_token, 0)
     format_lunchr_df(lunchr_df)
     account = list(lunchr_df['account'])[0]
@@ -57,7 +57,7 @@ def get_latest_lunchr():
 
 
 def get_all_lunchr_data():
-    access_token = get_token_info(login_lunchr)
+    access_token = get_token(login_lunchr)
     num_pages = how_many_pages(access_token)
 
     all_content = [lunchr_df_page_num(access_token, page_num) for page_num in range(num_pages)]

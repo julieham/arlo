@@ -2,7 +2,17 @@ import numpy as np
 import pandas as pd
 
 from arlo.format.df_operations import get_ids, filter_df_several_values, filter_df_one_value, df_is_not_empty, \
-    extract_line_from_df, get_pending_transactions, get_refund_transactions, make_empty_dataframe_based_on_this, how_many_rows
+    extract_line_from_df, how_many_rows
+from arlo.read_write.reader import empty_data_dataframe
+
+
+def get_pending_transactions(df):
+    return filter_df_one_value(df, 'pending', True)
+
+
+def get_refund_transactions(df):
+    refunds = filter_df_several_values(df, 'type', ['AV', 'AE'])
+    return filter_df_one_value(refunds, 'link', '-')
 
 
 def add_link_id(df):
@@ -21,7 +31,7 @@ def add_link_id(df):
 def match_gone_transactions(gone, candidates, processed_transactions, id_field_name):
     recup_columns = ['name', 'category', 'comment', 'link']
 
-    not_found = make_empty_dataframe_based_on_this(gone)
+    not_found = empty_data_dataframe()
     for _, row in gone.iterrows():
         replacement_transactions = filter_df_one_value(candidates, id_field_name, row[id_field_name])
 
@@ -63,18 +73,18 @@ def associate_pending_gone(old_data, new_data):
     return old, new
 
 
-def opposite_sign_linkID(linkID):
+def opposite_sign_linkID(link_id):
     replacement_sign = dict({'-': '+', '+': '-'})
-    return replacement_sign[linkID[0]] + linkID[1:]
+    return replacement_sign[link_id[0]] + link_id[1:]
 
 
 def find_the_associated_refund(pending_transactions, pending_source, refund_transactions, refunds_source):
-    #TODO use link function
+    # TODO use link function
 
     print('starting refund process')
     links_names = ['linkID', 'linkIDnoAmount', 'linkIDnoName']
 
-    while pending_transactions.shape[0]>0 and links_names:
+    while pending_transactions.shape[0] > 0 and links_names:
         not_found = []
         link_name = links_names.pop(0)
         print(pending_transactions.shape)

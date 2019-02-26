@@ -1,5 +1,6 @@
 import requests
 
+from arlo.format.types_operations import list_of_dict_to_df
 from arlo.parameters.credentials import login_N26
 from arlo.parameters.param import n26_url
 
@@ -23,12 +24,14 @@ def get_balance(name):
     return req_balance.json()
 
 
-def get_n_last_transactions(name, limit=10):
+def get_last_transactions_as_df(name, limit=50):
     if name not in login_N26:
-        return False
+        return False, None
     valid_token, access_token = get_token(name)
     if not valid_token:
-        return False, ''
+        return False, None
+
     headers = {'Authorization': 'bearer' + str(access_token)}
     req_transactions = requests.get(n26_url + '/api/smrt/transactions?limit=' + str(limit), headers=headers)
-    return True, req_transactions.json()
+    data = req_transactions.json()
+    return True, list_of_dict_to_df(data)

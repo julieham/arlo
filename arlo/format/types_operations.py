@@ -1,6 +1,9 @@
+import hashlib
+
 import pandas as pd
 
 from arlo.format.df_operations import vertical_concat
+from arlo.read_write.reader import empty_data_dataframe
 
 
 def string_to_float(string):
@@ -24,14 +27,23 @@ def dict_to_df(dictionary):
     return df
 
 
+def dict_to_df_with_all_columns(dictionary):
+    df = dict_to_df(dictionary)
+    return vertical_concat([df.mask(df == ''), empty_data_dataframe()])
+
+
+def list_of_dict_to_df(dict_list):
+    return pd.DataFrame(dict_list)
+
+
 def dict_add_value_if_not_present(dictionary, key, value):
     if key not in dictionary:
         dictionary[key] = value
 
 
-def df_field_to_numeric_with_sign(df, field, is_positive):
+def df_field_to_numeric_with_sign(df, field, is_credit=True):
     df[field] = pd.to_numeric(df[field])
-    if not is_positive:
+    if not is_credit:
         df[field] = - df[field]
 
 
@@ -57,3 +69,7 @@ def unnest_dictionary_layers(dictionary):
 def layered_dict_to_df(payments):
     payments = [dict_to_df(unnest_dictionary_layers(transaction)) for transaction in payments]
     return vertical_concat(payments)
+
+
+def encode_id(id_value):
+    return hashlib.md5(id_value.encode()).hexdigest()

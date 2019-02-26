@@ -18,5 +18,5 @@ def get_default_fields(name):
         return dict({'amount': default.at[name, 'amount'], 'account': default.at[name, 'account']})
 
 
-def get_possible_recurring(cycle):
+def get_possible_recurring():
     return list(get_default_recurring().index)

@@ -5,6 +5,12 @@ mandatory_fields = ['name', 'account']
 column_names = 'name,amount,category,account,cycle,date,type,comment,' \
                'pending,bank_name,originalAmount,originalCurrency,id,link'.split(',')
 
+typed_columns = dict({'amount': float, 'originalAmount': float, 'date': 'datetime64[ns]'})
+
+default_values = dict({'pending': False,
+                       'link': '-',
+                       'comment': '-'})
+
 column_names_for_front = 'id,name,amount,category,pending,originalAmount'\
                          ',originalCurrency,method,cycle,linked'.split(',')
 

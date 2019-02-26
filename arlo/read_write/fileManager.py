@@ -1,6 +1,6 @@
 from arlo.format.date_operations import string_to_datetime, time_since, now
 from arlo.format.df_operations import apply_function_to_field_overrule, sort_df_by_descending_date, \
-    change_field_on_several_ids_to_value, vertical_concat, series_dictioname
+    change_field_on_several_ids_to_value, vertical_concat
 from arlo.parameters.param import column_names, directory
 from arlo.read_write.reader import read_df_file
 from arlo.read_write.writer import write_df_to_csv
@@ -14,7 +14,7 @@ def read_data():
 
 
 def read_data_from_file(filename):
-    data = read_df_file(filename, sep=',')
+    data = read_df_file(filename)
     apply_function_to_field_overrule(data, 'date', string_to_datetime)
     return data
 

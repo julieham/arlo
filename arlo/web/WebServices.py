@@ -99,8 +99,7 @@ class MakeRecurring(Resource):
 class GetRecurring(Resource):
     @staticmethod
     def get():
-        cycle = request.args.get('cycle')
-        return json.loads(json.dumps(get_list_recurring(cycle)))
+        return json.loads(json.dumps(get_list_recurring()))
 
 
 class GetAllCycles(Resource):

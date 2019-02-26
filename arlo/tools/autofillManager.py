@@ -1,10 +1,16 @@
-from arlo.format.df_operations import assign_new_column, series_dictioname
+from arlo.format.df_operations import assign_new_column, assign_content_to_existing_column
 from arlo.parameters.param import directory
 from arlo.read_write.fileManager import read_series, write_dictionary_to_file
 
 
 def autofill_directory(filename):
     return directory + 'autofill/' + filename + '.csv'
+
+
+def series_dictioname(dictionary):
+    source = dictionary.index.name
+    destination = dictionary.name
+    return source + '-to-' + destination
 
 
 def read_autofill_dictionary(dictioname):
@@ -18,10 +24,16 @@ def autofill_series(series, dictioname, star_fill=False):
     return series.str.upper().map(dictionary).fillna(default_fill)
 
 
-def add_autofilled_column(data, column_from, column_to, star_fill=False):
+def add_new_column_autofilled(data, column_from, column_to, star_fill=False):
     dictioname = column_from + '-to-' + column_to
     column_content = autofill_series(data[column_from], dictioname, star_fill)
     assign_new_column(data, column_to, column_content)
+
+
+def fill_existing_column_with_autofill(data, column_from, column_to, star_fill=False, overrule=False):
+    dictioname = column_from + '-to-' + column_to
+    column_content = autofill_series(data[column_from], dictioname, star_fill)
+    assign_content_to_existing_column(data, column_to, column_content, overrule=overrule)
 
 
 def clean_dictionary(dictionary):
