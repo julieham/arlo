@@ -13,6 +13,19 @@ from arlo.parameters.param import lunchr_dictionary, lunchr_fields, column_names
     default_values
 
 
+def create_id(df):
+    df['id'] = df['name']
+    df['id'] += '*' + (1000000*df['timestamp']).astype(int).astype(str)
+    df['id'] += '*' + (100*df['amount'].fillna('0').astype(float)).astype(int).astype(str)
+    df['id'] += '*' + df['account']
+    apply_function_to_field_overrule(df, 'id', encode_id)
+
+
+def fill_with_default_values(df):
+    for field_name in default_values:
+        df[field_name].fillna(default_values[field_name], inplace=True)
+
+
 def format_lunchr_df(lunchr_df):
     lunchr_df.rename(columns=lunchr_dictionary, inplace=True)
     drop_other_columns(lunchr_df, lunchr_fields)
@@ -39,47 +52,24 @@ def format_lunchr_df(lunchr_df):
     drop_other_columns(lunchr_df, column_names)
 
 
-def dataframe_formatter(df, account):
-    if account.endswith('N26'):
-        df['bank_name'] = df.replace(NaN, '').apply(lambda row: make_bank_name(row), axis=1)
-        df['originalAmount'] = df.apply(lambda row: remove_original_amount_when_euro(row), axis=1)
-        df['originalCurrency'] = df.apply(lambda row: remove_original_currency_when_euro(row), axis=1)
+def format_n26_df(df, account):
+    df['bank_name'] = df.replace(NaN, '').apply(lambda row: make_bank_name(row), axis=1)
+    df['originalAmount'] = df.apply(lambda row: remove_original_amount_when_euro(row), axis=1)
+    df['originalCurrency'] = df.apply(lambda row: remove_original_currency_when_euro(row), axis=1)
 
     df['account'] = account
 
-    calculate_universal_fields(df)
+    apply_function_to_field_overrule(df, 'visibleTS', timestamp_to_datetime, destination='date')
+    apply_function_to_field_overrule(df, 'type', string_is_AA, destination='pending')
+    apply_function_to_field_overrule(df, 'date', date_to_cycle, destination='cycle')
+
+    add_field_with_default_value(df, 'comment', '-')
+    add_field_with_default_value(df, 'link', '-')
 
     add_new_column_autofilled(df, 'bank_name', 'name', star_fill=True)
     add_new_column_autofilled(df, 'name', 'category')
 
     return df
-
-
-def calculate_universal_fields(df):
-
-    if 'visibleTS' in df.columns:
-        apply_function_to_field_no_overrule(df, 'visibleTS', timestamp_to_datetime, destination='date')
-    elif 'date' not in df.columns:
-        add_field_with_default_value(df, 'visibleTS', get_timestamp_now())
-
-    apply_function_to_field_no_overrule(df, 'type', string_is_AA, destination='pending')
-    apply_function_to_field_no_overrule(df, 'date', date_to_cycle, destination='cycle')
-
-    add_field_with_default_value(df, 'comment', '-')
-    add_field_with_default_value(df, 'link', '-')
-
-
-def create_id(df):
-    df['id'] = df['name']
-    df['id'] += '*' + (1000000*df['timestamp']).astype(int).astype(str)
-    df['id'] += '*' + (100*df['amount'].fillna('0').astype(float)).astype(int).astype(str)
-    df['id'] += '*' + df['account']
-    apply_function_to_field_overrule(df, 'id', encode_id)
-
-
-def fill_with_default_values(df):
-    for field_name in default_values:
-        df[field_name].fillna(default_values[field_name], inplace=True)
 
 
 def format_manual_transaction(df):
@@ -93,6 +83,22 @@ def format_manual_transaction(df):
     add_new_column_autofilled(df, 'name', 'category')
 
     set_amounts_to_numeric(df, (df["isCredit"] == "true").all())
+
+    create_id(df)
+    drop_other_columns(df, column_names)
+
+
+def format_recurring_transaction(df):
+    apply_function_to_field_overrule(df, 'date', angular_string_to_timestamp, destination='timestamp')
+    apply_function_to_field_overrule(df, 'timestamp', timestamp_to_datetime, destination='date')
+    apply_function_to_field_no_overrule(df, 'date', date_to_cycle, destination='cycle')
+    fill_with_default_values(df)
+
+    add_new_column_autofilled(df, 'account', 'type')
+    add_new_column_autofilled(df, 'name', 'category')
+
+    set_amounts_to_numeric(df, is_positive=False)
+    add_prefix_to_column(df, 'rec', 'type')
 
     create_id(df)
     drop_other_columns(df, column_names)

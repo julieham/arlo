@@ -1,5 +1,4 @@
 from numpy import NaN
-import hashlib
 
 from arlo.read_write.fileManager import read_data
 
@@ -37,14 +36,3 @@ def remove_original_currency_when_euro(row):
     if row['originalCurrency'] == 'EUR':
         return ''
     return row['originalCurrency']
-
-
-def create_id(fields):
-    name, amount, account, timestamp = [fields[u] for u in ['name', 'amount', 'account', 'visibleTS']]
-
-    str_amount = str(amount)
-    if str_amount == '':
-        str_amount = '0'
-
-    string = '*'.join([name, str(int(timestamp) * 1000000), str(int(float(str_amount) * 100)), account])
-    return hashlib.md5(string.encode()).hexdigest()

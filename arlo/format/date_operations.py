@@ -12,11 +12,15 @@ def string_to_datetime(date):
 
 def angular_string_to_timestamp(date):
     if pd.isnull(date):
-        return 1000*get_timestamp_now()
+        return get_timestamp_now()
     timestamp = pd.to_datetime(date).timestamp()
     time_now = now()
     hour_offset = 3600 * time_now.hour + 60 * time_now.minute + time_now.second
     return 1000 * (timestamp + hour_offset)
+
+
+def datetime_to_timestamp(date):
+    return date.timestamp()
 
 
 def time_since(date):
@@ -24,7 +28,7 @@ def time_since(date):
 
 
 def get_timestamp_now():
-    return pd.datetime.timestamp(now())
+    return 1000 * pd.datetime.timestamp(now())
 
 
 def timestamp_to_datetime(timestamp):
@@ -40,11 +44,11 @@ def date_to_cycle(date):
     return month[:3]+year[-2:]
 
 
-def date_now():
+def date_today():
     return pd.to_datetime('today')
 
 
 def decode_cycle(cycle):
     if cycle == 'now':
-        return date_to_cycle(date_now())
+        return date_to_cycle(date_today())
     return cycle
