@@ -16,7 +16,7 @@ def read_data():
 def read_data_from_file(filename):
     set_pandas_print_parameters()
     data = read_df_file(filename)
-    # data.dropna(how='all', inplace=True)
+    data.dropna(how='all', inplace=True)
     apply_function_to_field_overrule(data, 'date', string_to_datetime)
     return data
 

@@ -1,9 +1,9 @@
 import numpy as np
-import pandas as pd
 
 from arlo.format.df_operations import get_ids, filter_df_several_values, filter_df_one_value, df_is_not_empty, \
-    extract_line_from_df, how_many_rows
+    extract_line_from_df, how_many_rows, disable_chained_assigment_warning, enable_chained_assigment_warning, vertical_concat
 from arlo.read_write.reader import empty_data_dataframe
+from arlo.tools.link_id import opposite_link_id, add_link_ids
 
 
 def get_pending_transactions(df):
@@ -13,19 +13,6 @@ def get_pending_transactions(df):
 def get_refund_transactions(df):
     refunds = filter_df_several_values(df, 'type', ['AV', 'AE'])
     return filter_df_one_value(refunds, 'link', '-')
-
-
-def add_link_id(df):
-    pd.options.mode.chained_assignment = None
-
-    df.loc[:, 'theSign'] = np.where(df['amount'] >= 0, '+', '-')
-    df.loc[:, 'theAmount'] = (100*df['amount']).abs().astype(int).astype(str)
-
-    df.loc[:, 'linkID'] = df['theSign'].str.cat(df[['theAmount', 'bank_name', 'account']], sep='*')
-    df.loc[:, 'linkIDnoName'] = df['theSign'].str.cat(df[['theAmount', 'account']], sep='*')
-    df.loc[:, 'linkIDnoAmount'] = df['theSign'].str.cat(df[['bank_name', 'account']], sep='*')
-
-    df.drop(['theAmount', 'theSign'], inplace=True, axis=1)
 
 
 def match_gone_transactions(gone, candidates, processed_transactions, id_field_name):
@@ -39,7 +26,7 @@ def match_gone_transactions(gone, candidates, processed_transactions, id_field_n
             chosen_index = min(replacement_transactions.index)
             the_transaction = extract_line_from_df(chosen_index, candidates)
             the_transaction[recup_columns] = row[recup_columns]
-            the_transaction = the_transaction.drop(labels=['linkID', 'linkIDnoAmount', 'linkIDnoName'])
+            the_transaction = the_transaction.drop(labels=['link_id', 'link_id_no_amount', 'link_id_no_name'])
             processed_transactions = processed_transactions.append(the_transaction)
         else:
             not_found = not_found.append(row)
@@ -60,12 +47,12 @@ def identify_old_new_data(old_data, new_data):
 
 def associate_pending_gone(old_data, new_data):
     (gone, old, new) = identify_old_new_data(old_data, new_data)
-    add_link_id(new)
-    add_link_id(gone)
+    add_link_ids(new)
+    add_link_ids(gone)
 
-    gone, old = match_gone_transactions(gone, new, old, 'linkID')
-    gone, old = match_gone_transactions(gone, new, old, 'linkIDnoAmount')
-    gone, old = match_gone_transactions(gone, new, old, 'linkIDnoName')
+    gone, old = match_gone_transactions(gone, new, old, 'link_id')
+    gone, old = match_gone_transactions(gone, new, old, 'link_id_no_amount')
+    gone, old = match_gone_transactions(gone, new, old, 'link_id_no_name')
 
     if len(gone):
         print('LOST TRANSACTIONS : ', len(gone))
@@ -73,23 +60,18 @@ def associate_pending_gone(old_data, new_data):
     return old, new
 
 
-def opposite_sign_linkID(link_id):
-    replacement_sign = dict({'-': '+', '+': '-'})
-    return replacement_sign[link_id[0]] + link_id[1:]
-
-
 def find_the_associated_refund(pending_transactions, pending_source, refund_transactions, refunds_source):
     # TODO use link function
 
     print('starting refund process')
-    links_names = ['linkID', 'linkIDnoAmount', 'linkIDnoName']
+    links_names = ['link_id', 'link_id_no_amount', 'link_id_no_name']
 
     while pending_transactions.shape[0] > 0 and links_names:
         not_found = []
         link_name = links_names.pop(0)
         print(pending_transactions.shape)
         for index_pending, pending_trans in pending_transactions.iterrows():
-            candidates = filter_df_one_value(refund_transactions, link_name, opposite_sign_linkID(pending_trans[link_name]))
+            candidates = filter_df_one_value(refund_transactions, link_name, opposite_link_id(pending_trans[link_name]))
 
             if df_is_not_empty(candidates):
                 chosen_index = min(candidates.index)
@@ -116,14 +98,14 @@ def associate_pending_with_refund(old_data, new_data):
 
     refunds = get_refund_transactions(new_data)
 
-    add_link_id(old_pending)
-    add_link_id(new_pending)
-    add_link_id(refunds)
+    add_link_ids(old_pending)
+    add_link_ids(new_pending)
+    add_link_ids(refunds)
 
     find_the_associated_refund(old_pending, old_data, refunds, new_data)
     find_the_associated_refund(new_pending, new_data, refunds, new_data)
 
-    return pd.concat([old_data, new_data], join='inner')
+    return vertical_concat([old_data, new_data])
 
 
 def merge_n26_data(old_data, new_data):
@@ -141,4 +123,4 @@ def merge_data(old_data, new_data):
     all_n26 = merge_n26_data(old_n26, new_data)
     all_n26['pending'] = all_n26.apply(lambda row: row['type'] == 'AA' and row['link'] == '-', axis=1)
 
-    return pd.concat([all_n26, other_accounts], sort=False).sort_values("date", ascending=False).reset_index(drop=True)
+    return vertical_concat([all_n26, other_accounts]).sort_values("date", ascending=False).reset_index(drop=True)

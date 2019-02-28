@@ -48,6 +48,10 @@ def drop_other_columns(df, fields):
     df.drop(columns=columns_to_remove, inplace=True)
 
 
+def drop_columns(df, fields):
+    df.drop(columns=fields, inplace=True)
+
+
 def remove_invalid_ids(df):
     invalid_ids = pd.isnull(df['id'])
     invalid_ids = invalid_ids[invalid_ids == True]
@@ -59,7 +63,7 @@ def remove_invalid_ids(df):
 
 def add_field_with_default_value(df, field, value):
     disable_chained_assigment_warning()
-    df.loc[:, field] = value
+    df[field] = value
     enable_chained_assigment_warning()
 
 
@@ -71,6 +75,12 @@ def add_prefix_to_column(df, prefix, column):
 
 def change_field_on_several_ids_to_value(df, ids, field_name, field_value):
     df.loc[df['id'].isin(ids), [field_name]] = field_value
+
+
+def change_field_on_several_indexes_to_value(df, indexes, field_name, field_value):
+    disable_chained_assigment_warning()
+    df.loc[indexes, field_name] = field_value
+    enable_chained_assigment_warning()
 
 
 def change_field_on_single_id_to_value(df, id_value, field_name, field_value):
@@ -104,6 +114,10 @@ def get_one_field(df, field_name):
 
 def how_many_rows(df):
     return df.shape[0]
+
+
+def select_columns(df, columns):
+    return df[columns]
 
 
 #%% ACCESSING SPECIFIC
@@ -142,3 +156,4 @@ def apply_function_to_field_no_overrule(df, field, function_to_apply, destinatio
     destination = field if not destination else destination
     column_content = df[field].apply(function_to_apply)
     assign_content_to_existing_column(df, destination, column_content, overrule=False)
+
