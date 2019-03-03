@@ -12,7 +12,7 @@ from arlo.format.df_operations import df_is_not_empty, change_field_on_single_id
     filter_df_on_cycle, change_field_on_several_ids_to_value, filter_df_not_this_value, vertical_concat, \
     set_pandas_print_parameters
 from arlo.format.formatting import parse_ids
-from arlo.format.types_operations import sorted_set, dict_to_df_with_all_columns
+from arlo.format.types_operations import sorted_set, dict_to_df_with_all_columns, string_to_bool
 from arlo.parameters.credentials import login_N26
 from arlo.parameters.param import *
 from arlo.read_write.fileManager import save_data, read_data, change_last_update_to_now, minutes_since_last_update, \
@@ -65,7 +65,7 @@ def list_data_json(refresh=None, hide_linked=False, cycle="now"):
     # TODO recup link disappearing transactions
 
     data = filter_df_on_cycle(data, cycle)
-    if hide_linked:
+    if string_to_bool(hide_linked):
         data = filter_df_not_this_value(data, 'category', 'Link')
 
     add_new_column_autofilled(data, 'type', 'method')
