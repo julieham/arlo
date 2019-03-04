@@ -52,3 +52,11 @@ def decode_cycle(cycle):
     if cycle == 'now':
         return date_to_cycle(date_today())
     return cycle
+
+
+def two_next_cycles():
+    # TODO not dummy
+    return ['Apr19', 'May19']
+
+def cycle_now():
+    return date_to_cycle(date_today())

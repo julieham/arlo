@@ -106,3 +106,9 @@ class GetAllCycles(Resource):
     @staticmethod
     def get():
         return json.loads(all_cycles())
+
+
+class GetAccounts(Resource):
+    @staticmethod
+    def get():
+        return json.loads(all_accounts())

@@ -3,14 +3,13 @@ import json
 
 
 from arlo.tools.autofillManager import add_new_column_autofilled
-from arlo.format.date_operations import decode_cycle
+from arlo.format.date_operations import decode_cycle, two_next_cycles, cycle_now
 from arlo.tools.clean_lunchr import get_latest_lunchr
 from arlo.tools.recap_by_category import get_categories_recap
 from arlo.format.data_operations import missing_valid_amount, missing_mandatory_field
 from arlo.format.df_operations import df_is_not_empty, change_field_on_single_id_to_value, get_one_field, \
     result_function_applied_to_field, how_many_rows, filter_df_several_values, \
-    filter_df_on_cycle, change_field_on_several_ids_to_value, filter_df_not_this_value, vertical_concat, \
-    set_pandas_print_parameters
+    filter_df_on_cycle, change_field_on_several_ids_to_value, filter_df_not_this_value, vertical_concat
 from arlo.format.formatting import parse_ids
 from arlo.format.types_operations import sorted_set, dict_to_df_with_all_columns, string_to_bool
 from arlo.parameters.credentials import login_N26
@@ -202,8 +201,9 @@ def create_recurring_transaction(transaction_fields):
 def all_cycles():
     data = read_data().sort_values("date", ascending=False).reset_index(drop=True)
     all_cycles_with_duplicates = list(data['cycle'])
-    set_cycles = sorted_set(all_cycles_with_duplicates)
-    return json.dumps(['-'] + set_cycles)
+    set_cycles = sorted_set(all_cycles_with_duplicates[::-1] + two_next_cycles())
+    now_index = set_cycles.index(cycle_now())
+    return json.dumps(set_cycles[now_index-3:now_index+3])
 
 
 def get_list_recurring():
@@ -212,3 +212,7 @@ def get_list_recurring():
 
 def refresh_lunchr():
     add_new_data(get_latest_lunchr())
+
+
+def all_accounts():
+    return json.dumps(['HB', 'Cash'])
