@@ -2,7 +2,7 @@ import json
 import requests
 
 from arlo.format.data_operations import remove_already_present_id
-from arlo.format.df_operations import vertical_concat
+from arlo.format.df_operations import concat_lines
 from arlo.format.types_operations import layered_dict_to_df
 from arlo.parameters.credentials import login_lunchr
 from arlo.parameters.param import lunchr_url
@@ -61,7 +61,7 @@ def get_all_lunchr_data():
     num_pages = how_many_pages(access_token)
 
     all_content = [lunchr_df_page_num(access_token, page_num) for page_num in range(num_pages)]
-    all_data = vertical_concat(all_content)
+    all_data = concat_lines(all_content)
     format_lunchr_df(all_data)
 
     return all_data.drop_duplicates()

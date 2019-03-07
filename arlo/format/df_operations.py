@@ -140,8 +140,16 @@ def filter_df_on_cycle(df, cycle):
     return df[df['cycle'] == cycle]
 
 
-def vertical_concat(df_list, sort=False):
+def concat_lines(df_list, sort=False):
     return pd.concat(df_list, axis=0, sort=sort, ignore_index=True)
+
+
+def concat_columns(df_list, sort=False, keep_index_name=False):
+    index_names = [df.index.names for df in df_list]
+    df = pd.concat(df_list, axis=1, sort=sort)
+    if keep_index_name:
+        df.index.names = index_names.pop(0)
+    return df
 
 
 #%% SET NEW COLUMNS / MODIFY EXISTING COLUMNS
@@ -157,3 +165,6 @@ def apply_function_to_field_no_overrule(df, field, function_to_apply, destinatio
     column_content = df[field].apply(function_to_apply)
     assign_content_to_existing_column(df, destination, column_content, overrule=False)
 
+
+def empty_series():
+    return pd.Series()

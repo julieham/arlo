@@ -2,7 +2,7 @@ import hashlib
 
 import pandas as pd
 
-from arlo.format.df_operations import vertical_concat
+from arlo.format.df_operations import concat_lines
 from arlo.read_write.reader import empty_data_dataframe
 
 
@@ -29,7 +29,7 @@ def dict_to_df(dictionary):
 
 def dict_to_df_with_all_columns(dictionary):
     df = dict_to_df(dictionary)
-    return vertical_concat([df.mask(df == ''), empty_data_dataframe()])
+    return concat_lines([df.mask(df == ''), empty_data_dataframe()])
 
 
 def list_of_dict_to_df(dict_list):
@@ -68,7 +68,7 @@ def unnest_dictionary_layers(dictionary):
 
 def layered_dict_to_df(payments):
     payments = [dict_to_df(unnest_dictionary_layers(transaction)) for transaction in payments]
-    return vertical_concat(payments)
+    return concat_lines(payments)
 
 
 def encode_id(id_value):

@@ -1,7 +1,7 @@
 import numpy as np
 
 from arlo.format.df_operations import get_ids, filter_df_several_values, filter_df_one_value, df_is_not_empty, \
-    extract_line_from_df, how_many_rows, disable_chained_assigment_warning, enable_chained_assigment_warning, vertical_concat
+    extract_line_from_df, how_many_rows, disable_chained_assigment_warning, enable_chained_assigment_warning, concat_lines
 from arlo.read_write.reader import empty_data_dataframe
 from arlo.tools.link_id import opposite_link_id, add_link_ids
 
@@ -105,7 +105,7 @@ def associate_pending_with_refund(old_data, new_data):
     find_the_associated_refund(old_pending, old_data, refunds, new_data)
     find_the_associated_refund(new_pending, new_data, refunds, new_data)
 
-    return vertical_concat([old_data, new_data])
+    return concat_lines([old_data, new_data])
 
 
 def merge_n26_data(old_data, new_data):
@@ -123,4 +123,4 @@ def merge_data(old_data, new_data):
     all_n26 = merge_n26_data(old_n26, new_data)
     all_n26['pending'] = all_n26.apply(lambda row: row['type'] == 'AA' and row['link'] == '-', axis=1)
 
-    return vertical_concat([all_n26, other_accounts]).sort_values("date", ascending=False).reset_index(drop=True)
+    return concat_lines([all_n26, other_accounts]).sort_values("date", ascending=False).reset_index(drop=True)

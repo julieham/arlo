@@ -1,9 +1,8 @@
 import math
-import pandas as pd
 
-# from arlo.format.date_operations import decode_cycle
-from arlo.format.df_operations import df_is_not_empty
-from arlo.parameters.param import budgets_filename
+from arlo.format.df_operations import df_is_not_empty, assign_new_column, concat_columns, empty_series, filter_df_not_this_value
+from arlo.format.series_operations import positive_part, ceil_series, floor_series
+from arlo.parameters.param import budgets_filename, no_recap_categories
 from arlo.read_write.reader import read_df_file
 
 
@@ -24,7 +23,7 @@ def get_budgets(cycle):
         budgets = budgets.groupby('category').apply(sum)['amount']
         return budgets
 
-    return pd.Series()
+    return empty_series()
 
 
 def get_exchange_rate(data):
@@ -59,12 +58,21 @@ def get_categories_recap(cycle_data, cycle):
     exchange_rate = get_exchange_rate(cycle_data)
     euro_amounts = cycle_data.apply(lambda row: get_euro_amount(row, exchange_rate), axis=1)
     cycle_data = cycle_data.assign(euro_amount=euro_amounts)
-    cycle_data = cycle_data[['date', 'euro_amount', 'category']]
+    cycle_data = cycle_data[['euro_amount', 'category']]
 
-    cycle_data = cycle_data.groupby(['category']).sum().apply(abs).reset_index()
+    spent_by_category = cycle_data.groupby(['category']).sum().apply(abs).reset_index()
+    spent_by_category.set_index('category', inplace=True)
 
-    budgets = get_budgets(cycle)
-    cycle_data['total_budget'] = cycle_data['category'].map(budgets).fillna(0).astype(float)
-    cycle_data = cycle_data[cycle_data['category'] != "Input"]
+    budgets = get_budgets(cycle).rename('total_budget')
 
-    return cycle_data
+    recap = concat_columns([spent_by_category, budgets], keep_index_name=True).round(2).fillna(0)
+    recap.reset_index(inplace=True)
+
+    assign_new_column(recap, 'over', ceil_series(positive_part(recap['euro_amount'] - recap['total_budget'])))
+    assign_new_column(recap, 'remaining', floor_series(positive_part(recap['total_budget'] - recap['euro_amount'])))
+    assign_new_column(recap, 'spent', ceil_series(recap['euro_amount'] - recap['over']))
+
+    for no_recap_cat in no_recap_categories:
+        recap = filter_df_not_this_value(recap, 'category', no_recap_cat)
+
+    return recap[['category', 'spent', 'remaining', 'over']]

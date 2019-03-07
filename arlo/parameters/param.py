@@ -1,6 +1,7 @@
 delay_refresh_minutes = 10
 
 mandatory_fields = ['name', 'account']
+no_recap_categories = ['link', 'Input']
 
 column_names = 'name,amount,category,account,cycle,date,type,comment,' \
                'pending,bank_name,originalAmount,originalCurrency,id,link'.split(',')

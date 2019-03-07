@@ -1,6 +1,6 @@
 from arlo.format.date_operations import string_to_datetime, time_since, now
 from arlo.format.df_operations import apply_function_to_field_overrule, sort_df_by_descending_date, \
-    change_field_on_several_ids_to_value, vertical_concat, set_pandas_print_parameters
+    change_field_on_several_ids_to_value, concat_lines, set_pandas_print_parameters
 from arlo.parameters.param import column_names, directory
 from arlo.read_write.reader import read_df_file
 from arlo.read_write.writer import write_df_to_csv
@@ -57,7 +57,7 @@ def minutes_since_last_update():
 
 
 def add_new_data(new_data):
-    data = vertical_concat([read_data(), new_data])
+    data = concat_lines([read_data(), new_data])
     save_data(data)
 
 

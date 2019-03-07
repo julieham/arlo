@@ -9,7 +9,7 @@ from arlo.tools.recap_by_category import get_categories_recap
 from arlo.format.data_operations import missing_valid_amount, missing_mandatory_field
 from arlo.format.df_operations import df_is_not_empty, change_field_on_single_id_to_value, get_one_field, \
     result_function_applied_to_field, how_many_rows, filter_df_several_values, \
-    filter_df_on_cycle, change_field_on_several_ids_to_value, filter_df_not_this_value, vertical_concat
+    filter_df_on_cycle, change_field_on_several_ids_to_value, filter_df_not_this_value, concat_lines
 from arlo.format.formatting import parse_ids
 from arlo.format.types_operations import sorted_set, dict_to_df_with_all_columns, string_to_bool
 from arlo.parameters.credentials import login_N26
@@ -50,7 +50,7 @@ def force_refresh():
         print('REFRESH FAILED')
         return 'FAIL'
 
-    save_data(merge_data(read_data(), vertical_concat(all_data)))
+    save_data(merge_data(read_data(), concat_lines(all_data)))
     change_last_update_to_now()
 
     return 'SUCCESS'
