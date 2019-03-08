@@ -1,6 +1,9 @@
-from arlo.format.df_operations import assign_new_column, assign_content_to_existing_column
 from arlo.parameters.param import directory
 from arlo.read_write.fileManager import read_series, write_dictionary_to_file
+
+
+def make_dictioname(source, destination):
+    return source + '-to-' + destination
 
 
 def autofill_directory(filename):
@@ -10,7 +13,7 @@ def autofill_directory(filename):
 def series_dictioname(dictionary):
     source = dictionary.index.name
     destination = dictionary.name
-    return source + '-to-' + destination
+    return make_dictioname(source, destination)
 
 
 def read_autofill_dictionary(dictioname):
@@ -28,23 +31,6 @@ def _autofill_series(series, dictioname, star_fill=False):
     return autofill_series_with_series(series, dictionary, star_fill=star_fill)
 
 
-def fill_missing_with_autofill_dict(data, column_from, dictionary):
-    column_content = autofill_series_with_series(data[column_from], dictionary)
-    assign_content_to_existing_column(data, dictionary.name, column_content)
-
-
-def add_new_column_autofilled(data, column_from, column_to, star_fill=False):
-    dictioname = column_from + '-to-' + column_to
-    column_content = _autofill_series(data[column_from], dictioname, star_fill)
-    assign_new_column(data, column_to, column_content)
-
-
-def fill_existing_column_with_autofill(data, column_from, column_to, star_fill=False, overrule=False):
-    dictioname = column_from + '-to-' + column_to
-    column_content = _autofill_series(data[column_from], dictioname, star_fill)
-    assign_content_to_existing_column(data, column_to, column_content, overrule=overrule)
-
-
 def clean_dictionary(dictionary):
     dictionary = dictionary.reset_index().drop_duplicates()
     dictionary = dictionary.set_index(dictionary.columns.tolist()[0]).squeeze()
@@ -55,3 +41,11 @@ def write_autofill_dictionary(dictionary):
     dictioname = series_dictioname(dictionary)
     dictionary = clean_dictionary(dictionary)
     write_dictionary_to_file(dictionary, autofill_directory(dictioname))
+
+
+def autofill_single_value(value, source, destination):
+    dictioname = make_dictioname(source, destination)
+    formatted_value = value.strftime('%Y-%m-%d') if source == 'date' else value
+    dico = read_autofill_dictionary(dictioname)
+    result = dico[formatted_value] if formatted_value in dico else '-'
+    return result

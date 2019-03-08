@@ -1,7 +1,5 @@
-import numpy as np
-
 from arlo.format.df_operations import get_ids, filter_df_several_values, filter_df_one_value, df_is_not_empty, \
-    extract_line_from_df, how_many_rows, disable_chained_assigment_warning, enable_chained_assigment_warning, concat_lines
+    extract_line_from_df, how_many_rows, concat_lines
 from arlo.read_write.reader import empty_data_dataframe
 from arlo.tools.link_id import opposite_link_id, add_link_ids
 

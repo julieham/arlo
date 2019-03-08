@@ -35,28 +35,14 @@ def timestamp_to_datetime(timestamp):
     return pd.datetime.fromtimestamp(int(timestamp)/1000)
 
 
-def date_to_cycle(date):
-    month = str(date.month_name())
-    year = str(date.year)
-
-    # TODO Overrule default dates to cycles
-
-    return month[:3]+year[-2:]
-
-
 def date_today():
     return pd.to_datetime('today')
 
-
-def decode_cycle(cycle):
-    if cycle == 'now':
-        return date_to_cycle(date_today())
-    return cycle
 
 
 def two_next_cycles():
     # TODO not dummy
     return ['Apr19', 'May19']
 
-def cycle_now():
-    return date_to_cycle(date_today())
+
+

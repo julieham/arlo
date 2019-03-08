@@ -1,6 +1,6 @@
 from arlo.parameters.param import directory
 from arlo.read_write.reader import read_df_file
-from arlo.tools.autofillManager import fill_missing_with_autofill_dict
+from arlo.tools.autofill_df import fill_missing_with_autofill_dict
 
 recurring_filename = directory + 'recurring.txt'
 

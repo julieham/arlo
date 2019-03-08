@@ -1,9 +1,8 @@
 import pandas as pd
 
-from arlo.format.date_operations import decode_cycle
-
 
 #%% PANDAS STUFF
+
 
 def set_pandas_print_parameters():
     desired_width = 10000
@@ -131,13 +130,6 @@ def get_ids(df):
 
 def result_function_applied_to_field(df, field_name, function_to_apply):
     return function_to_apply(df[field_name])
-
-
-def filter_df_on_cycle(df, cycle):
-    cycle = decode_cycle(cycle)
-    if cycle == 'all':
-        return df
-    return df[df['cycle'] == cycle]
 
 
 def concat_lines(df_list, sort=False):
