@@ -2,7 +2,7 @@ import hashlib
 
 import pandas as pd
 
-from arlo.format.df_operations import concat_lines
+from arlo.operations.df_operations import concat_lines
 from arlo.read_write.reader import empty_data_dataframe
 
 

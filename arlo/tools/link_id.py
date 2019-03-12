@@ -1,8 +1,8 @@
 #%% PARAMETERS
 
-from arlo.format.df_operations import add_field_with_default_value, get_one_field, change_field_on_several_indexes_to_value, \
+from arlo.operations.df_operations import add_field_with_default_value, get_one_field, change_field_on_several_indexes_to_value, \
     assign_new_column, select_columns, drop_columns
-from arlo.format.series_operations import apply_function
+from arlo.operations.series_operations import apply_function
 
 sign_name, amount_name = 'link_sign', 'link_amount'
 

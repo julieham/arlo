@@ -1,17 +1,17 @@
 import pandas as pd
 import json
 
-from arlo.format.date_operations import two_next_cycles
+from arlo.operations.date_operations import two_next_cycles
 from arlo.tools.autofill_df import add_new_column_autofilled
 from arlo.tools.clean_lunchr import get_latest_lunchr
 from arlo.tools.cycleManager import decode_cycle, cycle_now, filter_df_on_cycle
-from arlo.tools.recap_by_category import get_categories_recap
-from arlo.format.data_operations import missing_valid_amount, missing_mandatory_field
-from arlo.format.df_operations import df_is_not_empty, change_field_on_single_id_to_value, get_one_field, \
+from arlo.tools.recap_by_category import get_categories_recap, get_budgets
+from arlo.operations.data_operations import missing_valid_amount, missing_mandatory_field
+from arlo.operations.df_operations import df_is_not_empty, change_field_on_single_id_to_value, get_one_field, \
     result_function_applied_to_field, how_many_rows, filter_df_several_values, \
-    change_field_on_several_ids_to_value, filter_df_not_this_value, concat_lines
-from arlo.format.formatting import parse_ids
-from arlo.format.types_operations import sorted_set, dict_to_df_with_all_columns, string_to_bool
+    change_field_on_several_ids_to_value, filter_df_not_this_value, concat_lines, filter_df_one_value
+from arlo.operations.formatting import parse_ids
+from arlo.operations.types_operations import sorted_set, dict_to_df_with_all_columns, string_to_bool
 from arlo.parameters.credentials import login_N26
 from arlo.parameters.param import *
 from arlo.read_write.fileManager import save_data, read_data, set_field_to_value_on_ids, add_new_data
@@ -25,6 +25,8 @@ from arlo.tools.uniform_data_maker import format_n26_df, format_manual_transacti
 
 
 # %% SERVICES
+from read_write.reader import empty_data_dataframe
+
 
 def refresh_data():
     print('REFRESHING ? ')
@@ -69,6 +71,7 @@ def list_data_json(refresh=None, hide_linked=False, cycle="now"):
 
     add_new_column_autofilled(data, 'type', 'method')
     data['linked'] = data['link'] != '-'
+
     data = data[column_names_for_front]
 
     return data.to_json(orient="records")
@@ -216,3 +219,8 @@ def refresh_lunchr():
 
 def all_accounts():
     return json.dumps(['HB', 'Cash'])
+
+
+def all_categories(cycle='now'):
+    budgets = get_budgets(cycle)
+    return json.dumps(list(budgets.index) + ['Input'])

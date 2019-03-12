@@ -1,5 +1,5 @@
-from arlo.format.df_operations import get_ids, filter_df_several_values, filter_df_one_value, df_is_not_empty, \
-    extract_line_from_df, how_many_rows, concat_lines
+from arlo.operations.df_operations import get_ids, filter_df_several_values, filter_df_one_value, df_is_not_empty, \
+    extract_line_from_df, how_many_rows, concat_lines, filter_df_not_this_value
 from arlo.read_write.reader import empty_data_dataframe
 from arlo.tools.link_id import opposite_link_id, add_link_ids
 
@@ -117,6 +117,7 @@ def merge_n26_data(old_data, new_data):
 def merge_data(old_data, new_data):
     other_accounts = old_data[old_data['account'].str.endswith('_N26') == False]
     old_n26 = old_data[old_data['account'].str.endswith('N26')]
+    old_n26 = filter_df_not_this_value(old_n26, 'type', 'FIC')
 
     all_n26 = merge_n26_data(old_n26, new_data)
     all_n26['pending'] = all_n26.apply(lambda row: row['type'] == 'AA' and row['link'] == '-', axis=1)

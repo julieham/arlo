@@ -1,9 +1,10 @@
 import math
 
-from arlo.format.df_operations import df_is_not_empty, assign_new_column, concat_columns, empty_series, filter_df_not_this_value
-from arlo.format.series_operations import positive_part, ceil_series, floor_series
+from arlo.operations.df_operations import df_is_not_empty, assign_new_column, concat_columns, empty_series, filter_df_not_this_value
+from arlo.operations.series_operations import positive_part, ceil_series, floor_series
 from arlo.parameters.param import budgets_filename, no_recap_categories
 from arlo.read_write.reader import read_df_file
+from tools.cycleManager import decode_cycle
 
 
 def get_euro_amount(row, exchange_rate):
@@ -16,7 +17,7 @@ def get_budgets(cycle):
     budgets = read_df_file(budgets_filename, sep=';')
 
     if cycle != 'all':
-        budgets = budgets[budgets['cycle'] == cycle]
+        budgets = budgets[budgets['cycle'] == decode_cycle(cycle)]
 
     if df_is_not_empty(budgets):
 

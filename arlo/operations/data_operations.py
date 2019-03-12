@@ -1,6 +1,6 @@
 import pandas as pd
 
-from arlo.format.types_operations import df_field_to_numeric_with_sign
+from arlo.operations.types_operations import df_field_to_numeric_with_sign
 from arlo.parameters.param import mandatory_fields
 from arlo.read_write.fileManager import read_data
 

@@ -39,10 +39,6 @@ def date_today():
     return pd.to_datetime('today')
 
 
-
 def two_next_cycles():
     # TODO not dummy
     return ['Apr19', 'May19']
-
-
-

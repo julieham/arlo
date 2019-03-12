@@ -1,6 +1,6 @@
 import requests
 
-from arlo.format.types_operations import list_of_dict_to_df
+from arlo.operations.types_operations import list_of_dict_to_df
 from arlo.parameters.credentials import login_N26
 from arlo.parameters.param import n26_url
 

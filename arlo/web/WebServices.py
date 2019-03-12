@@ -112,3 +112,9 @@ class GetAccounts(Resource):
     @staticmethod
     def get():
         return json.loads(all_accounts())
+
+
+class GetCategories(Resource):
+    @staticmethod
+    def get():
+        return json.loads(all_categories())

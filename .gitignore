@@ -6,3 +6,4 @@ venv/*
 */sandbox/*
 *.pyc
 .DS_Store
+*/backup/

@@ -1,9 +1,9 @@
 import json
 import requests
 
-from arlo.format.data_operations import remove_already_present_id
-from arlo.format.df_operations import concat_lines
-from arlo.format.types_operations import layered_dict_to_df
+from arlo.operations.data_operations import remove_already_present_id
+from arlo.operations.df_operations import concat_lines
+from arlo.operations.types_operations import layered_dict_to_df
 from arlo.parameters.credentials import login_lunchr
 from arlo.parameters.param import lunchr_url
 from arlo.tools.uniform_data_maker import format_lunchr_df

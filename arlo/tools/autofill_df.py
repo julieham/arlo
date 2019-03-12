@@ -1,4 +1,4 @@
-from arlo.format.df_operations import assign_content_to_existing_column, assign_new_column
+from arlo.operations.df_operations import assign_content_to_existing_column, assign_new_column
 from arlo.tools.autofillManager import autofill_series_with_series, make_dictioname, _autofill_series
 
 

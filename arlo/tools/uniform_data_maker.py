@@ -1,13 +1,13 @@
 from numpy import NaN
 
-from arlo.format.data_operations import set_amounts_to_numeric
-from arlo.format.date_operations import timestamp_to_datetime, \
+from arlo.operations.data_operations import set_amounts_to_numeric
+from arlo.operations.date_operations import timestamp_to_datetime, \
     string_to_datetime, angular_string_to_timestamp
-from arlo.format.df_operations import drop_other_columns, add_prefix_to_column, remove_invalid_ids, \
+from arlo.operations.df_operations import drop_other_columns, add_prefix_to_column, remove_invalid_ids, \
     apply_function_to_field_overrule, add_field_with_default_value, sort_df_by_descending_date, \
     apply_function_to_field_no_overrule
-from arlo.format.formatting import make_bank_name, remove_original_amount_when_euro, remove_original_currency_when_euro
-from arlo.format.types_operations import string_is_AA, encode_id
+from arlo.operations.formatting import make_bank_name, remove_original_amount_when_euro, remove_original_currency_when_euro
+from arlo.operations.types_operations import string_is_AA, encode_id
 from arlo.parameters.param import lunchr_dictionary, lunchr_fields, column_names, lunchr_id_prefix, \
     lunchr_account_name, default_values
 from arlo.tools.autofill_df import add_new_column_autofilled

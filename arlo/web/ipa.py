@@ -10,7 +10,8 @@ ipa = Api(app)
 
 ipa.add_resource(GetRecurring, "/list/recurring")
 ipa.add_resource(GetAllCycles, "/list/cycle")
-ipa.add_resource(GetAccounts, "/list/accounts")
+ipa.add_resource(GetAccounts, "/list/account")
+ipa.add_resource(GetCategories, "/list/category")
 
 ipa.add_resource(ListOperations, "/transactions")
 ipa.add_resource(GetRecap, "/recap")
