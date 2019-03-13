@@ -16,3 +16,7 @@ def floor_series(series):
 
 def ceil_series(series):
     return np.ceil(series)
+
+
+def filter_series_on_value(series, value):
+    return series[series == value]

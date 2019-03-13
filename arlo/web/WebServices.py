@@ -1,7 +1,11 @@
 from flask import json, request
 from flask_restful import Resource
 
-from arlo.web.services import *
+from services.list import all_categories, all_accounts, all_cycles, all_recurring, data
+from services.services import create_manual_transaction, force_refresh, get_recap_categories, get_balances, \
+    create_recurring_transaction
+
+from services.set_fields import link_ids, name, change_cycle, categorize
 
 
 class ListOperations (Resource):
@@ -11,7 +15,7 @@ class ListOperations (Resource):
         refresh = request.args.get('refresh')
         cycle = request.args.get('cycle')
         hide_linked = request.args.get("hide_linked")
-        operations = list_data_json(cycle=cycle, refresh=refresh, hide_linked=hide_linked)
+        operations = data(cycle=cycle, refresh=refresh, hide_linked=hide_linked)
         return json.loads(operations)
 
 
@@ -99,7 +103,7 @@ class MakeRecurring(Resource):
 class GetRecurring(Resource):
     @staticmethod
     def get():
-        return json.loads(json.dumps(get_list_recurring()))
+        return json.loads(json.dumps(all_recurring()))
 
 
 class GetAllCycles(Resource):

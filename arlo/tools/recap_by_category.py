@@ -55,7 +55,7 @@ def summary_on_field(data, field_name, cycle):
 """
 
 
-def get_categories_recap(cycle_data, cycle):
+def get_categories_recap(cycle_data, cycle, round_it=False):
     exchange_rate = get_exchange_rate(cycle_data)
     euro_amounts = cycle_data.apply(lambda row: get_euro_amount(row, exchange_rate), axis=1)
     cycle_data = cycle_data.assign(euro_amount=euro_amounts)
@@ -69,9 +69,13 @@ def get_categories_recap(cycle_data, cycle):
     recap = concat_columns([spent_by_category, budgets], keep_index_name=True).round(2).fillna(0)
     recap.reset_index(inplace=True)
 
-    assign_new_column(recap, 'over', ceil_series(positive_part(recap['euro_amount'] - recap['total_budget'])))
-    assign_new_column(recap, 'remaining', floor_series(positive_part(recap['total_budget'] - recap['euro_amount'])))
-    assign_new_column(recap, 'spent', ceil_series(recap['euro_amount'] - recap['over']))
+    over = positive_part(recap['euro_amount'] - recap['total_budget'])
+    remaining = positive_part(recap['total_budget'] - recap['euro_amount'])
+    spent = recap['euro_amount'] - over
+
+    assign_new_column(recap, 'over', ceil_series(over) if round_it else over)
+    assign_new_column(recap, 'remaining', floor_series(remaining) if round_it else remaining)
+    assign_new_column(recap, 'spent', ceil_series(spent) if round_it else spent)
 
     for no_recap_cat in no_recap_categories:
         recap = filter_df_not_this_value(recap, 'category', no_recap_cat)
