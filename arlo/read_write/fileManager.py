@@ -1,5 +1,6 @@
-from arlo.operations.df_operations import sort_df_by_descending_date, change_field_on_several_ids_to_value, concat_lines
-from arlo.parameters.param import column_names, directory
+from arlo.operations.df_operations import sort_df_by_descending_date, change_field_on_several_ids_to_value, \
+    concat_lines, null_value
+from arlo.parameters.param import column_names, directory, default_values
 from arlo.read_write.reader import read_df_file
 from arlo.read_write.writer import write_df_to_csv
 
@@ -31,6 +32,17 @@ def set_field_to_value_on_ids(ids, field_name, field_value):
     data = read_data()
     change_field_on_several_ids_to_value(data, ids, field_name, field_value)
     save_data(data)
+
+
+def default_value(field):
+    if field in default_values:
+        return default_values[field]
+    return null_value()
+
+
+def set_field_to_default_value_on_ids(ids, field_name):
+    field_value = default_value(field_name)
+    set_field_to_value_on_ids(ids, field_name, field_value)
 
 
 def change_last_update_to_this_date(date):

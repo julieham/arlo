@@ -2,6 +2,7 @@ import pandas as pd
 
 
 #%% PANDAS STUFF
+from operations.series_operations import get_first_value_from_series
 
 
 def set_pandas_print_parameters():
@@ -160,3 +161,16 @@ def apply_function_to_field_no_overrule(df, field, function_to_apply, destinatio
 
 def empty_series():
     return pd.Series()
+
+
+def null_value():
+    return pd.np.NaN
+
+
+def get_transaction_with_id(data, id):
+    return filter_df_one_value(data, 'id', id)
+
+def get_this_field_from_this_id(data, id, field):
+    transaction = get_transaction_with_id(data, id)
+    field = get_first_value_from_series(get_one_field(transaction, field))
+    return field

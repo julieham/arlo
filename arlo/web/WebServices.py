@@ -5,7 +5,7 @@ from services.list import all_categories, all_accounts, all_cycles, all_recurrin
 from services.services import create_manual_transaction, force_refresh, get_recap_categories, get_balances, \
     create_recurring_transaction
 
-from services.set_fields import link_ids, name, change_cycle, categorize
+from services.set_fields import link_ids_if_possible, name, change_cycle, categorize, unlink_ids_if_possible
 
 
 class ListOperations (Resource):
@@ -66,12 +66,21 @@ class RefreshOperations(Resource):
         return {"status": result}
 
 
-class LinkTwoTransactions(Resource):
+class LinkTransactions(Resource):
 
     @staticmethod
     def post():
         ids = request.json['transaction_ids']
-        result = link_ids(ids)
+        result = link_ids_if_possible(ids)
+        return {"status": result}
+
+
+class UnlinkTransactions(Resource):
+
+    @staticmethod
+    def post():
+        ids = request.json['transaction_ids']
+        result = unlink_ids_if_possible(ids)
         return {"status": result}
 
 

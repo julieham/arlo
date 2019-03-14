@@ -20,3 +20,9 @@ def ceil_series(series):
 
 def filter_series_on_value(series, value):
     return series[series == value]
+
+
+def get_first_value_from_series(series):
+    if series.shape[0] == 0:
+        return None
+    return series.iloc[0]
