@@ -13,6 +13,7 @@ from tools.cycleManager import cycle_now, filter_df_on_cycle
 
 from tools.recap_by_category import get_budgets
 from tools.recurringManager import get_possible_recurring
+from tools.uniform_data_maker import add_pending_column
 
 
 def all_categories(cycle='now'):
@@ -50,6 +51,7 @@ def data(refresh=None, hide_linked=False, cycle="now"):
 
     add_new_column_autofilled(data, 'type', 'method')
     data['linked'] = data['link'] != '-'
+    add_pending_column(data)
 
     data = data[column_names_for_front]
 

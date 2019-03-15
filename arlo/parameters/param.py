@@ -3,13 +3,12 @@ delay_refresh_minutes = 10
 mandatory_fields = ['name', 'account']
 no_recap_categories = ['link', 'Input']
 
-column_names = 'name,amount,category,account,cycle,date,type,comment,' \
-               'pending,bank_name,originalAmount,originalCurrency,id,link'.split(',')
+column_names_stored = 'name,amount,category,account,cycle,date,type,comment,' \
+               'bank_name,originalAmount,originalCurrency,id,link'.split(',')
 
 typed_columns = dict({'amount': float, 'originalAmount': float, 'date': 'datetime64[ns]'})
 
-default_values = dict({'pending': False,
-                       'link': '-',
+default_values = dict({'link': '-',
                        'comment': '-'})
 
 column_names_for_front = 'id,name,amount,category,pending,originalAmount'\

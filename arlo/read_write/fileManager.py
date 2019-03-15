@@ -1,6 +1,6 @@
 from arlo.operations.df_operations import sort_df_by_descending_date, change_field_on_several_ids_to_value, \
     concat_lines, null_value
-from arlo.parameters.param import column_names, directory, default_values
+from arlo.parameters.param import column_names_stored, directory, default_values
 from arlo.read_write.reader import read_df_file
 from arlo.read_write.writer import write_df_to_csv
 
@@ -25,7 +25,7 @@ def save_data_in_file(data, filename):
     data.dropna(how='all', inplace=True)
     data.drop_duplicates(inplace=True)
     sort_df_by_descending_date(data)
-    write_df_to_csv(data[column_names], filename, index=False)
+    write_df_to_csv(data[column_names_stored], filename, index=False)
 
 
 def set_field_to_value_on_ids(ids, field_name, field_value):

@@ -5,13 +5,14 @@ from arlo.operations.date_operations import timestamp_to_datetime, \
     string_to_datetime, angular_string_to_timestamp
 from arlo.operations.df_operations import drop_other_columns, add_prefix_to_column, remove_invalid_ids, \
     apply_function_to_field_overrule, add_field_with_default_value, sort_df_by_descending_date, \
-    apply_function_to_field_no_overrule
+    apply_function_to_field_no_overrule, concat_columns, assign_new_column
 from arlo.operations.formatting import make_bank_name, remove_original_amount_when_euro, remove_original_currency_when_euro
 from arlo.operations.types_operations import encode_id
-from arlo.parameters.param import lunchr_dictionary, lunchr_fields, column_names, lunchr_id_prefix, \
-    lunchr_account_name, default_values
+from arlo.parameters.param import lunchr_dictionary, lunchr_fields, lunchr_id_prefix, \
+    lunchr_account_name, default_values, column_names_stored
 from arlo.tools.autofill_df import add_new_column_autofilled
 from arlo.tools.cycleManager import date_to_cycle
+from read_write.fileManager import default_value
 
 
 def create_id(df):
@@ -22,9 +23,9 @@ def create_id(df):
     apply_function_to_field_overrule(df, 'id', encode_id)
 
 
-def fill_with_default_values(df):
+def add_columns_with_default_values(df):
     for field_name in default_values:
-        df[field_name].fillna(default_values[field_name], inplace=True)
+        assign_new_column(df, field_name, default_values[field_name])
 
 
 def format_lunchr_df(lunchr_df):
@@ -38,7 +39,7 @@ def format_lunchr_df(lunchr_df):
     apply_function_to_field_overrule(lunchr_df, 'date', date_to_cycle, destination='cycle')
     apply_function_to_field_overrule(lunchr_df, 'bank_name', str.upper)
 
-    fill_with_default_values(lunchr_df)
+    add_columns_with_default_values(lunchr_df)
 
     add_field_with_default_value(lunchr_df, 'account', lunchr_account_name)
     add_field_with_default_value(lunchr_df, "originalAmount", '')
@@ -49,7 +50,7 @@ def format_lunchr_df(lunchr_df):
     add_new_column_autofilled(lunchr_df, 'lunchr_type', 'type', star_fill=True)
 
     sort_df_by_descending_date(lunchr_df)
-    drop_other_columns(lunchr_df, column_names)
+    drop_other_columns(lunchr_df, column_names_stored)
 
 
 def format_n26_df(n26_df, account):
@@ -62,7 +63,7 @@ def format_n26_df(n26_df, account):
     apply_function_to_field_overrule(n26_df, 'visibleTS', timestamp_to_datetime, destination='date')
     apply_function_to_field_overrule(n26_df, 'date', date_to_cycle, destination='cycle')
 
-    fill_with_default_values(n26_df)
+    add_columns_with_default_values(n26_df)
 
     add_new_column_autofilled(n26_df, 'bank_name', 'name', star_fill=True)
     add_new_column_autofilled(n26_df, 'name', 'category')
@@ -75,7 +76,7 @@ def format_manual_transaction(man_df):
     apply_function_to_field_overrule(man_df, 'timestamp', timestamp_to_datetime, destination='date')
     apply_function_to_field_no_overrule(man_df, 'date', date_to_cycle, destination='cycle')
 
-    fill_with_default_values(man_df)
+    add_columns_with_default_values(man_df)
 
     add_new_column_autofilled(man_df, 'account', 'type')
     add_new_column_autofilled(man_df, 'name', 'category')
@@ -83,7 +84,7 @@ def format_manual_transaction(man_df):
     set_amounts_to_numeric(man_df, (man_df["isCredit"] == "true").all())
 
     create_id(man_df)
-    drop_other_columns(man_df, column_names)
+    drop_other_columns(man_df, column_names_stored)
 
 
 def format_recurring_transaction(rec_df):
@@ -91,7 +92,7 @@ def format_recurring_transaction(rec_df):
     apply_function_to_field_overrule(rec_df, 'timestamp', timestamp_to_datetime, destination='date')
     apply_function_to_field_no_overrule(rec_df, 'date', date_to_cycle, destination='cycle')
 
-    fill_with_default_values(rec_df)
+    add_columns_with_default_values(rec_df)
 
     add_new_column_autofilled(rec_df, 'account', 'type')
     add_new_column_autofilled(rec_df, 'name', 'category')
@@ -100,4 +101,12 @@ def format_recurring_transaction(rec_df):
     add_prefix_to_column(rec_df, 'rec', 'type')
 
     create_id(rec_df)
-    drop_other_columns(rec_df, column_names)
+    drop_other_columns(rec_df, column_names_stored)
+
+
+def calculate_pending_column(data):
+    return concat_columns([data['type'] == 'AA', data['link'] == default_value('link')]).all(axis=1)
+
+
+def add_pending_column(data):
+    assign_new_column(data, 'pending', calculate_pending_column(data))
