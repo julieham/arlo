@@ -18,6 +18,8 @@ from arlo.tools.uniform_data_maker import format_n26_df, format_manual_transacti
 
 
 # %% SERVICES
+from tools.autofillManager import _not_possible_to_add_name_references, _add_name_references
+from web.status import my_response
 
 
 def refresh_data():
@@ -130,3 +132,7 @@ def refresh_lunchr():
     add_new_data(get_latest_lunchr())
 
 
+def add_name_references_if_possible(bank_name, name, category):
+    if _not_possible_to_add_name_references(bank_name, name, category):
+        return my_response(False, 'nothing to add')
+    return _add_name_references(bank_name, name, category)

@@ -3,7 +3,7 @@ from flask_restful import Resource
 
 from services.list import all_categories, all_accounts, all_cycles, all_recurring, data
 from services.services import create_manual_transaction, force_refresh, get_recap_categories, get_balances, \
-    create_recurring_transaction
+    create_recurring_transaction, add_name_references_if_possible
 
 from services.set_fields import link_ids_if_possible, name, change_cycle, categorize, unlink_ids_if_possible
 
@@ -25,8 +25,16 @@ class CategorizeOperations(Resource):
     def post():
         ids = request.json['transaction_ids']
         category = request.json['field_value']
-        result = categorize(ids, category)
-        return {"status": result}
+        return categorize(ids, category)
+
+
+class AddNameReference(Resource):
+    @staticmethod
+    def post():
+        bank_name = request.json['bank_name']
+        name = request.json['name']
+        category = request.json['category']
+        return add_name_references_if_possible(bank_name, name, category)
 
 
 class NameOperations(Resource):
@@ -35,8 +43,7 @@ class NameOperations(Resource):
     def post():
         ids = request.json['transaction_ids']
         category = request.json['field_value']
-        result = name(ids, category)
-        return {"status": result}
+        return name(ids, category)
 
 
 class ChangeCycle(Resource):
@@ -45,8 +52,7 @@ class ChangeCycle(Resource):
     def post():
         ids = request.json['transaction_ids']
         category = request.json['field_value']
-        result = change_cycle(ids, category)
-        return {"status": result}
+        return change_cycle(ids, category)
 
 
 class CreateManualTransaction(Resource):
