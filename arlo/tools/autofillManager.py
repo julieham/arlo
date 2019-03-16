@@ -80,10 +80,10 @@ def _not_possible_to_add_name_references(bank_name, name, category):
 
 def _add_name_references(bank_name, name, category):
     response = my_response(True)
-    if bank_name is not None:
-        response = add_reference('bank_name', 'name', bank_name, name)
-        if is_fail(response):
-            return response
     if category is not None:
         response = add_reference('name', 'category', name, category)
+        if is_fail(response):
+            return response
+    if bank_name is not None:
+        response = add_reference('bank_name', 'name', bank_name, name)
     return response

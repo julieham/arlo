@@ -116,10 +116,14 @@ def merge_n26_data(old_data, new_data):
 
 def merge_data(old_data, new_data):
     other_accounts = old_data[old_data['account'].str.endswith('_N26') == False]
-    old_n26 = old_data[old_data['account'].str.endswith('N26')]
-    old_n26 = filter_df_not_this_value(old_n26, 'type', 'FIC')
 
-    all_n26 = merge_n26_data(old_n26, new_data)
+    old_n26 = old_data[old_data['account'].str.endswith('N26')]
+    old_n26_real = filter_df_not_this_value(old_n26, 'type', 'FIC')
+    old_n26_fic = filter_df_one_value(old_n26, 'type', 'FIC')
+
+    keep = concat_lines([other_accounts, old_n26_fic])
+
+    all_n26 = merge_n26_data(old_n26_real, new_data)
     all_n26['pending'] = all_n26.apply(lambda row: row['type'] == 'AA' and row['link'] == '-', axis=1)
 
-    return concat_lines([all_n26, other_accounts]).sort_values("date", ascending=False).reset_index(drop=True)
+    return concat_lines([all_n26, keep]).sort_values("date", ascending=False).reset_index(drop=True)

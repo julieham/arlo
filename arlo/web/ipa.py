@@ -21,6 +21,7 @@ ipa.add_resource(RefreshOperations, "/refresh")
 
 ipa.add_resource(CreateManualTransaction, "/create/manual")
 ipa.add_resource(MakeRecurring, "/create/recurring")
+ipa.add_resource(AddNameReference, "/create/name_ref")
 
 ipa.add_resource(LinkTransactions, "/set-fields/link")
 ipa.add_resource(UnlinkTransactions, "/set-fields/unlink")

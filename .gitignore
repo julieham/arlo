@@ -6,4 +6,4 @@ venv/*
 */sandbox/*
 *.pyc
 .DS_Store
-*/backup/
+arlo/data/backup

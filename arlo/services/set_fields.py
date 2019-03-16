@@ -6,7 +6,7 @@ from read_write.fileManager import read_data, save_data, set_field_to_value_on_i
 from web.status import my_response, success_response
 
 
-def name(transaction_ids, transaction_name):
+def rename(transaction_ids, transaction_name):
     return set_field_on_ids(transaction_ids, 'name', transaction_name)
 
 
