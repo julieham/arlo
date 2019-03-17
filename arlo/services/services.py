@@ -19,10 +19,12 @@ from arlo.tools.uniform_data_maker import format_n26_df, format_manual_transacti
 
 # %% SERVICES
 from tools.autofillManager import _not_possible_to_add_name_references, _add_name_references
+from tools.backup_email import send_email_backup_data
 from web.status import my_response
 
 
 def refresh_data():
+
     print('REFRESHING ? ')
     if minutes_since_last_update() > delay_refresh_minutes:
         print('YES')
@@ -33,6 +35,7 @@ def refresh_data():
 
 def force_refresh():
     print('FORCE REFRESH')
+    send_email_backup_data()
     refresh_lunchr()
     status_refresh_n26 = refresh_n26()
 
