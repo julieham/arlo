@@ -61,7 +61,7 @@ def get_categories_recap(cycle_data, cycle, round_it=False):
     cycle_data = cycle_data.assign(euro_amount=euro_amounts)
     cycle_data = cycle_data[['euro_amount', 'category']]
 
-    spent_by_category = cycle_data.groupby(['category']).sum().apply(abs).reset_index()
+    spent_by_category = cycle_data.groupby(['category']).sum().reset_index()
     spent_by_category.set_index('category', inplace=True)
 
     budgets = get_budgets(cycle).rename('total_budget')
@@ -69,9 +69,9 @@ def get_categories_recap(cycle_data, cycle, round_it=False):
     recap = concat_columns([spent_by_category, budgets], keep_index_name=True).round(2).fillna(0)
     recap.reset_index(inplace=True)
 
-    over = positive_part(recap['euro_amount'] - recap['total_budget'])
-    remaining = positive_part(recap['total_budget'] - recap['euro_amount'])
-    spent = recap['euro_amount'] - over
+    over = positive_part(- recap['euro_amount'] - recap['total_budget'])
+    remaining = positive_part(recap['total_budget'] + recap['euro_amount'])
+    spent = positive_part(- recap['euro_amount'] - over)
 
     assign_new_column(recap, 'over', ceil_series(over) if round_it else over)
     assign_new_column(recap, 'remaining', floor_series(remaining) if round_it else remaining)

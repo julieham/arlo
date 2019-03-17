@@ -85,7 +85,8 @@ def get_recap_categories(cycle='now'):
     if df_is_not_empty(data):
         recap = get_categories_recap(data, cycle)
 
-    recap = recap[recap['category'] != "Link"]
+    if df_is_not_empty(recap):
+        recap = recap[recap['category'] != "Link"]
 
     return recap.to_json(orient="records")
 

@@ -2,6 +2,7 @@ from arlo.operations.df_operations import get_ids, filter_df_several_values, fil
     extract_line_from_df, how_many_rows, concat_lines, filter_df_not_this_value
 from arlo.read_write.reader import empty_data_dataframe
 from arlo.tools.link_id import opposite_link_id, add_link_ids
+from tools.uniform_data_maker import add_pending_column
 
 
 def get_pending_transactions(df):
@@ -91,6 +92,8 @@ def find_the_associated_refund(pending_transactions, pending_source, refund_tran
 
 
 def associate_pending_with_refund(old_data, new_data):
+    add_pending_column(old_data)
+    add_pending_column(new_data)
     old_pending = get_pending_transactions(old_data)
     new_pending = get_pending_transactions(new_data)
 
