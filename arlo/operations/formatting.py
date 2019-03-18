@@ -1,6 +1,6 @@
 from numpy import NaN
 
-from arlo.read_write.fileManager import read_data
+from arlo.read_write.file_manager import read_data
 
 
 def parse_ids(transaction_ids):

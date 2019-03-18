@@ -1,5 +1,5 @@
 from arlo.operations.df_operations import assign_content_to_existing_column, assign_new_column
-from arlo.tools.autofillManager import autofill_series_with_series, make_dictioname, _autofill_series
+from arlo.tools.autofill_manager import autofill_series_with_series, make_dictioname, _autofill_series
 
 
 def fill_missing_with_autofill_dict(data, column_from, dictionary):

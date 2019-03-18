@@ -1,5 +1,5 @@
 from arlo.operations.date_operations import string_to_datetime, time_since, now
-from arlo.read_write.fileManager import get_last_update_string, change_last_update_to_this_date
+from arlo.read_write.file_manager import get_last_update_string, change_last_update_to_this_date
 
 
 def minutes_since_last_update():

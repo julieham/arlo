@@ -4,7 +4,7 @@ from arlo.operations.df_operations import df_is_not_empty, assign_new_column, co
 from arlo.operations.series_operations import positive_part, ceil_series, floor_series
 from arlo.parameters.param import budgets_filename, no_recap_categories
 from arlo.read_write.reader import read_df_file
-from tools.cycleManager import decode_cycle
+from tools.cycle_manager import decode_cycle
 
 
 def get_euro_amount(row, exchange_rate):

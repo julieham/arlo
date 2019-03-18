@@ -1,5 +1,5 @@
 from arlo.operations.date_operations import date_today
-from arlo.tools.autofillManager import autofill_single_value
+from arlo.tools.autofill_manager import autofill_single_value
 
 
 source = 'date'

@@ -1,0 +1,31 @@
+from unittest import TestCase
+
+import pandas as pd
+
+from tools.autofill_df import add_new_column_autofilled
+
+
+class MergeDataFromSingleAccount(TestCase):
+
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+    def assert_equals_df(self, expected_merged, effective_merged):
+        expected_merged = expected_merged.sort_values('id').reset_index(drop=True)
+        effective_merged = effective_merged.sort_values('id').reset_index(drop=True)
+        pd.testing.assert_frame_equal(expected_merged,effective_merged, check_like=True, check_dtype=False)
+
+    def test_autofill_empty_field(self):
+        initial_df = pd.DataFrame({'name':['Chipotle']})
+        expected_df = pd.DataFrame({'name':['Chipotle'], 'category': ['Restaurants']})
+        add_new_column_autofilled(initial_df, 'name', 'category')
+        self.assert_equals_df(initial_df, expected_df)
+
+    def test_autofill_already_filled(self):
+        initial_df = pd.DataFrame({'name': ['Chipotle'], 'category': ['YOUPI']})
+        expected_df = pd.DataFrame({'name': ['Chipotle'], 'category': ['YOUPI']})
+        add_new_column_autofilled(initial_df, 'name', 'category')
+        self.assert_equals_df(initial_df, expected_df)

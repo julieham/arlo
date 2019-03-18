@@ -1,5 +1,5 @@
 from arlo.parameters.param import directory
-from arlo.read_write.fileManager import read_series, write_dictionary_to_file
+from arlo.read_write.file_manager import read_series, write_dictionary_to_file
 from web.status import my_response, is_fail
 
 star_fill_characters = '**'
@@ -16,7 +16,7 @@ def remove_star_fill(name):
     return name
 
 
-def autofill_directory(filename):
+def _autofill_directory(filename):
     return directory + 'autofill/' + filename + '.csv'
 
 
@@ -27,7 +27,7 @@ def series_dictioname(dictionary):
 
 
 def read_autofill_dictionary(dictioname):
-    return read_series(autofill_directory(dictioname))
+    return read_series(_autofill_directory(dictioname))
 
 
 def autofill_series_with_series(source, dictionary, star_fill=False):
@@ -41,16 +41,16 @@ def _autofill_series(series, dictioname, star_fill=False):
     return autofill_series_with_series(series, dictionary, star_fill=star_fill)
 
 
-def clean_dictionary(dictionary):
+def _clean_dictionary(dictionary):
     dictionary = dictionary.reset_index().drop_duplicates()
     dictionary = dictionary.set_index(dictionary.columns.tolist()[0]).squeeze()
     return dictionary.sort_index()
 
 
-def write_autofill_dictionary(dictionary):
+def _write_autofill_dictionary(dictionary):
     dictioname = series_dictioname(dictionary)
-    dictionary = clean_dictionary(dictionary)
-    write_dictionary_to_file(dictionary, autofill_directory(dictioname))
+    dictionary = _clean_dictionary(dictionary)
+    write_dictionary_to_file(dictionary, _autofill_directory(dictioname))
 
 
 def autofill_single_value(value, source, destination):
@@ -68,14 +68,10 @@ def add_reference(name_source, name_destination, value_source, value_destination
     value_destination = remove_star_fill(value_destination)
     if value_source.upper() not in dictionary.str.upper():
         dictionary[value_source] = value_destination
-        write_autofill_dictionary(dictionary)
+        _write_autofill_dictionary(dictionary)
         return my_response(True)
     else:
         return my_response(False, value_source + ' already present')
-
-
-def _not_possible_to_add_name_references(bank_name, name, category):
-    return name is None or (bank_name, category) is (None, None)
 
 
 def _add_name_references(bank_name, name, category):

@@ -1,26 +1,19 @@
 import pandas as pd
 
 from arlo.tools.clean_lunchr import get_latest_lunchr
-from arlo.tools.cycleManager import decode_cycle, filter_df_on_cycle
+from arlo.tools.cycle_manager import decode_cycle, filter_df_on_cycle
 from arlo.tools.recap_by_category import get_categories_recap
-from arlo.operations.data_operations import missing_valid_amount, missing_mandatory_field
 from arlo.operations.df_operations import df_is_not_empty, concat_lines
-from arlo.operations.types_operations import dict_to_df_with_all_columns
 from arlo.parameters.credentials import login_N26
 from arlo.parameters.param import *
-from arlo.read_write.fileManager import save_data, read_data, add_new_data
+from arlo.read_write.file_manager import save_data, read_data, add_new_data
 from arlo.tools.clean_n26 import get_last_transactions_as_df
-from arlo.tools.recurringManager import fill_missing_with_default_values
 from arlo.tools.merge_data import merge_data
 from arlo.tools.refresh import minutes_since_last_update, change_last_update_to_now
-from arlo.tools.uniform_data_maker import format_n26_df, format_manual_transaction, \
-    format_recurring_transaction
-
+from arlo.tools.uniform_data_maker import format_n26_df
 
 # %% SERVICES
-from tools.autofillManager import _not_possible_to_add_name_references, _add_name_references
 from tools.backup_email import send_email_backup_data
-from web.status import my_response
 
 
 def refresh_data():
@@ -58,21 +51,6 @@ def refresh_n26():
         return 'FAIL'
 
     save_data(merge_data(read_data(), concat_lines(all_data)))
-    return 'SUCCESS'
-
-
-def create_manual_transaction(transaction_fields):
-    df = dict_to_df_with_all_columns(transaction_fields)
-
-    if missing_valid_amount(df):
-        return 'FAIL : no valid amount'
-
-    if missing_mandatory_field(df):
-        return 'FAIL : missing mandatory field'
-
-    format_manual_transaction(df)
-    add_new_data(df)
-
     return 'SUCCESS'
 
 
@@ -116,27 +94,5 @@ def get_balances(cycle='now'):
     return balances
 
 
-def create_recurring_transaction(transaction_fields):
-    df = dict_to_df_with_all_columns(transaction_fields)
-    fill_missing_with_default_values(df)
-
-    if missing_valid_amount(df):
-        return 'FAIL : no valid amount'
-
-    if missing_mandatory_field(df):
-        return 'FAIL : missing mandatory field'
-
-    format_recurring_transaction(df)
-    add_new_data(df)
-
-    print('SUCCESS')
-
-
 def refresh_lunchr():
     add_new_data(get_latest_lunchr())
-
-
-def add_name_references_if_possible(bank_name, name, category):
-    if _not_possible_to_add_name_references(bank_name, name, category):
-        return my_response(False, 'nothing to add')
-    return _add_name_references(bank_name, name, category)

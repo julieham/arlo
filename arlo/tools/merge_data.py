@@ -130,3 +130,7 @@ def merge_data(old_data, new_data):
     all_n26['pending'] = all_n26.apply(lambda row: row['type'] == 'AA' and row['link'] == '-', axis=1)
 
     return concat_lines([all_n26, keep]).sort_values("date", ascending=False).reset_index(drop=True)
+
+
+def merge_data_from_single_account(old_df, new_df, account_name):
+    return concat_lines([old_df, new_df])

@@ -5,14 +5,14 @@ from operations.df_operations import filter_df_not_this_value
 from operations.series_operations import filter_series_on_value
 from operations.types_operations import sorted_set, string_to_bool
 from parameters.param import column_names_for_front
-from read_write.fileManager import read_data
+from read_write.file_manager import read_data
 from services.services import refresh_data
-from tools.autofillManager import read_autofill_dictionary
+from tools.autofill_manager import read_autofill_dictionary
 from tools.autofill_df import add_new_column_autofilled
-from tools.cycleManager import cycle_now, filter_df_on_cycle
+from tools.cycle_manager import cycle_now, filter_df_on_cycle
 
 from tools.recap_by_category import get_budgets
-from tools.recurringManager import get_possible_recurring
+from tools.recurring_manager import get_possible_recurring
 from tools.uniform_data_maker import add_pending_column
 
 

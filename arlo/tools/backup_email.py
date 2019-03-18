@@ -6,7 +6,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 from parameters.credentials import login_gmail
-from read_write.fileManager import get_last_update_string
+from read_write.file_manager import get_last_update_string
 
 
 def send_email_backup_data():

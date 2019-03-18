@@ -3,8 +3,8 @@ from flask_restful import Resource
 
 from operations.data_operations import get_bank_name_from_id
 from services.list import all_categories, all_accounts, all_cycles, all_recurring, data
-from services.services import create_manual_transaction, force_refresh, get_recap_categories, get_balances, \
-    create_recurring_transaction, add_name_references_if_possible
+from services.services import force_refresh, get_recap_categories, get_balances
+from services.create import create_manual_transaction, create_recurring_transaction, create_name_references_if_possible
 
 from services.set_fields import link_ids_if_possible, rename, change_cycle, categorize, unlink_ids_if_possible
 from web.status import is_fail
@@ -44,7 +44,7 @@ class AddNameReference(Resource):
             result = categorize(this_id, category)
             if is_fail(result):
                 return result
-        return add_name_references_if_possible(bank_name, this_name, category)
+        return create_name_references_if_possible(bank_name, this_name, category)
 
 
 class NameOperations(Resource):

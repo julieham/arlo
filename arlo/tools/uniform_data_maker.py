@@ -5,14 +5,14 @@ from arlo.operations.date_operations import timestamp_to_datetime, \
     string_to_datetime, angular_string_to_timestamp
 from arlo.operations.df_operations import drop_other_columns, add_prefix_to_column, remove_invalid_ids, \
     apply_function_to_field_overrule, add_field_with_default_value, sort_df_by_descending_date, \
-    apply_function_to_field_no_overrule, concat_columns, assign_new_column
+    apply_function_to_field_no_overrule, concat_columns, assign_new_column, set_pandas_print_parameters
 from arlo.operations.formatting import make_bank_name, remove_original_amount_when_euro, remove_original_currency_when_euro
 from arlo.operations.types_operations import encode_id
 from arlo.parameters.param import lunchr_dictionary, lunchr_fields, lunchr_id_prefix, \
     lunchr_account_name, default_values, column_names_stored
-from arlo.tools.autofill_df import add_new_column_autofilled
-from arlo.tools.cycleManager import date_to_cycle
-from read_write.fileManager import default_value
+from arlo.tools.autofill_df import add_new_column_autofilled, fill_existing_column_with_autofill
+from arlo.tools.cycle_manager import date_to_cycle
+from read_write.file_manager import default_value
 
 
 def create_id(df):
@@ -78,8 +78,8 @@ def format_manual_transaction(man_df):
 
     add_columns_with_default_values(man_df)
 
-    add_new_column_autofilled(man_df, 'account', 'type')
-    add_new_column_autofilled(man_df, 'name', 'category')
+    fill_existing_column_with_autofill(man_df, 'account', 'type')
+    fill_existing_column_with_autofill(man_df, 'name', 'category')
 
     set_amounts_to_numeric(man_df, (man_df["isCredit"] == "true").all())
 
@@ -94,8 +94,8 @@ def format_recurring_transaction(rec_df):
 
     add_columns_with_default_values(rec_df)
 
-    add_new_column_autofilled(rec_df, 'account', 'type')
-    add_new_column_autofilled(rec_df, 'name', 'category')
+    fill_existing_column_with_autofill(rec_df, 'account', 'type')
+    fill_existing_column_with_autofill(rec_df, 'name', 'category')
 
     set_amounts_to_numeric(rec_df, is_positive=False)
     add_prefix_to_column(rec_df, 'rec', 'type')

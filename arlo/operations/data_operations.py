@@ -2,7 +2,7 @@ import pandas as pd
 
 from arlo.operations.types_operations import df_field_to_numeric_with_sign
 from arlo.parameters.param import mandatory_fields
-from arlo.read_write.fileManager import read_data
+from arlo.read_write.file_manager import read_data
 from operations.df_operations import get_transaction_with_id, get_one_field
 from operations.series_operations import get_first_value_from_series
 

@@ -3,7 +3,7 @@ from unittest import TestCase
 import pandas as pd
 
 from operations.df_operations import set_pandas_print_parameters
-from read_write.fileManager import read_data_from_file
+from read_write.file_manager import read_data_from_file
 from tools.merge_data import merge_data_from_single_account
 
 
@@ -48,5 +48,3 @@ class MergeDataFromSingleAccount(TestCase):
         expected_merged = read_data_from_file('./test_files/merged_one_and_two_transactions.csv')
         effective_merged = merge_data_from_single_account(old_data, new_data, 'acc')
         self.assert_equals_df(expected_merged, effective_merged)
-
-
