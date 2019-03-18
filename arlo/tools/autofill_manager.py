@@ -1,6 +1,6 @@
 from arlo.parameters.param import directory
 from arlo.read_write.file_manager import read_series, write_dictionary_to_file
-from web.status import my_response, is_fail
+from web.status import is_fail, success_response, is_successful, failure_response
 
 star_fill_characters = '**'
 nb_char_star_fill = len(star_fill_characters)
@@ -66,16 +66,24 @@ def add_reference(name_source, name_destination, value_source, value_destination
     dictionary = read_autofill_dictionary(dictioname)
     value_source = remove_star_fill(value_source)
     value_destination = remove_star_fill(value_destination)
-    if value_source.upper() not in dictionary.str.upper():
+
+    response = reference_is_valid(value_source, value_destination, dictionary)
+    if is_successful(response):
         dictionary[value_source] = value_destination
         _write_autofill_dictionary(dictionary)
-        return my_response(True)
-    else:
-        return my_response(False, value_source + ' already present')
+    return response
+
+
+def reference_is_valid(source, destination, dictionary):
+    if len(source) * len(destination) == 0:
+        return failure_response("impossible to add null reference")
+    if source.upper() in dictionary:
+        return failure_response(source + 'already present in dictionary')
+    return success_response()
 
 
 def _add_name_references(bank_name, name, category):
-    response = my_response(True)
+    response = success_response()
     if category is not None:
         response = add_reference('name', 'category', name, category)
         if is_fail(response):

@@ -1,10 +1,11 @@
-from operations.data_operations import missing_valid_amount, missing_mandatory_field
+from operations.data_operations import missing_valid_amount, missing_mandatory_field, get_bank_name_from_id
 from operations.types_operations import dict_to_df_with_all_columns
 from read_write.file_manager import add_new_data
-from tools.autofill_manager import _add_name_references
+from services.set_fields import rename, categorize
+from tools.autofill_manager import _add_name_references, add_reference
 from tools.recurring_manager import fill_missing_with_default_values
 from tools.uniform_data_maker import format_manual_transaction, format_recurring_transaction
-from web.status import my_response, success_response, is_successful
+from web.status import success_response, is_successful, failure_response, merge_status
 
 
 def create_manual_transaction(transaction_fields):
@@ -30,19 +31,34 @@ def create_recurring_transaction(transaction_fields):
 
 def is_valid_transaction_df(df):
     if missing_valid_amount(df):
-        return my_response(False, 'no valid amount')
+        return failure_response('no valid amount')
 
     if missing_mandatory_field(df):
-        return my_response(False, 'missing mandatory field')
+        return failure_response('missing mandatory field')
 
     return success_response()
 
 
-def create_name_references_if_possible(bank_name, name, category):
-    if _not_possible_to_add_name_references(bank_name, name, category):
-        return my_response(False, 'nothing to add')
-    return _add_name_references(bank_name, name, category)
+def create_name_references_if_possible(this_id, name, category):
+    bank_name = get_bank_name_from_id(this_id)
+    status_name = status_field_not_empty('name', name)
+    if is_successful(status_name):
+        rename(this_id, name)
+        name_ref_added = add_reference('bank_name', 'name', bank_name, name)
+    else:
+        return status_name
+
+    status_category = status_field_not_empty('category', category)
+    if is_successful(status_category):
+        categorize(this_id, category)
+        cat_ref_added = add_reference('name', 'category', name, category)
+    else:
+        return status_category
+
+    return merge_status(name_ref_added, cat_ref_added)
 
 
-def _not_possible_to_add_name_references(bank_name, name, category):
-    return name is None or (bank_name, category) is (None, None)
+def status_field_not_empty(field_name, field_value):
+    if field_value is None:
+        return failure_response('No '+field_name+' Entered')
+    return success_response()

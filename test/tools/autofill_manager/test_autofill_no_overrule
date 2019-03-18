@@ -29,3 +29,4 @@ class MergeDataFromSingleAccount(TestCase):
         expected_df = pd.DataFrame({'name': ['Chipotle'], 'category': ['YOUPI']})
         add_new_column_autofilled(initial_df, 'name', 'category')
         self.assert_equals_df(initial_df, expected_df)
+

@@ -11,6 +11,8 @@ typed_columns = dict({'amount': float, 'originalAmount': float, 'date': 'datetim
 default_values = dict({'link': '-',
                        'comment': '-'})
 
+immutable_values = dict({'category': {'Link'}})
+
 column_names_for_front = 'id,name,amount,category,pending,originalAmount'\
                          ',originalCurrency,method,cycle,linked'.split(',')
 

@@ -3,7 +3,7 @@ from operations.df_operations import change_field_on_several_ids_to_value, filte
 from operations.formatting import parse_ids
 from read_write.file_manager import read_data, save_data, set_field_to_value_on_ids, set_field_to_default_value_on_ids, \
     default_value
-from web.status import my_response, success_response
+from web.status import success_response, failure_response
 
 
 def rename(transaction_ids, transaction_name):
@@ -90,6 +90,6 @@ def _link_ids(ids):
 def set_field_on_ids(transaction_ids, field_name, field_value):
     error_message, transaction_ids = parse_ids(transaction_ids)
     if error_message:
-        return my_response(False, error_message)
+        return failure_response(error_message)
     set_field_to_value_on_ids(transaction_ids, field_name, field_value)
     return success_response()
