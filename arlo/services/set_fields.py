@@ -88,6 +88,8 @@ def _link_ids(ids):
 
 
 def set_field_on_ids(transaction_ids, field_name, field_value):
+    if field_value:
+        return failure_response('field cannot be empty')
     error_message, transaction_ids = parse_ids(transaction_ids)
     if error_message:
         return failure_response(error_message)

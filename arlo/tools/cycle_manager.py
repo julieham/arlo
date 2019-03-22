@@ -1,6 +1,7 @@
 from arlo.operations.date_operations import date_today
-from arlo.tools.autofill_manager import autofill_single_value
-
+from arlo.tools.autofill_manager import autofill_single_value, read_autofill_dictionary, make_dictioname
+from operations.df_operations import concat_columns
+from operations.series_operations import series_swap_index_values
 
 source = 'date'
 destination = 'cycle'
@@ -26,3 +27,10 @@ def filter_df_on_cycle(df, cycle):
     if cycle == 'all':
         return df
     return df[df['cycle'] == cycle]
+
+
+def get_first_last_day_cycles():
+    d = read_autofill_dictionary(make_dictioname('date', 'cycle'))
+    start_cycles = series_swap_index_values(d.drop_duplicates(keep='first')).rename('first')
+    end_cycles = series_swap_index_values(d.drop_duplicates(keep='last')).rename('last')
+    return concat_columns([start_cycles, end_cycles])

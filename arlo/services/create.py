@@ -40,18 +40,22 @@ def is_valid_transaction_df(df):
 
 
 def create_name_references_if_possible(this_id, name, category):
+    if not name:
+        return failure_response("name cannot be empty")
     bank_name = get_bank_name_from_id(this_id)
     status_name = status_field_not_empty('name', name)
     if is_successful(status_name):
-        rename(this_id, name)
         name_ref_added = add_reference('bank_name', 'name', bank_name, name)
+        if is_successful(name_ref_added):
+            rename(this_id, name)
     else:
         return status_name
 
     status_category = status_field_not_empty('category', category)
     if is_successful(status_category):
-        categorize(this_id, category)
         cat_ref_added = add_reference('name', 'category', name, category)
+        if is_successful(cat_ref_added):
+            categorize(this_id, category)
     else:
         return status_category
 

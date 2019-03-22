@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 
 def apply_function(series, function_to_apply):
@@ -26,3 +27,6 @@ def get_first_value_from_series(series):
     if series.shape[0] == 0:
         return None
     return series.iloc[0]
+
+def series_swap_index_values(series):
+    return pd.Series(series.index.values, index=series)
