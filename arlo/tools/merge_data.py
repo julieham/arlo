@@ -91,7 +91,7 @@ def find_the_associated_refund(pending_transactions, pending_source, refund_tran
         print(how_many_rows(refund_transactions))
 
 
-def associate_pending_with_refund(old_data, new_data):
+def  associate_pending_with_refund(old_data, new_data):
     add_pending_column(old_data)
     add_pending_column(new_data)
     old_pending = get_pending_transactions(old_data)
@@ -110,11 +110,11 @@ def associate_pending_with_refund(old_data, new_data):
 
 
 def merge_n26_data(old_data, new_data):
-    (old_data, new_data) = associate_pending_gone(old_data, new_data)
-    old_data = old_data.sort_values("date", ascending=True).reset_index(drop=True)
-    new_data = new_data.sort_values("date", ascending=True).reset_index(drop=True)
+    # (old_data, new_data) = associate_pending_gone(old_data, new_data)
+    # old_data = old_data.sort_values("date", ascending=True).reset_index(drop=True)
+    # new_data = new_data.sort_values("date", ascending=True).reset_index(drop=True)
 
-    return associate_pending_with_refund(old_data, new_data)
+    return concat_lines([old_data, new_data]) # associate_pending_with_refund(old_data, new_data)
 
 
 def merge_data(old_data, new_data):
