@@ -3,7 +3,7 @@ import pandas as pd
 from arlo.tools.clean_lunchr import get_latest_lunchr
 from arlo.tools.cycle_manager import decode_cycle, filter_df_on_cycle
 from arlo.tools.recap_by_category import get_categories_recap
-from arlo.operations.df_operations import df_is_not_empty, concat_lines
+from arlo.operations.df_operations import df_is_not_empty, concat_lines, add_field_with_default_value
 from arlo.parameters.credentials import login_N26
 from arlo.parameters.param import *
 from arlo.read_write.file_manager import save_data, read_data, add_new_data
@@ -81,13 +81,17 @@ def get_balances(cycle='now'):
 
     data = data.groupby('account').apply(lambda x: x.sum(skipna=False))
     data_this_cycle = data_this_cycle.groupby('account').apply(lambda x: x.sum(skipna=False))
+
     data["all_times"] = data["amount"]
-    data_this_cycle["this_cycle"] = data_this_cycle[["amount"]]
-
     data = data[["all_times"]]
-    data_this_cycle = data_this_cycle[["this_cycle"]]
+    if df_is_not_empty(data_this_cycle):
+        data_this_cycle["this_cycle"] = data_this_cycle[["amount"]]
+        data_this_cycle = data_this_cycle[["this_cycle"]]
+        balances = pd.concat([data, data_this_cycle], axis=1, sort=False).fillna(0)
+    else:
+        balances = data
+        add_field_with_default_value(balances, "this_cycle", 0)
 
-    balances = pd.concat([data, data_this_cycle], axis=1, sort=False).fillna(0)
     balances["currency"] = "EUR"
     balances.index.names = ['account_name']
 
