@@ -77,7 +77,8 @@ def get_balances(cycle='now'):
     data = read_data()
     data = data[['amount', 'account', 'cycle']]
 
-    data_this_cycle = data[data['cycle'] == cycle]
+    data_this_cycle = filter_df_on_cycle(data, cycle)
+    valid_accounts = set(data_this_cycle['account'])
 
     data = data.groupby('account').apply(lambda x: x.sum(skipna=False))
     data_this_cycle = data_this_cycle.groupby('account').apply(lambda x: x.sum(skipna=False))
@@ -87,13 +88,14 @@ def get_balances(cycle='now'):
     if df_is_not_empty(data_this_cycle):
         data_this_cycle["this_cycle"] = data_this_cycle[["amount"]]
         data_this_cycle = data_this_cycle[["this_cycle"]]
-        balances = pd.concat([data, data_this_cycle], axis=1, sort=False).fillna(0)
+        balances = pd.concat([data[data.index.isin(valid_accounts)], data_this_cycle], axis=1, sort=False).fillna(0)
     else:
         balances = data
         add_field_with_default_value(balances, "this_cycle", 0)
 
     balances["currency"] = "EUR"
     balances.index.names = ['account_name']
+
 
     return balances
 
