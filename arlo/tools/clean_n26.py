@@ -26,9 +26,11 @@ def get_balance(name):
 
 def get_last_transactions_as_df(name, limit=50):
     if name not in login_N26:
+        print('INVALID NAME :', name)
         return False, None
     valid_token, access_token = get_token(name)
     if not valid_token:
+        print('INVALID TOKEN')
         return False, None
 
     headers = {'Authorization': 'bearer' + str(access_token)}

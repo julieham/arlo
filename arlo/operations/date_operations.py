@@ -42,3 +42,7 @@ def date_today():
 def two_next_cycles():
     # TODO not dummy
     return ['Apr19', 'May19']
+
+
+def string_date_now():
+    return date_today().strftime('%Y-%m-%d')

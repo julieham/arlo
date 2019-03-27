@@ -2,7 +2,7 @@ from operations.data_operations import missing_valid_amount, missing_mandatory_f
 from operations.types_operations import dict_to_df_with_all_columns
 from read_write.file_manager import add_new_data
 from services.set_fields import rename, categorize
-from tools.autofill_manager import _add_name_references, add_reference
+from tools.autofill_manager import add_reference
 from tools.recurring_manager import fill_missing_with_default_values
 from tools.uniform_data_maker import format_manual_transaction, format_recurring_transaction
 from web.status import success_response, is_successful, failure_response, merge_status

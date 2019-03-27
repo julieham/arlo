@@ -1,11 +1,10 @@
 from flask import json, request
 from flask_restful import Resource
 
+from services.create import create_manual_transaction, create_recurring_transaction, create_name_references_if_possible
 from services.list import all_categories, all_accounts, all_cycles, all_recurring, data
 from services.services import force_refresh, get_recap_categories, get_balances
-from services.create import create_manual_transaction, create_recurring_transaction, create_name_references_if_possible
-
-from services.set_fields import link_ids_if_possible, rename, change_cycle, categorize, unlink_ids_if_possible
+from services.set_fields import link_ids_if_possible, unlink_ids_if_possible, edit_transaction
 
 
 #%% CREATE
@@ -96,38 +95,11 @@ class GetBalances(Resource):
     @staticmethod
     def get():
         cycle = request.args.get('cycle')
-        recap = get_balances(cycle=cycle).reset_index()
-        return json.loads(recap.to_json(orient="records"))
+        balances = get_balances(cycle=cycle)
+        return json.loads(balances)
 
 
 #%% SET FIELDS
-
-
-class CategorizeOperations(Resource):
-
-    @staticmethod
-    def post():
-        ids = request.json['transaction_ids']
-        category = request.json['field_value']
-        return categorize(ids, category)
-
-
-class NameOperations(Resource):
-
-    @staticmethod
-    def post():
-        ids = request.json['transaction_ids']
-        category = request.json['field_value']
-        return rename(ids, category)
-
-
-class ChangeCycle(Resource):
-
-    @staticmethod
-    def post():
-        ids = request.json['transaction_ids']
-        category = request.json['field_value']
-        return change_cycle(ids, category)
 
 
 class LinkTransactions(Resource):
@@ -146,3 +118,13 @@ class UnlinkTransactions(Resource):
         ids = request.json['transaction_ids']
         result = unlink_ids_if_possible(ids)
         return {"status": result}
+
+
+# %% EDIT
+
+class EditTransaction(Resource):
+    @staticmethod
+    def post():
+        json_input = request.json
+        result = edit_transaction(json_input)
+        return result

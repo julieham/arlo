@@ -7,13 +7,12 @@ from operations.types_operations import sorted_set, string_to_bool
 from parameters.param import column_names_for_front
 from read_write.file_manager import read_data
 from services.services import refresh_data
-from tools.autofill_manager import read_autofill_dictionary
 from tools.autofill_df import add_new_column_autofilled
+from tools.autofill_manager import read_autofill_dictionary
 from tools.cycle_manager import cycle_now, filter_df_on_cycle
-
 from tools.recap_by_category import get_budgets
 from tools.recurring_manager import get_possible_recurring
-from tools.uniform_data_maker import add_pending_column
+from tools.uniform_data_maker import add_pending_column, add_linked_column, add_manual_column
 
 
 def all_categories(cycle='now'):
@@ -50,9 +49,8 @@ def data(refresh=None, hide_linked=False, cycle="now"):
         data = filter_df_not_this_value(data, 'category', 'Link')
 
     add_new_column_autofilled(data, 'type', 'method')
-    data['linked'] = data['link'] != '-'
+    add_linked_column(data)
     add_pending_column(data)
+    add_manual_column(data)
 
-    data = data[column_names_for_front]
-
-    return data.to_json(orient="records")
+    return data[column_names_for_front].to_json(orient="records")

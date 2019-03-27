@@ -1,21 +1,17 @@
 from operations.df_operations import change_field_on_several_ids_to_value, filter_df_several_values, how_many_rows, \
     result_function_applied_to_field, get_one_field, change_field_on_single_id_to_value, get_this_field_from_this_id
 from operations.formatting import parse_ids
-from read_write.file_manager import read_data, save_data, set_field_to_value_on_ids, set_field_to_default_value_on_ids, \
+from read_write.file_manager import read_data, save_data, set_field_to_value_on_ids, reset_link_on_ids, \
     default_value
 from web.status import success_response, failure_response
 
 
-def rename(transaction_ids, transaction_name):
-    return set_field_on_ids(transaction_ids, 'name', transaction_name)
+def rename(transaction_id, transaction_name):
+    return set_field_to_value_on_ids([transaction_id], 'name', transaction_name)
 
 
-def change_cycle(transaction_ids, cycle_value):
-    return set_field_on_ids(transaction_ids, 'cycle', cycle_value)
-
-
-def categorize(transaction_ids, category_value):
-    return set_field_on_ids(transaction_ids, 'category', category_value)
+def categorize(transaction_id, category_value):
+    return set_field_to_value_on_ids([transaction_id], 'category', category_value)
 
 
 def present_links_is_not_empty(data):
@@ -51,19 +47,14 @@ def link_is_not_null(link):
     return link is not default_value('link')
 
 
-def all_transactions_linked_to_this(data, id):
-    ids = [id]
-    link = get_this_field_from_this_id(data, id, 'link')
-    while link not in ids and link_is_not_null(link):
-        ids.append(link)
-        link = get_this_field_from_this_id(data, link, 'link')
-    return ids
+def _link_ids(ids):
+    data = read_data()
+    ids_link = ids[1:] + [ids[0]]
+    for transaction_id, transaction_link in zip(ids, ids_link):
+        change_field_on_single_id_to_value(data, transaction_id, 'link', transaction_link)
+    change_field_on_several_ids_to_value(data, ids, "category", "Link")
 
-
-def _unlink_id(id):
-    all_ids = all_transactions_linked_to_this(read_data(), id)
-    set_field_to_default_value_on_ids(all_ids, 'link')
-    set_field_to_value_on_ids(all_ids, 'category', '-')
+    save_data(data)
 
 
 def unlink_ids_if_possible(ids):
@@ -77,21 +68,36 @@ def unlink_ids_if_possible(ids):
     return 'SUCCESS'
 
 
-def _link_ids(ids):
-    data = read_data()
-    ids_link = ids[1:] + [ids[0]]
-    for transaction_id, transaction_link in zip(ids, ids_link):
-        change_field_on_single_id_to_value(data, transaction_id, 'link', transaction_link)
-    change_field_on_several_ids_to_value(data, ids, "category", "Link")
+def all_transactions_linked_to_this(data, id):
+    ids = [id]
+    link = get_this_field_from_this_id(data, id, 'link')
+    while link not in ids and link_is_not_null(link):
+        ids.append(link)
+        link = get_this_field_from_this_id(data, link, 'link')
+    return ids
 
-    save_data(data)
+
+def _unlink_id(id):
+    all_ids = all_transactions_linked_to_this(read_data(), id)
+    reset_link_on_ids(all_ids)
+    set_field_to_value_on_ids(all_ids, 'category', '-')
 
 
-def set_field_on_ids(transaction_ids, field_name, field_value):
-    if field_value:
-        return failure_response('field cannot be empty')
-    error_message, transaction_ids = parse_ids(transaction_ids)
-    if error_message:
-        return failure_response(error_message)
-    set_field_to_value_on_ids(transaction_ids, field_name, field_value)
-    return success_response()
+def edit_transaction(fields):
+    if 'id' not in fields:
+        return failure_response('invalid id')
+    transaction_id = fields['id']
+    response = success_response()
+    for field in set(fields) - {'id'}:
+        if field == 'cycle':
+            response = change_cycle_on_id(transaction_id, fields[field])
+        else:
+            response = set_field_to_value_on_ids([transaction_id], field, fields[field])
+    return response
+
+
+def change_cycle_on_id(transaction_id, cycle_value):
+    print('CHANGE CYCLE')
+    ids = all_transactions_linked_to_this(read_data(), transaction_id)
+    print(ids)
+    return set_field_to_value_on_ids(ids, 'cycle', cycle_value)

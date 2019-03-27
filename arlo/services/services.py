@@ -1,17 +1,16 @@
 import pandas as pd
 
-from arlo.tools.clean_lunchr import get_latest_lunchr
-from arlo.tools.cycle_manager import decode_cycle, filter_df_on_cycle
-from arlo.tools.recap_by_category import get_categories_recap
 from arlo.operations.df_operations import df_is_not_empty, concat_lines, add_field_with_default_value
 from arlo.parameters.credentials import login_N26
 from arlo.parameters.param import *
 from arlo.read_write.file_manager import save_data, read_data, add_new_data
+from arlo.tools.clean_lunchr import get_latest_lunchr
 from arlo.tools.clean_n26 import get_last_transactions_as_df
+from arlo.tools.cycle_manager import decode_cycle, filter_df_on_cycle
 from arlo.tools.merge_data import merge_data
+from arlo.tools.recap_by_category import get_categories_recap
 from arlo.tools.refresh import minutes_since_last_update, change_last_update_to_now
 from arlo.tools.uniform_data_maker import format_n26_df
-
 # %% SERVICES
 from tools.backup_email import send_email_backup_data
 
@@ -94,10 +93,9 @@ def get_balances(cycle='now'):
         add_field_with_default_value(balances, "this_cycle", 0)
 
     balances["currency"] = "EUR"
-    balances.index.names = ['account_name']
+    balances.index.names = ['acc_name']
 
-
-    return balances
+    return balances.reset_index().to_json(orient="records")
 
 
 def refresh_lunchr():

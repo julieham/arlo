@@ -3,6 +3,7 @@ from arlo.operations.df_operations import sort_df_by_descending_date, change_fie
 from arlo.parameters.param import column_names_stored, directory, default_values
 from arlo.read_write.reader import read_df_file
 from arlo.read_write.writer import write_df_to_csv
+from web.status import success_response, failure_response
 
 data_file = directory + "data.csv"
 last_update_file = directory + "last_update.txt"
@@ -29,9 +30,12 @@ def save_data_in_file(data, filename):
 
 
 def set_field_to_value_on_ids(ids, field_name, field_value):
+    if field_name == 'id':
+        return failure_response('Impossible to change id')
     data = read_data()
     change_field_on_several_ids_to_value(data, ids, field_name, field_value)
     save_data(data)
+    return success_response()
 
 
 def default_value(field):
@@ -40,9 +44,9 @@ def default_value(field):
     return null_value()
 
 
-def set_field_to_default_value_on_ids(ids, field_name):
-    field_value = default_value(field_name)
-    set_field_to_value_on_ids(ids, field_name, field_value)
+def reset_link_on_ids(ids):
+    field_value = default_value('link')
+    set_field_to_value_on_ids(ids, 'link', field_value)
 
 
 def change_last_update_to_this_date(date):

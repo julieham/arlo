@@ -5,8 +5,9 @@ from arlo.operations.date_operations import timestamp_to_datetime, \
     string_to_datetime, angular_string_to_timestamp
 from arlo.operations.df_operations import drop_other_columns, add_prefix_to_column, remove_invalid_ids, \
     apply_function_to_field_overrule, add_field_with_default_value, sort_df_by_descending_date, \
-    apply_function_to_field_no_overrule, concat_columns, assign_new_column, set_pandas_print_parameters
-from arlo.operations.formatting import make_bank_name, remove_original_amount_when_euro, remove_original_currency_when_euro
+    apply_function_to_field_no_overrule, concat_columns, assign_new_column
+from arlo.operations.formatting import make_bank_name, remove_original_amount_when_euro, \
+    remove_original_currency_when_euro
 from arlo.operations.types_operations import encode_id
 from arlo.parameters.param import lunchr_dictionary, lunchr_fields, lunchr_id_prefix, \
     lunchr_account_name, default_values, column_names_stored
@@ -110,3 +111,15 @@ def calculate_pending_column(data):
 
 def add_pending_column(data):
     assign_new_column(data, 'pending', calculate_pending_column(data))
+
+
+def add_linked_column(data):
+    assign_new_column(data, 'linked', data['link'] != '-')
+
+
+def calculate_manual_column(data):
+    return data['account'].isin(['T_N26', 'J_N26', 'lunchr']) == False
+
+
+def add_manual_column(data):
+    assign_new_column(data, 'manual', calculate_manual_column(data))

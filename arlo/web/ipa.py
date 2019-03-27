@@ -1,6 +1,6 @@
 from flask import Flask
-from flask_restful import Api
 from flask_cors import CORS
+from flask_restful import Api
 
 from arlo.web.WebServices import *
 
@@ -25,9 +25,8 @@ ipa.add_resource(AddNameReference, "/create/name_ref")
 
 ipa.add_resource(LinkTransactions, "/set-fields/link")
 ipa.add_resource(UnlinkTransactions, "/set-fields/unlink")
-ipa.add_resource(CategorizeOperations, "/set-fields/category")
-ipa.add_resource(NameOperations, "/set-fields/name")
-ipa.add_resource(ChangeCycle, "/set-fields/cycle")
+
+ipa.add_resource(EditTransaction, "/edit/transaction")
 
 
 if __name__ == '__main__':

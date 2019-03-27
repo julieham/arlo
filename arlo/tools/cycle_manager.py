@@ -1,4 +1,4 @@
-from arlo.operations.date_operations import date_today
+from arlo.operations.date_operations import date_today, string_date_now
 from arlo.tools.autofill_manager import autofill_single_value, read_autofill_dictionary, make_dictioname
 from operations.df_operations import concat_columns
 from operations.series_operations import series_swap_index_values
@@ -17,7 +17,7 @@ def cycle_now():
 
 
 def decode_cycle(cycle):
-    if cycle == 'now':
+    if cycle in ['now', 'undefined']:
         return cycle_now()
     return cycle
 
@@ -34,3 +34,11 @@ def get_first_last_day_cycles():
     start_cycles = series_swap_index_values(d.drop_duplicates(keep='first')).rename('first')
     end_cycles = series_swap_index_values(d.drop_duplicates(keep='last')).rename('last')
     return concat_columns([start_cycles, end_cycles])
+
+
+def nb_days_in_cycle(cycle='now'):
+    dates = read_autofill_dictionary(make_dictioname('date', 'cycle'))
+    cycle = decode_cycle(cycle)
+    dates_this_cycle = dates[dates == cycle]
+    total = dates_this_cycle.shape[0]
+    return sum(dates_this_cycle.index <= string_date_now()), total
