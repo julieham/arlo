@@ -17,7 +17,8 @@ def cycle_now():
 
 
 def decode_cycle(cycle):
-    if cycle in ['now', 'undefined']:
+    if cycle == 'now':
+        # if cycle in ['now', 'undefined']:
         return cycle_now()
     return cycle
 

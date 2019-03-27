@@ -1,9 +1,8 @@
 import json
 
 from operations.date_operations import two_next_cycles
-from operations.df_operations import filter_df_not_this_value
 from operations.series_operations import filter_series_on_value
-from operations.types_operations import sorted_set, string_to_bool
+from operations.types_operations import sorted_set
 from parameters.param import column_names_for_front
 from read_write.file_manager import read_data
 from services.services import refresh_data
@@ -37,7 +36,7 @@ def all_recurring():
     return get_possible_recurring()
 
 
-def data(refresh=None, hide_linked=False, cycle="now"):
+def data(refresh=None, cycle="now"):
     if refresh:
         refresh_data()
 
@@ -45,8 +44,6 @@ def data(refresh=None, hide_linked=False, cycle="now"):
     # TODO recup link disappearing transactions
 
     data = filter_df_on_cycle(data, cycle)
-    if string_to_bool(hide_linked):
-        data = filter_df_not_this_value(data, 'category', 'Link')
 
     add_new_column_autofilled(data, 'type', 'method')
     add_linked_column(data)

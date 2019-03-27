@@ -42,8 +42,7 @@ class ListOperations (Resource):
     def get():
         refresh = request.args.get('refresh')
         cycle = request.args.get('cycle')
-        hide_linked = request.args.get("hide_linked")
-        operations = data(cycle=cycle, refresh=refresh, hide_linked=hide_linked)
+        operations = data(cycle=cycle, refresh=refresh)
         return json.loads(operations)
 
 

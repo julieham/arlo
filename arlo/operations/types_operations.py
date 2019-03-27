@@ -73,7 +73,3 @@ def layered_dict_to_df(payments):
 
 def encode_id(id_value):
     return hashlib.md5(id_value.encode()).hexdigest()
-
-
-def string_to_bool(string):
-    return string.title() == "True"
