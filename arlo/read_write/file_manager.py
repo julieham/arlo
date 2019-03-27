@@ -44,9 +44,11 @@ def default_value(field):
     return null_value()
 
 
-def reset_link_on_ids(ids):
-    field_value = default_value('link')
-    set_field_to_value_on_ids(ids, 'link', field_value)
+def reset_field_on_ids(ids, field_name):
+    field_value = default_value(field_name)
+    if field_value == null_value():
+        return False
+    set_field_to_value_on_ids(ids, field_name, field_value)
 
 
 def change_last_update_to_this_date(date):

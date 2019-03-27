@@ -1,7 +1,6 @@
 import pandas as pd
 
-
-#%% PANDAS STUFF
+# %% PANDAS STUFF
 from operations.series_operations import get_first_value_from_series
 from parameters.param import immutable_values
 
@@ -74,14 +73,16 @@ def add_prefix_to_column(df, prefix, column):
     enable_chained_assigment_warning()
 
 
-def change_field_on_several_ids_to_value(df, ids, field_name, field_value):
-    ids = remove_immutable_ids(df, ids, field_name)
+def change_field_on_several_ids_to_value(df, ids, field_name, field_value, force_code=None):
+    if force_code != 'unlink_ok':
+        ids = remove_immutable_ids(df, ids, field_name)
     df.loc[df['id'].isin(ids), [field_name]] = field_value
 
 
-def change_field_on_several_indexes_to_value(df, indexes, field_name, field_value):
+def change_field_on_several_indexes_to_value(df, indexes, field_name, field_value, force_code=None):
     disable_chained_assigment_warning()
-    indexes = remove_immutable_indexes(df, indexes, field_name)
+    if force_code == None:
+        indexes = remove_immutable_indexes(df, indexes, field_name)
     df.loc[indexes, field_name] = field_value
     enable_chained_assigment_warning()
 

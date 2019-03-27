@@ -1,8 +1,7 @@
 from operations.df_operations import change_field_on_several_ids_to_value, filter_df_several_values, how_many_rows, \
     result_function_applied_to_field, get_one_field, change_field_on_single_id_to_value, get_this_field_from_this_id
 from operations.formatting import parse_ids
-from read_write.file_manager import read_data, save_data, set_field_to_value_on_ids, reset_link_on_ids, \
-    default_value
+from read_write.file_manager import read_data, save_data, set_field_to_value_on_ids, default_value
 from web.status import success_response, failure_response
 
 
@@ -52,7 +51,7 @@ def _link_ids(ids):
     ids_link = ids[1:] + [ids[0]]
     for transaction_id, transaction_link in zip(ids, ids_link):
         change_field_on_single_id_to_value(data, transaction_id, 'link', transaction_link)
-    change_field_on_several_ids_to_value(data, ids, "category", "Link")
+        change_field_on_single_id_to_value(data, transaction_id, "category", "Link")
 
     save_data(data)
 
@@ -78,9 +77,11 @@ def all_transactions_linked_to_this(data, id):
 
 
 def _unlink_id(id):
-    all_ids = all_transactions_linked_to_this(read_data(), id)
-    reset_link_on_ids(all_ids)
-    set_field_to_value_on_ids(all_ids, 'category', '-')
+    data = read_data()
+    all_ids = all_transactions_linked_to_this(data, id)
+    change_field_on_several_ids_to_value(data, all_ids, "link", default_value('link'), force_code='unlink_ok')
+    change_field_on_several_ids_to_value(data, all_ids, "category", default_value('category'), force_code='unlink_ok')
+    save_data(data)
 
 
 def edit_transaction(fields):

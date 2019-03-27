@@ -9,7 +9,8 @@ column_names_stored = 'name,amount,category,account,cycle,date,type,comment,' \
 typed_columns = dict({'amount': float, 'originalAmount': float, 'date': 'datetime64[ns]'})
 
 default_values = dict({'link': '-',
-                       'comment': '-'})
+                       'comment': '-',
+                       'category': '-'})
 
 immutable_values = dict({'category': {'Link'}})
 
