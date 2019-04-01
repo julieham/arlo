@@ -27,6 +27,7 @@ ipa.add_resource(LinkTransactions, "/set-fields/link")
 ipa.add_resource(UnlinkTransactions, "/set-fields/unlink")
 
 ipa.add_resource(EditTransaction, "/edit/transaction")
+ipa.add_resource(SplitTransaction, "/edit/split")
 
 
 if __name__ == '__main__':

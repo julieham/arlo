@@ -13,6 +13,7 @@ from arlo.tools.refresh import minutes_since_last_update, change_last_update_to_
 from arlo.tools.uniform_data_maker import format_n26_df
 # %% SERVICES
 from tools.backup_email import send_email_backup_data
+from tools.split import split_transaction_if_possible
 
 
 def refresh_data():
@@ -93,10 +94,16 @@ def get_balances(cycle='now'):
         add_field_with_default_value(balances, "this_cycle", 0)
 
     balances["currency"] = "EUR"
-    balances.index.names = ['acc_name']
+    balances.reset_index(inplace=True)
+    balances['manual'] = balances['account'].isin(['T_N26', 'J_N26', 'lunchr']) == False
+    balances.rename(columns={'account': 'acc_name'}, inplace=True)
 
-    return balances.reset_index().to_json(orient="records")
+    return balances.to_json(orient="records")
 
 
 def refresh_lunchr():
     add_new_data(get_latest_lunchr())
+
+
+def split_transaction(fields):
+    return split_transaction_if_possible(fields)

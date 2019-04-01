@@ -5,7 +5,8 @@ from arlo.operations.date_operations import timestamp_to_datetime, \
     string_to_datetime, angular_string_to_timestamp
 from arlo.operations.df_operations import drop_other_columns, add_prefix_to_column, remove_invalid_ids, \
     apply_function_to_field_overrule, add_field_with_default_value, sort_df_by_descending_date, \
-    apply_function_to_field_no_overrule, concat_columns, assign_new_column
+    apply_function_to_field_no_overrule, concat_columns, assign_new_column, disable_chained_assigment_warning, \
+    enable_chained_assigment_warning
 from arlo.operations.formatting import make_bank_name, remove_original_amount_when_euro, \
     remove_original_currency_when_euro
 from arlo.operations.types_operations import encode_id
@@ -17,11 +18,13 @@ from read_write.file_manager import default_value
 
 
 def create_id(df):
+    disable_chained_assigment_warning()
     df['id'] = df['name']
     df['id'] += '*' + (1000000*df['timestamp']).astype(int).astype(str)
     df['id'] += '*' + (100*df['amount'].fillna('0').astype(float)).astype(int).astype(str)
     df['id'] += '*' + df['account']
     apply_function_to_field_overrule(df, 'id', encode_id)
+    enable_chained_assigment_warning()
 
 
 def add_columns_with_default_values(df):
@@ -105,21 +108,28 @@ def format_recurring_transaction(rec_df):
     drop_other_columns(rec_df, column_names_stored)
 
 
-def calculate_pending_column(data):
+def format_for_front(data):
+    add_new_column_autofilled(data, 'type', 'method')
+    add_linked_column(data)
+    add_pending_column(data)
+    add_manual_column(data)
+
+
+def _calculate_pending_column(data):
     return concat_columns([data['type'] == 'AA', data['link'] == default_value('link')]).all(axis=1)
 
 
+def _calculate_manual_column(data):
+    return data['account'].isin(['T_N26', 'J_N26', 'lunchr']) == False
+
+
 def add_pending_column(data):
-    assign_new_column(data, 'pending', calculate_pending_column(data))
+    assign_new_column(data, 'pending', _calculate_pending_column(data))
 
 
 def add_linked_column(data):
     assign_new_column(data, 'linked', data['link'] != '-')
 
 
-def calculate_manual_column(data):
-    return data['account'].isin(['T_N26', 'J_N26', 'lunchr']) == False
-
-
 def add_manual_column(data):
-    assign_new_column(data, 'manual', calculate_manual_column(data))
+    assign_new_column(data, 'manual', _calculate_manual_column(data))

@@ -3,7 +3,7 @@ from flask_restful import Resource
 
 from services.create import create_manual_transaction, create_recurring_transaction, create_name_references_if_possible
 from services.list import all_categories, all_accounts, all_cycles, all_recurring, data
-from services.services import force_refresh, get_recap_categories, get_balances
+from services.services import force_refresh, get_recap_categories, get_balances, split_transaction
 from services.set_fields import link_ids_if_possible, unlink_ids_if_possible, edit_transaction
 
 
@@ -126,4 +126,12 @@ class EditTransaction(Resource):
     def post():
         json_input = request.json
         result = edit_transaction(json_input)
+        return result
+
+
+class SplitTransaction(Resource):
+    @staticmethod
+    def post():
+        json_input = request.json
+        result = split_transaction(json_input)
         return result

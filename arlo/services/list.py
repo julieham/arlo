@@ -6,12 +6,11 @@ from operations.types_operations import sorted_set
 from parameters.param import column_names_for_front
 from read_write.file_manager import read_data
 from services.services import refresh_data
-from tools.autofill_df import add_new_column_autofilled
 from tools.autofill_manager import read_autofill_dictionary
 from tools.cycle_manager import cycle_now, filter_df_on_cycle
 from tools.recap_by_category import get_budgets
 from tools.recurring_manager import get_possible_recurring
-from tools.uniform_data_maker import add_pending_column, add_linked_column, add_manual_column
+from tools.uniform_data_maker import format_for_front
 
 
 def all_categories(cycle='now'):
@@ -44,10 +43,6 @@ def data(refresh=None, cycle="now"):
     # TODO recup link disappearing transactions
 
     data = filter_df_on_cycle(data, cycle)
-
-    add_new_column_autofilled(data, 'type', 'method')
-    add_linked_column(data)
-    add_pending_column(data)
-    add_manual_column(data)
+    format_for_front(data)
 
     return data[column_names_for_front].to_json(orient="records")

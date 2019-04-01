@@ -1,9 +1,12 @@
 from numpy import NaN
 
 from arlo.read_write.file_manager import read_data
+from read_write.reader import empty_data_dataframe
 
 
 def parse_ids(transaction_ids):
+    if not transaction_ids:
+        return 'no transaction', empty_data_dataframe()
     try:
         transaction_ids = list(transaction_ids.replace(' ', '').split(','))
     except ValueError:

@@ -32,7 +32,7 @@ def link_ids_if_possible(ids):
     if how_many_rows(data_ids) != len(ids):
         return 'FAIL at least one transaction missing'
 
-    if result_function_applied_to_field(data_ids, 'amount', sum) != 0:
+    if round(result_function_applied_to_field(data_ids, 'amount', sum), 2) != 0:
         return 'FAIL transactions do not cancel each other out'
 
     if present_links_is_not_empty(data_ids):
@@ -52,7 +52,6 @@ def _link_ids(ids):
     for transaction_id, transaction_link in zip(ids, ids_link):
         change_field_on_single_id_to_value(data, transaction_id, 'link', transaction_link)
         change_field_on_single_id_to_value(data, transaction_id, "category", "Link")
-
     save_data(data)
 
 
@@ -62,25 +61,27 @@ def unlink_ids_if_possible(ids):
     if error_message:
         return error_message
 
-    for id in ids:
-        _unlink_id(id)
+    _unlink_ids(id)
     return 'SUCCESS'
 
 
-def all_transactions_linked_to_this(data, id):
-    ids = [id]
-    link = get_this_field_from_this_id(data, id, 'link')
+def all_transactions_linked_to_this(data, this_id):
+    ids = [this_id]
+    link = get_this_field_from_this_id(data, this_id, 'link')
     while link not in ids and link_is_not_null(link):
         ids.append(link)
         link = get_this_field_from_this_id(data, link, 'link')
     return ids
 
 
-def _unlink_id(id):
+def _unlink_ids(ids):
     data = read_data()
-    all_ids = all_transactions_linked_to_this(data, id)
-    change_field_on_several_ids_to_value(data, all_ids, "link", default_value('link'), force_code='unlink_ok')
-    change_field_on_several_ids_to_value(data, all_ids, "category", default_value('category'), force_code='unlink_ok')
+    fields = ['link', 'category']
+    force_code = "unlink_ok"
+    for this_id in ids:
+        all_ids = all_transactions_linked_to_this(data, this_id)
+        for field in fields:
+            change_field_on_several_ids_to_value(data, all_ids, field, default_value(field), force_code=force_code)
     save_data(data)
 
 

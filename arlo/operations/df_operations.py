@@ -74,7 +74,9 @@ def add_prefix_to_column(df, prefix, column):
 
 
 def change_field_on_several_ids_to_value(df, ids, field_name, field_value, force_code=None):
-    if force_code != 'unlink_ok':
+    if force_code:
+        print('Editing immutable field', field_name, 'for reason :', force_code)
+    if force_code not in ['unlink_ok', 'clean_ok']:
         ids = remove_immutable_ids(df, ids, field_name)
     df.loc[df['id'].isin(ids), [field_name]] = field_value
 
@@ -197,3 +199,13 @@ def remove_immutable_indexes(df, indexes, field_name):
         forbidden_values = immutable_values[field_name]
         return [index for index in indexes if get_this_field_from_this_index(df, index, field_name) not in forbidden_values]
     return indexes
+
+
+def reverse_amount(df):
+    assign_new_column(df, 'amount', - df['amount'])
+
+
+def set_value_to_column(df, column_name, column_value):
+    disable_chained_assigment_warning()
+    df.loc[:, column_name] = column_value
+    enable_chained_assigment_warning()
