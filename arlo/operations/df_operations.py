@@ -109,6 +109,12 @@ def assign_content_to_existing_column(df, column_name, column_content, overrule=
     disable_chained_assigment_warning()
     indexes = df.index if overrule else pd.isnull(df[column_name])
     df.loc[indexes, column_name] = column_content[indexes]
+
+
+def assign_value_to_empty_in_existing_column(df, column_name, column_value):
+    disable_chained_assigment_warning()
+    indexes = pd.isnull(df[column_name])
+    df.loc[indexes, column_name] = column_value
     enable_chained_assigment_warning()
 
 
