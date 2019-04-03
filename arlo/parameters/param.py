@@ -14,7 +14,7 @@ default_values = dict({'link': '-',
 
 immutable_values = dict({'category': {'Link'}})
 
-column_names_for_front = 'id,name,amount,category,pending,originalAmount' \
+column_names_for_front = 'id,name,amount,category,pending,originalAmount,account' \
                          ',originalCurrency,method,cycle,linked,bank_name,date,manual'.split(',')
 
 directory = './arlo/data/'

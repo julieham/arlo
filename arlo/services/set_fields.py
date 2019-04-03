@@ -61,7 +61,7 @@ def unlink_ids_if_possible(ids):
     if error_message:
         return error_message
 
-    _unlink_ids(id)
+    _unlink_ids(ids)
     return 'SUCCESS'
 
 
