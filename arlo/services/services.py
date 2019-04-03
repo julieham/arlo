@@ -95,7 +95,7 @@ def get_balances(cycle='now'):
 
     balances["currency"] = "EUR"
     balances.reset_index(inplace=True)
-    balances['manual'] = balances['account'].isin(['T_N26', 'J_N26', 'lunchr']) == False
+    balances['manual'] = balances['account'].isin(auto_accounts) == False
     balances.rename(columns={'account': 'acc_name'}, inplace=True)
 
     return balances.to_json(orient="records")

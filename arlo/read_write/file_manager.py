@@ -1,5 +1,5 @@
 from arlo.operations.df_operations import sort_df_by_descending_date, change_field_on_several_ids_to_value, \
-    concat_lines, null_value
+    concat_lines, null_value, filter_df_not_this_value
 from arlo.parameters.param import column_names_stored, directory, default_values
 from arlo.read_write.reader import read_df_file
 from arlo.read_write.writer import write_df_to_csv
@@ -80,3 +80,13 @@ def read_series(filename, parse_dates=False):
 
 def write_dictionary_to_file(dictionary, filename):
     write_df_to_csv(dictionary, filename)
+
+
+def remove_data_on_id(id_to_remove):
+    data = filter_df_not_this_value(read_data(), 'id', id_to_remove)
+    save_data(data)
+
+
+def get_transaction_with_id(id_to_find):
+    data = read_data()
+    return data[data['id'] == id_to_find]

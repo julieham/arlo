@@ -1,7 +1,7 @@
 from copy import deepcopy
 
 from operations.date_operations import datetime_to_timestamp, get_timestamp_now
-from operations.df_operations import get_transaction_with_id, concat_lines, reverse_amount, assign_new_column, \
+from operations.df_operations import filter_df_on_id, concat_lines, reverse_amount, assign_new_column, \
     apply_function_to_field_overrule, set_value_to_column
 from operations.series_operations import get_first_value_from_series
 from read_write.file_manager import read_data, add_new_data
@@ -49,7 +49,7 @@ def make_split_transactions(transaction, the_input):
 
 def split_transaction_if_possible(the_input):
     data = read_data()
-    transaction = get_transaction_with_id(data, the_input['id'])
+    transaction = filter_df_on_id(data, the_input['id'])
 
     if transaction.shape[0] != 1:
         return failure_response('Invalid id')

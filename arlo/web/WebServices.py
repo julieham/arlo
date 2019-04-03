@@ -1,7 +1,8 @@
 from flask import json, request
 from flask_restful import Resource
 
-from services.create import create_manual_transaction, create_recurring_transaction, create_name_references_if_possible
+from services.create_delete import create_manual_transaction, create_recurring_transaction, \
+    create_name_references_if_possible, remove_data_on_id_if_possible
 from services.list import all_categories, all_accounts, all_cycles, all_recurring, data
 from services.services import force_refresh, get_recap_categories, get_balances, split_transaction
 from services.set_fields import link_ids_if_possible, unlink_ids_if_possible, edit_transaction
@@ -135,3 +136,12 @@ class SplitTransaction(Resource):
         json_input = request.json
         result = split_transaction(json_input)
         return result
+
+
+class DeleteTransaction(Resource):
+
+    @staticmethod
+    def post():
+        id_to_delete = request.json['transaction_ids']
+        result = remove_data_on_id_if_possible(id_to_delete)
+        return {"status": result}

@@ -1,6 +1,7 @@
 from operations.data_operations import missing_valid_amount, missing_mandatory_field, get_bank_name_from_id
 from operations.types_operations import dict_to_df_with_all_columns
-from read_write.file_manager import add_new_data
+from parameters.param import auto_accounts
+from read_write.file_manager import add_new_data, remove_data_on_id, get_transaction_with_id
 from services.set_fields import rename, categorize
 from tools.autofill_manager import add_reference
 from tools.recurring_manager import fill_missing_with_default_values
@@ -65,4 +66,16 @@ def create_name_references_if_possible(this_id, name, category):
 def status_field_not_empty(field_name, field_value):
     if field_value is None:
         return failure_response('No '+field_name+' Entered')
+    return success_response()
+
+
+def remove_data_on_id_if_possible(id_to_remove):
+    transaction_to_delete = get_transaction_with_id(id_to_remove)
+    if transaction_to_delete.shape[0] == 0:
+        return failure_response('ID not found, nothing to delete')
+
+    if set(transaction_to_delete['account'].tolist()) & set(auto_accounts):
+        return failure_response('Impossible to remove automatic transaction')
+
+    remove_data_on_id(id_to_remove)
     return success_response()

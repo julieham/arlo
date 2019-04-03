@@ -179,12 +179,12 @@ def null_value():
     return pd.np.NaN
 
 
-def get_transaction_with_id(data, id):
+def filter_df_on_id(data, id):
     return filter_df_one_value(data, 'id', id)
 
 
 def get_this_field_from_this_id(data, id, field):
-    transaction = get_transaction_with_id(data, id)
+    transaction = filter_df_on_id(data, id)
     field = get_first_value_from_series(get_one_field(transaction, field))
     return field
 

@@ -20,6 +20,8 @@ column_names_for_front = 'id,name,amount,category,pending,originalAmount,account
 directory = './arlo/data/'
 budgets_filename = directory + 'budgets.csv'
 
+auto_accounts = ['T_N26', 'J_N26', 'lunchr']
+
 #%% N26
 
 n26_url = 'https://api.tech26.de'
