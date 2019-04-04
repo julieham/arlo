@@ -3,6 +3,7 @@ from arlo.operations.df_operations import sort_df_by_descending_date, change_fie
 from arlo.parameters.param import column_names_stored, directory, default_values
 from arlo.read_write.reader import read_df_file
 from arlo.read_write.writer import write_df_to_csv
+from operations.date_operations import date_parser_for_reading
 from web.status import success_response, failure_response
 
 data_file = directory + "data.csv"
@@ -14,7 +15,7 @@ def read_data():
 
 
 def read_data_from_file(filename):
-    data = read_df_file(filename, parse_dates=['date'])
+    data = read_df_file(filename, parse_dates=['date'], date_parser=date_parser_for_reading)
     return data.dropna(how='all')
 
 

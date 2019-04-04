@@ -5,6 +5,10 @@ def now():
     return pd.datetime.now()
 
 
+def date_parser_for_reading(date):
+    return pd.to_datetime(date, format='%Y-%m-%d %H:%M:%S.%f', errors='coerce')
+
+
 def string_to_datetime(date):
     date = date.replace(date[10], ' ')
     return pd.datetime.strptime(date[:19], '%Y-%m-%d %H:%M:%S')
