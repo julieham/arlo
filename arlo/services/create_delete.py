@@ -1,5 +1,5 @@
 from operations.data_operations import missing_valid_amount, missing_mandatory_field, get_bank_name_from_id
-from operations.types_operations import dict_to_df_with_all_columns
+from operations.types_operations import dict_to_df
 from parameters.param import auto_accounts
 from read_write.file_manager import add_new_data, remove_data_on_id, get_transaction_with_id
 from services.set_fields import rename, categorize
@@ -10,7 +10,7 @@ from web.status import success_response, is_successful, failure_response, merge_
 
 
 def create_manual_transaction(transaction_fields):
-    df = dict_to_df_with_all_columns(transaction_fields)
+    df = dict_to_df(transaction_fields)
 
     valid_response = is_valid_transaction_df(df)
     if is_successful(valid_response):
@@ -20,7 +20,7 @@ def create_manual_transaction(transaction_fields):
 
 
 def create_recurring_transaction(transaction_fields):
-    df = dict_to_df_with_all_columns(transaction_fields)
+    df = dict_to_df(transaction_fields)
     fill_missing_with_default_values(df)
 
     valid_response = is_valid_transaction_df(df)

@@ -3,7 +3,9 @@ import pandas as pd
 
 
 def apply_function(series, function_to_apply):
-    return series.apply(function_to_apply, axis=1)
+    if series.shape[0] > 0:
+        return series.apply(function_to_apply, axis=1)
+    return pd.Series()
 
 
 def positive_part(series):
@@ -28,5 +30,10 @@ def get_first_value_from_series(series):
         return None
     return series.iloc[0]
 
+
 def series_swap_index_values(series):
     return pd.Series(series.index.values, index=series)
+
+
+def is_negative(series):
+    return series < 0

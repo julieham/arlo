@@ -24,22 +24,22 @@ def link_ids_if_possible(ids):
         return error_message
 
     if len(ids) < 2:
-        return 'FAIL not enough transactions'
+        return failure_response('not enough transactions')
 
     data = read_data()
     data_ids = filter_df_several_values(data, 'id', ids)
 
     if how_many_rows(data_ids) != len(ids):
-        return 'FAIL at least one transaction missing'
+        return failure_response('at least one transaction missing')
 
     if round(result_function_applied_to_field(data_ids, 'amount', sum), 2) != 0:
-        return 'FAIL transactions do not cancel each other out'
+        return failure_response('transactions do not cancel each other out')
 
     if present_links_is_not_empty(data_ids):
-        return 'FAIL one or more transaction already linked'
+        return failure_response('one or more transaction already linked')
 
     _link_ids(ids)
-    return 'SUCCESS'
+    return success_response()
 
 
 def link_is_not_null(link):
@@ -99,7 +99,5 @@ def edit_transaction(fields):
 
 
 def change_cycle_on_id(transaction_id, cycle_value):
-    print('CHANGE CYCLE')
     ids = all_transactions_linked_to_this(read_data(), transaction_id)
-    print(ids)
     return set_field_to_value_on_ids(ids, 'cycle', cycle_value)

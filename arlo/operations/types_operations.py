@@ -3,7 +3,6 @@ import hashlib
 import pandas as pd
 
 from arlo.operations.df_operations import concat_lines
-from arlo.read_write.reader import empty_data_dataframe
 
 
 def string_to_float(string):
@@ -24,12 +23,7 @@ def string_is_AA(string):
 def dict_to_df(dictionary):
     dictionary = dict_to_dfreadable_dict(dictionary)
     df = pd.DataFrame(dictionary)
-    return df
-
-
-def dict_to_df_with_all_columns(dictionary):
-    df = dict_to_df(dictionary)
-    return concat_lines([df.mask(df == ''), empty_data_dataframe()])
+    return df.mask(df == '')
 
 
 def list_of_dict_to_df(dict_list):

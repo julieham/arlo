@@ -1,8 +1,8 @@
 #%% PARAMETERS
 
-from arlo.operations.df_operations import add_field_with_default_value, get_one_field, change_field_on_several_indexes_to_value, \
-    assign_new_column, select_columns, drop_columns
-from arlo.operations.series_operations import apply_function
+from arlo.operations.df_operations import add_field_with_default_value, get_one_field, \
+    change_field_on_several_indexes_to_value, assign_new_column, select_columns, drop_columns
+from arlo.operations.series_operations import apply_function, is_negative
 
 sign_name, amount_name = 'link_sign', 'link_amount'
 
@@ -22,13 +22,10 @@ link_id_columns = [field_name for field_name in fields_link_ids]
 
 #%% COLUMNS TOOLS
 
-def add_the_sign_to_df(df):
-    def is_negative(series):
-        return series < 0
-
-    add_field_with_default_value(df, sign_name, '+')
+def add_the_sign_to_df(df, normal_sign, reverse_sign):
+    add_field_with_default_value(df, sign_name, normal_sign)
     negative_amounts = is_negative(get_one_field(df, amount_field))
-    change_field_on_several_indexes_to_value(df, negative_amounts, sign_name, '-')
+    change_field_on_several_indexes_to_value(df, negative_amounts, sign_name, reverse_sign)
 
 
 def add_the_amount_to_df(df):
@@ -53,8 +50,8 @@ def opposite_link_id(link_id):
 
 
 #%%
-def add_link_ids(df):
-    add_the_sign_to_df(df)
+def add_link_ids(df, normal_sign, reverse_sign):
+    add_the_sign_to_df(df, normal_sign, reverse_sign)
     add_the_amount_to_df(df)
     add_link_fields(df)
     drop_columns(df, [sign_name, amount_name])

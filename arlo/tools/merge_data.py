@@ -1,136 +1,134 @@
-from arlo.operations.df_operations import get_ids, filter_df_several_values, filter_df_one_value, df_is_not_empty, \
-    extract_line_from_df, how_many_rows, concat_lines, filter_df_not_this_value
-from arlo.read_write.reader import empty_data_dataframe
-from arlo.tools.link_id import opposite_link_id, add_link_ids
-from tools.uniform_data_maker import add_pending_column
+from arlo.operations.df_operations import filter_df_one_value, df_is_not_empty, concat_lines, both_series_are_true, \
+    get_loc_df, drop_line_with_index, assign_value_to_loc, add_column_with_value, set_pandas_print_parameters, is_empty
+from arlo.tools.link_id import add_link_ids, fields_link_ids
+from parameters.param import editable_fields_to_recover
+from read_write.file_manager import read_data, save_data, default_value, add_new_data
+from read_write.reader import empty_data_dataframe
+from services.set_fields import link_ids_if_possible, all_transactions_linked_to_this, unlink_ids_if_possible
+from tools.uniform_data_maker import add_pending_column, add_refund_column
+from web.status import is_successful
 
 
 def get_pending_transactions(df):
+    add_pending_column(df)
     return filter_df_one_value(df, 'pending', True)
 
 
 def get_refund_transactions(df):
-    refunds = filter_df_several_values(df, 'type', ['AV', 'AE'])
-    return filter_df_one_value(refunds, 'link', '-')
+    add_refund_column(df)
+    return filter_df_one_value(df, 'refund', True)
 
 
-def match_gone_transactions(gone, candidates, processed_transactions, id_field_name):
-    recup_columns = ['name', 'category', 'comment', 'link']
+def find_matches_pending_refunds(pending, refunds, link_name):
+    for index_refund in refunds.index.tolist()[::-1]:
+        link_value = get_loc_df(refunds, index_refund, link_name)
+        match = filter_df_one_value(pending, link_name, link_value)
 
-    not_found = empty_data_dataframe()
-    for _, row in gone.iterrows():
-        replacement_transactions = filter_df_one_value(candidates, id_field_name, row[id_field_name])
-
-        if df_is_not_empty(replacement_transactions):
-            chosen_index = min(replacement_transactions.index)
-            the_transaction = extract_line_from_df(chosen_index, candidates)
-            the_transaction[recup_columns] = row[recup_columns]
-            the_transaction = the_transaction.drop(labels=['link_id', 'link_id_no_amount', 'link_id_no_name'])
-            processed_transactions = processed_transactions.append(the_transaction)
-        else:
-            not_found = not_found.append(row)
-
-    return not_found, processed_transactions
+        if df_is_not_empty(match):
+            index_pending = max(match.index)
+            id_refund = get_loc_df(refunds, index_refund, 'id')
+            id_pending = get_loc_df(pending, index_pending, 'id')
+            if is_successful(link_ids_if_possible(id_refund + ',' + id_pending)):
+                drop_line_with_index(pending, index_pending)
 
 
-def identify_old_new_data(old_data, new_data):
-    old_ids = get_ids(old_data)
-    new_ids = get_ids(new_data)
+def link_the_refunds():
+    for link_name in fields_link_ids:
+        data = read_data()
+        pending = get_pending_transactions(data)
+        refunds = get_refund_transactions(data)
 
-    unchanged = filter_df_several_values(old_data, 'id', old_ids & new_ids)
-    new = filter_df_several_values(new_data, 'id', new_ids - old_ids)
-    gone = filter_df_several_values(old_data, 'id', old_ids - new_ids)
+        if df_is_not_empty(pending) & df_is_not_empty(refunds):
+            add_link_ids(pending, '-', '+')
+            add_link_ids(refunds, '+', '-')
 
-    return gone, unchanged, new
-
-
-def associate_pending_gone(old_data, new_data):
-    (gone, old, new) = identify_old_new_data(old_data, new_data)
-    add_link_ids(new)
-    add_link_ids(gone)
-
-    gone, old = match_gone_transactions(gone, new, old, 'link_id')
-    gone, old = match_gone_transactions(gone, new, old, 'link_id_no_amount')
-    gone, old = match_gone_transactions(gone, new, old, 'link_id_no_name')
-
-    if len(gone):
-        print('LOST TRANSACTIONS : ', len(gone))
-
-    return old, new
+            find_matches_pending_refunds(pending, refunds, link_name)
 
 
-def find_the_associated_refund(pending_transactions, pending_source, refund_transactions, refunds_source):
-    # TODO use link function
+def find_matches_gone_newsettled(new, gone, link_name, links_to_add):
+    data = read_data()
+    free_new = new[new['replaces_a_pending'] == False]
+    for index_gone in gone.index.tolist():
+        link_value = get_loc_df(gone, index_gone, link_name)
+        match = filter_df_one_value(free_new, link_name, link_value)
 
-    print('starting refund process')
-    links_names = ['link_id', 'link_id_no_amount', 'link_id_no_name']
+        if df_is_not_empty(match):
+            index_new_settled = max(match.index)
+            gone_transaction = gone.loc[index_gone]
+            settled_transaction = new.loc[index_new_settled]
+            print('#merge_data ------- Identified : -------')
+            print(concat_lines([gone_transaction.to_frame().T, settled_transaction.to_frame().T]))
+            print('merge_data -----------------------------')
 
-    while pending_transactions.shape[0] > 0 and links_names:
-        not_found = []
-        link_name = links_names.pop(0)
-        print(pending_transactions.shape)
-        for index_pending, pending_trans in pending_transactions.iterrows():
-            candidates = filter_df_one_value(refund_transactions, link_name, opposite_link_id(pending_trans[link_name]))
-
-            if df_is_not_empty(candidates):
-                chosen_index = min(candidates.index)
-                print('refund', index_pending, chosen_index)
-                pending_source.loc[index_pending, ['link', 'pending']] = [refunds_source.loc[chosen_index, 'id'], False]
-                refunds_source.loc[chosen_index, ['link', 'pending']] = [pending_source.loc[index_pending, 'id'], False]
-                extract_line_from_df(chosen_index, refund_transactions)
-            else:
-                not_found.append(index_pending)
-
-        pending_transactions = pending_transactions.loc[not_found]
-
-    if df_is_not_empty(pending_transactions):
-        print('PENDING NO REFUND FOUND :')
-        print(how_many_rows(pending_transactions))
-    if df_is_not_empty(refund_transactions):
-        print('REFUNDS remaining')
-        print(how_many_rows(refund_transactions))
+            to_relink_after_gone_replaced_with_settled(data, gone_transaction, settled_transaction, links_to_add)
+            recover_editable_fields(new, index_new_settled, gone, index_gone)
+            drop_line_with_index(gone, index_gone)
+            drop_line_with_index(data, index_gone)
+            assign_value_to_loc(new, index_new_settled, 'replaces_a_pending', True)
+    save_data(data)
 
 
-def  associate_pending_with_refund(old_data, new_data):
-    add_pending_column(old_data)
-    add_pending_column(new_data)
-    old_pending = get_pending_transactions(old_data)
-    new_pending = get_pending_transactions(new_data)
-
-    refunds = get_refund_transactions(new_data)
-
-    add_link_ids(old_pending)
-    add_link_ids(new_pending)
-    add_link_ids(refunds)
-
-    find_the_associated_refund(old_pending, old_data, refunds, new_data)
-    find_the_associated_refund(new_pending, new_data, refunds, new_data)
-
-    return concat_lines([old_data, new_data])
+def recover_editable_fields(appeared_data, index_appeared, gone_data, index_gone):
+    for field in editable_fields_to_recover:
+        assign_value_to_loc(appeared_data, index_appeared, field, get_loc_df(gone_data, index_gone, field))
 
 
-def merge_n26_data(old_data, new_data):
-    # (old_data, new_data) = associate_pending_gone(old_data, new_data)
-    # old_data = old_data.sort_values("date", ascending=True).reset_index(drop=True)
-    # new_data = new_data.sort_values("date", ascending=True).reset_index(drop=True)
-
-    return concat_lines([old_data, new_data]) # associate_pending_with_refund(old_data, new_data)
-
-
-def merge_data(old_data, new_data):
-    other_accounts = old_data[old_data['account'].str.endswith('_N26') == False]
-
-    old_n26 = old_data[old_data['account'].str.endswith('N26')]
-    old_n26_real = filter_df_not_this_value(old_n26, 'type', 'FIC')
-    old_n26_fic = filter_df_one_value(old_n26, 'type', 'FIC')
-
-    keep = concat_lines([other_accounts, old_n26_fic])
-
-    all_n26 = merge_n26_data(old_n26_real, new_data)
-    all_n26['pending'] = all_n26.apply(lambda row: row['type'] == 'AA' and row['link'] == '-', axis=1)
-
-    return concat_lines([all_n26, keep]).sort_values("date", ascending=False).reset_index(drop=True)
+def to_relink_after_gone_replaced_with_settled(data, gone_transaction, settled_transaction, links_to_add):
+    link_gone = gone_transaction['link']
+    id_gone = gone_transaction['id']
+    id_settled = settled_transaction['id']
+    if link_gone != default_value('link'):
+        all_links = ','.join(all_transactions_linked_to_this(data, id_gone))
+        unlink_ids_if_possible(id_gone)
+        links_to_add.append(all_links.replace(id_gone, id_settled))
 
 
-def merge_data_from_single_account(old_df, new_df, account_name):
-    return concat_lines([old_df, new_df])
+def identify_new_and_gone(data, latest_data, account):
+    if df_is_not_empty(latest_data):
+        add_link_ids(latest_data, '+', '-')
+        condition1 = data['account'] == account
+        condition2 = data['type'] != 'FIC'
+        previous_data = data[both_series_are_true(condition1, condition2)]
+        new_data = latest_data[latest_data['id'].isin(previous_data['id']) == False]
+        previous_in_range = previous_data[previous_data['date'] >= min(latest_data['date'])]
+        gone_data = previous_in_range[previous_in_range['id'].isin(latest_data['id']) == False]
+        if df_is_not_empty(gone_data):
+            add_link_ids(gone_data, '+', '-')
+            add_column_with_value(new_data, 'replaces_a_pending', False)
+            return new_data, gone_data
+        return new_data, empty_data_dataframe()
+    return empty_data_dataframe(), empty_data_dataframe()
+
+
+def delete_gone_from_data(data, gone):
+    if df_is_not_empty(gone):
+        print('#merge_data NOT FOUND GONE TRANSACTIONS :')
+        set_pandas_print_parameters()
+        print(gone)
+        for index in gone.index:
+            drop_line_with_index(data, index)
+        save_data(data)
+
+
+def process_gone_transactions(latest, account):
+    data = read_data()
+    new_data, gone_data = identify_new_and_gone(data, latest, account)
+    if is_empty(new_data):
+        return
+
+    if is_empty(gone_data):
+        add_new_data(new_data)
+        return
+
+    links_to_add = []
+    for link_name in fields_link_ids:
+        find_matches_gone_newsettled(new_data, gone_data, link_name, links_to_add)
+    add_new_data(new_data)
+    delete_gone_from_data(data, gone_data)
+    for link_ids in links_to_add:
+        link_ids_if_possible(link_ids)
+
+
+def merge_with_data(latest_data, account):
+    process_gone_transactions(latest_data, account)
+    link_the_refunds()

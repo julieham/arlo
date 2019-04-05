@@ -24,15 +24,21 @@ def remove_already_present_id(df, account, limit=None):
 
 
 def missing_valid_amount(df):
-    valid_amount = pd.isnull(df['amount']) == False
-    valid_original = (pd.isnull(df['originalAmount']) == False) & (pd.isnull(df['originalCurrency']) == False)
-    amounts = pd.DataFrame({'valid_amount': valid_amount, 'valid_original': valid_original})
-    return not amounts.any(axis=None)
+    try:
+        valid_amount = pd.isnull(df['amount']) == False
+        valid_original = (pd.isnull(df['originalAmount']) == False) & (pd.isnull(df['originalCurrency']) == False)
+        amounts = pd.DataFrame({'valid_amount': valid_amount, 'valid_original': valid_original})
+        return not amounts.any(axis=None)
+    except KeyError:
+        return True
 
 
 def missing_mandatory_field(df):
-    missing_fields = pd.DataFrame({field: pd.isnull(df[field]) for field in mandatory_fields})
-    return missing_fields.any(axis=None)
+    try:
+        missing_fields = pd.DataFrame({field: pd.isnull(df[field]) for field in mandatory_fields})
+        return missing_fields.any(axis=None)
+    except KeyError:
+        return True
 
 
 def get_bank_name_from_id(id):

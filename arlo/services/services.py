@@ -1,19 +1,18 @@
 import pandas as pd
 
-from arlo.operations.df_operations import df_is_not_empty, concat_lines, add_field_with_default_value
-from arlo.parameters.credentials import login_N26
+from arlo.operations.df_operations import df_is_not_empty, add_field_with_default_value
 from arlo.parameters.param import *
-from arlo.read_write.file_manager import save_data, read_data, add_new_data
+from arlo.read_write.file_manager import read_data, add_new_data
 from arlo.tools.clean_lunchr import get_latest_lunchr
-from arlo.tools.clean_n26 import get_last_transactions_as_df
 from arlo.tools.cycle_manager import decode_cycle, filter_df_on_cycle
-from arlo.tools.merge_data import merge_data
 from arlo.tools.recap_by_category import get_categories_recap
 from arlo.tools.refresh import minutes_since_last_update, change_last_update_to_now
-from arlo.tools.uniform_data_maker import format_n26_df
-# %% SERVICES
+from parameters.credentials import login_N26
 from tools.backup_email import send_email_backup_data
+from tools.clean_n26 import get_last_transactions_as_df
+from tools.merge_data import merge_with_data
 from tools.split import split_transaction_if_possible
+from web.status import is_successful, merge_status
 
 
 def refresh_data():
@@ -26,32 +25,24 @@ def refresh_data():
         print('NO')
 
 
+def refresh_n26():
+    all_status = []
+    for account in login_N26:
+        status, latest_data = get_last_transactions_as_df(account)
+        merge_with_data(latest_data, account)
+        all_status.append(status)
+    return merge_status(all_status[0], all_status[1])
+
+
 def force_refresh():
-    print('FORCE REFRESH')
+    print('Refreshing')
     send_email_backup_data()
     refresh_lunchr()
-    status_refresh_n26 = refresh_n26()
-
-    if status_refresh_n26 == 'SUCCESS':
+    status_n26 = refresh_n26()
+    if is_successful(status_n26):
         change_last_update_to_now()
-        return 'SUCCESS'
-    return 'FAIL'
+    return status_n26
 
-
-def refresh_n26():
-    all_valid, all_data = True, []
-    for account in login_N26:
-        valid, data = get_last_transactions_as_df(account, n26_max_transactions_per_user)
-        all_valid = all_valid and valid
-        all_data.append(format_n26_df(data, account))
-    all_valid = True
-
-    if not all_valid:
-        print('REFRESH N26 FAILED')
-        return 'FAIL'
-
-    save_data(merge_data(read_data(), concat_lines(all_data)))
-    return 'SUCCESS'
 
 
 def get_recap_categories(cycle='now'):

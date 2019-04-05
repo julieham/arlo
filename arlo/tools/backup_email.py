@@ -9,7 +9,7 @@ from parameters.credentials import login_gmail
 from read_write.file_manager import get_last_update_string
 
 
-def send_email_backup_data():
+def send_email_backup_data(body='Hi Arlo, here is your data.'):
 
     sender = login_gmail.username
     passwd = login_gmail.password
@@ -18,8 +18,6 @@ def send_email_backup_data():
     name = get_last_update_string().replace(' ', '_')
     msg['From'] = sender
     msg['To'] = sender
-    msg['Subject'] = 'Backup Data ' + name
-    body = 'Hi Arlo,\nHere is your data.'
     msg.attach(MIMEText(body))
 
     attachment = './arlo/data/data.csv'

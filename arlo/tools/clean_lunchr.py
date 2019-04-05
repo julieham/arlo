@@ -1,11 +1,12 @@
 import json
+
 import requests
 
 from arlo.operations.data_operations import remove_already_present_id
-from arlo.operations.df_operations import concat_lines
+from arlo.operations.df_operations import concat_lines, drop_other_columns
 from arlo.operations.types_operations import layered_dict_to_df
 from arlo.parameters.credentials import login_lunchr
-from arlo.parameters.param import lunchr_url
+from arlo.parameters.param import lunchr_url, lunchr_dictionary
 from arlo.tools.uniform_data_maker import format_lunchr_df
 
 
@@ -51,6 +52,7 @@ def lunchr_df_page_num(access_token, num_page):
 def get_latest_lunchr():
     access_token = get_token(login_lunchr)
     lunchr_df = lunchr_df_page_num(access_token, 0)
+    drop_other_columns(lunchr_df, lunchr_dictionary.keys())
     format_lunchr_df(lunchr_df)
     account = list(lunchr_df['account'])[0]
     return remove_already_present_id(lunchr_df, account, limit=30)
