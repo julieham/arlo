@@ -1,8 +1,8 @@
 from flask import json, request
 from flask_restful import Resource
 
-from services.create_delete import create_manual_transaction, create_recurring_transaction, \
-    create_name_references_if_possible, remove_data_on_id_if_possible
+from services.create_delete import create_manual_transaction, create_single_recurring, \
+    create_name_references_if_possible, remove_data_on_id_if_possible, create_several_recurring
 from services.list import all_categories, all_accounts, all_cycles, all_recurring, data
 from services.services import force_refresh, get_recap_categories, get_balances, split_transaction
 from services.set_fields import link_ids_if_possible, unlink_ids_if_possible, edit_transaction
@@ -24,15 +24,23 @@ class CreateManualTransaction(Resource):
     @staticmethod
     def post():
         json_input = request.json
-        result = create_manual_transaction(json_input)
-        return {"status": result}
+        response = create_manual_transaction(json_input)
+        return response
 
 
-class MakeRecurring(Resource):
+class CreateSingleRecurring(Resource):
     @staticmethod
     def post():
-        result = create_recurring_transaction(request.json)
-        return {"status": result}
+        this_name = request.json['name']
+        response = create_single_recurring(this_name)
+        return response
+
+
+class CreateSeveralRecurring(Resource):
+    @staticmethod
+    def post():
+        response = create_several_recurring(request.json)
+        return response
 
 
 #%% LIST
@@ -50,7 +58,7 @@ class ListOperations (Resource):
 class GetRecurring(Resource):
     @staticmethod
     def get():
-        return json.loads(json.dumps(all_recurring()))
+        return all_recurring()
 
 
 class GetAllCycles(Resource):

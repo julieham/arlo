@@ -6,9 +6,9 @@ from arlo.operations.date_operations import timestamp_to_datetime, string_to_dat
 from arlo.operations.df_operations import drop_other_columns, add_prefix_to_column, remove_invalid_ids, \
     apply_function_to_field_overrule, add_field_with_default_value, sort_df_by_descending_date, \
     apply_function_to_field_no_overrule, assign_new_column, disable_chained_assigment_warning, \
-    enable_chained_assigment_warning, assign_value_to_empty_in_existing_column, both_series_are_true
-from arlo.operations.formatting import make_bank_name, remove_original_amount_when_euro, \
-    remove_original_currency_when_euro
+    enable_chained_assigment_warning, assign_value_to_empty_in_existing_column, both_series_are_true, get_one_field, \
+    assign_value_to_loc
+from arlo.operations.formatting import make_bank_name
 from arlo.operations.types_operations import encode_id
 from arlo.tools.autofill_df import add_new_column_autofilled, fill_existing_column_with_autofill
 from arlo.tools.cycle_manager import date_to_cycle
@@ -63,8 +63,8 @@ def format_lunchr_df(lunchr_df):
 
 def format_n26_df(n26_df, account):
     n26_df['bank_name'] = n26_df.replace(NaN, '').apply(lambda row: make_bank_name(row), axis=1)
-    assign_new_column(n26_df, 'originalAmount', _calculate_n26_original_amount(n26_df))
-    assign_new_column(n26_df, 'originalCurrency', _calculate_n26_original_currency(n26_df))
+
+    _remove_original_amount_when_euro(n26_df)
 
     add_field_with_default_value(n26_df, 'account', account)
     add_missing_columns(n26_df)
@@ -123,12 +123,10 @@ def format_for_front(data):
     add_manual_column(data)
 
 
-def _calculate_n26_original_amount(df):
-    return df.apply(lambda row: remove_original_amount_when_euro(row), axis=1)
-
-
-def _calculate_n26_original_currency(df):
-    return df.apply(lambda row: remove_original_currency_when_euro(row), axis=1)
+def _remove_original_amount_when_euro(df):
+    original_amount_is_euro = get_one_field(df, 'originalCurrency') == 'EUR'
+    assign_value_to_loc(df, original_amount_is_euro, 'originalCurrency', NaN)
+    assign_value_to_loc(df, original_amount_is_euro, 'originalAmount', NaN)
 
 
 def _calculate_pending_column(data):

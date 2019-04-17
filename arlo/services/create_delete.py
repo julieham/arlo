@@ -4,7 +4,7 @@ from parameters.param import auto_accounts
 from read_write.file_manager import add_new_data, remove_data_on_id, get_transaction_with_id
 from services.set_fields import rename, categorize
 from tools.autofill_manager import add_reference
-from tools.recurring_manager import fill_missing_with_default_values
+from tools.recurring_manager import get_possible_recurring
 from tools.uniform_data_maker import format_manual_transaction, format_recurring_transaction
 from web.status import success_response, is_successful, failure_response, merge_status
 
@@ -16,18 +16,32 @@ def create_manual_transaction(transaction_fields):
     if is_successful(valid_response):
         format_manual_transaction(df)
         add_new_data(df)
+    print(valid_response)
     return valid_response
 
 
-def create_recurring_transaction(transaction_fields):
-    df = dict_to_df(transaction_fields)
-    fill_missing_with_default_values(df)
-
+def create_single_recurring(name, number=None):
+    rec = get_possible_recurring()
+    df = rec[rec.index == name].reset_index()
+    if df.shape[0] != 1:
+        return failure_response('Invalid name')
     valid_response = is_valid_transaction_df(df)
+    print(valid_response)
     if is_successful(valid_response):
         format_recurring_transaction(df)
+        if number:
+            df['name'] = str(number) + ' ' + df['name'] + 's'
+            df['amount'] = int(number) * df['amount']
         add_new_data(df)
     return valid_response
+
+
+def create_several_recurring(how_many_recurring):
+    response = success_response()
+    for name in how_many_recurring:
+        if how_many_recurring[name] > 0:
+            response = create_single_recurring(name, how_many_recurring[name])
+    return response
 
 
 def is_valid_transaction_df(df):

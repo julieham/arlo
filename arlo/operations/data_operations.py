@@ -26,9 +26,9 @@ def remove_already_present_id(df, account, limit=None):
 def missing_valid_amount(df):
     try:
         valid_amount = pd.isnull(df['amount']) == False
-        valid_original = (pd.isnull(df['originalAmount']) == False) & (pd.isnull(df['originalCurrency']) == False)
-        amounts = pd.DataFrame({'valid_amount': valid_amount, 'valid_original': valid_original})
-        return not amounts.any(axis=None)
+        # valid_original = (pd.isnull(df['originalAmount']) == False) & (pd.isnull(df['originalCurrency']) == False)
+        # amounts = pd.DataFrame({'valid_amount': valid_amount, 'valid_original': valid_original})
+        return not valid_amount.any(axis=None)  # amounts.any(axis=None)
     except KeyError:
         return True
 

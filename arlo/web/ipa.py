@@ -20,7 +20,8 @@ ipa.add_resource(GetBalances, "/balances")
 ipa.add_resource(RefreshOperations, "/refresh")
 
 ipa.add_resource(CreateManualTransaction, "/create/manual")
-ipa.add_resource(MakeRecurring, "/create/recurring")
+ipa.add_resource(CreateSingleRecurring, "/create/recurring/single")
+ipa.add_resource(CreateSeveralRecurring, "/create/recurring/several")
 ipa.add_resource(AddNameReference, "/create/name_ref")
 ipa.add_resource(DeleteTransaction, "/delete/transaction")
 

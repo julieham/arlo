@@ -32,7 +32,7 @@ def all_cycles():
 
 
 def all_recurring():
-    return get_possible_recurring()
+    return list(get_possible_recurring().index)
 
 
 def data(refresh=None, cycle="now"):

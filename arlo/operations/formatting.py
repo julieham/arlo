@@ -1,5 +1,3 @@
-from numpy import NaN
-
 from arlo.read_write.file_manager import read_data
 from read_write.reader import empty_data_dataframe
 
@@ -27,15 +25,3 @@ def make_bank_name(row):
     if reference:
         return row['referenceText'] + ' #VIR'
     return '#VIR ' + ['to ', 'from '][row['amount'] > 0] + partner
-
-
-def remove_original_amount_when_euro(row):
-    if row['originalCurrency'] == 'EUR':
-        return NaN
-    return row['originalAmount']
-
-
-def remove_original_currency_when_euro(row):
-    if row['originalCurrency'] == 'EUR':
-        return ''
-    return row['originalCurrency']
