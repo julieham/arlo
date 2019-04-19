@@ -2,7 +2,8 @@ from numpy import NaN
 
 import arlo.parameters.param
 from arlo.operations.data_operations import set_amounts_to_numeric
-from arlo.operations.date_operations import timestamp_to_datetime, string_to_datetime, angular_string_to_timestamp
+from arlo.operations.date_operations import timestamp_to_datetime, string_to_datetime, angular_string_to_timestamp, \
+    datetime_to_timestamp
 from arlo.operations.df_operations import drop_other_columns, add_prefix_to_column, remove_invalid_ids, \
     apply_function_to_field_overrule, add_field_with_default_value, sort_df_by_descending_date, \
     apply_function_to_field_no_overrule, assign_new_column, disable_chained_assigment_warning, \
@@ -17,6 +18,8 @@ from read_write.file_manager import default_value
 
 def create_id(df):
     disable_chained_assigment_warning()
+    if 'timestamp' not in df.columns:
+        apply_function_to_field_overrule(df, 'date', datetime_to_timestamp, destination='timestamp')
     df['id'] = df['name']
     df['id'] += '*' + (1000000*df['timestamp']).astype(int).astype(str)
     df['id'] += '*' + (100*df['amount'].fillna('0').astype(float)).astype(int).astype(str)

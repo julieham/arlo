@@ -30,6 +30,7 @@ ipa.add_resource(UnlinkTransactions, "/set-fields/unlink")
 
 ipa.add_resource(EditTransaction, "/edit/transaction")
 ipa.add_resource(SplitTransaction, "/edit/split")
+ipa.add_resource(TransferTransaction, "/edit/transfer")
 
 
 if __name__ == '__main__':

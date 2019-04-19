@@ -2,13 +2,14 @@ from flask import json, request
 from flask_restful import Resource
 
 from services.create_delete import create_manual_transaction, create_single_recurring, \
-    create_name_references_if_possible, remove_data_on_id_if_possible, create_several_recurring
+    create_name_references_if_possible, remove_data_on_id_if_possible, create_several_recurring, \
+    create_transfer_if_possible
 from services.list import all_categories, all_accounts, all_cycles, all_recurring, data
 from services.services import force_refresh, get_recap_categories, get_balances, split_transaction
 from services.set_fields import link_ids_if_possible, unlink_ids_if_possible, edit_transaction
+# %% CREATE
+from web.status import success_response
 
-
-#%% CREATE
 
 class AddNameReference(Resource):
     @staticmethod
@@ -96,6 +97,16 @@ class GetRecap(Resource):
         cycle = request.args.get('cycle')
         recap = get_recap_categories(cycle=cycle)
         return json.loads(recap)
+
+
+class TransferTransaction(Resource):
+
+    @staticmethod
+    def post():
+        id_one_way = request.args.get('id')
+        account = request.args.get('account')
+        create_transfer_if_possible(id_one_way, account)
+        return success_response()
 
 
 class GetBalances(Resource):
