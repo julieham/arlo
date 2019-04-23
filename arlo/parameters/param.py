@@ -17,7 +17,7 @@ immutable_values = dict({'category': {'Link'}})
 column_names_for_front = 'id,name,amount,category,pending,originalAmount,account' \
                          ',originalCurrency,method,cycle,linked,bank_name,date,manual'.split(',')
 
-directory = './arlo/data/'
+directory = '/Users/julie/PycharmProjects/arlo/arlo/data/'
 budgets_filename = directory + 'budgets.csv'
 
 auto_accounts = ['T_N26', 'J_N26', 'lunchr']

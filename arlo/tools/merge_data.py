@@ -56,11 +56,13 @@ def find_matches_gone_newsettled(new, gone, link_name, links_to_add):
             index_new_settled = max(match.index)
             gone_transaction = gone.loc[index_gone]
             settled_transaction = new.loc[index_new_settled]
+            set_pandas_print_parameters()
             print('#merge_data ------- Identified : -------')
             print(concat_lines([gone_transaction.to_frame().T, settled_transaction.to_frame().T]))
             print('merge_data -----------------------------')
 
             to_relink_after_gone_replaced_with_settled(data, gone_transaction, settled_transaction, links_to_add)
+            data = read_data()
             recover_editable_fields(new, index_new_settled, gone, index_gone)
             drop_line_with_index(gone, index_gone)
             drop_line_with_index(data, index_gone)
@@ -114,6 +116,7 @@ def process_gone_transactions(latest, account):
     data = read_data()
     new_data, gone_data = identify_new_and_gone(data, latest, account)
     if is_empty(new_data):
+        delete_gone_from_data(data, gone_data)
         return
 
     if is_empty(gone_data):

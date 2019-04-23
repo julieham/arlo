@@ -1,6 +1,7 @@
 import json
 
 from operations.date_operations import two_next_cycles
+from operations.df_operations import select_columns
 from operations.series_operations import filter_series_on_value
 from operations.types_operations import sorted_set
 from parameters.param import column_names_for_front
@@ -26,9 +27,10 @@ def all_accounts():
 def all_cycles():
     data = read_data().sort_values("date", ascending=False).reset_index(drop=True)
     all_cycles_with_duplicates = list(data['cycle'])
-    set_cycles = sorted_set(all_cycles_with_duplicates[::-1] + two_next_cycles())
+    set_cycles = sorted_set(all_cycles_with_duplicates[::-1])
     now_index = set_cycles.index(cycle_now())
-    return json.dumps(set_cycles[now_index-3:now_index+3])
+    selected_cycles = set_cycles[now_index - 3:now_index + 2] + two_next_cycles()
+    return json.dumps(['Lagos19', 'Feb19', 'Mar19', 'Apr19', 'Pyr19', 'May19', 'Jun19', 'DK19', 'Cali19'])
 
 
 def all_recurring():
@@ -45,4 +47,4 @@ def data(refresh=None, cycle="now"):
     data = filter_df_on_cycle(data, cycle)
     format_for_front(data)
 
-    return data[column_names_for_front].to_json(orient="records")
+    return select_columns(data, column_names_for_front).to_json(orient="records")

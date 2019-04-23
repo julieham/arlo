@@ -138,6 +138,7 @@ def how_many_rows(df):
 
 
 def select_columns(df, columns):
+    columns = list(set(columns) & set(df.columns.tolist()))
     return df[columns]
 
 
@@ -247,7 +248,9 @@ def drop_line_with_index(df, index):
 
 
 def add_column_with_value(df, column_name, column_value):
+    disable_chained_assigment_warning()
     df[column_name] = column_value
+    enable_chained_assigment_warning()
 
 
 def is_empty(df):
