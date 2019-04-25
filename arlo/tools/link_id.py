@@ -4,9 +4,9 @@ from arlo.operations.df_operations import add_field_with_default_value, get_one_
     change_field_on_several_indexes_to_value, assign_new_column, select_columns, drop_columns
 from arlo.operations.series_operations import apply_function, is_negative
 
-sign_name, amount_name = 'link_sign', 'link_amount'
+sign_name, amount_name, o_amount_name, currency_name = 'link_sign', 'link_amount', 'link_o_amount', 'link_currency'
 
-name_field, account_field, amount_field = 'bank_name', 'account', 'amount'
+name_field, account_field, amount_field, o_amount_field, o_currency_field = 'bank_name', 'account', 'amount', 'originalAmount', 'originalCurrency'
 
 sep_link_ids = "__"
 
@@ -14,9 +14,12 @@ sep_link_ids = "__"
 
 fields_link_ids = dict({'link_id': [sign_name, amount_name, name_field, account_field],
                         'link_id_no_name': [sign_name, amount_name, account_field],
-                        'link_id_no_amount': [sign_name, name_field, account_field]})
+                        'link_id_original_and_name': [sign_name, currency_name, o_amount_name, name_field,
+                                                      account_field],
+                        'link_id_no_amount': [sign_name, name_field, account_field],
+                        'link_id_only_original': [sign_name, currency_name, o_amount_name, account_field]})
 
-link_id_columns = [field_name for field_name in fields_link_ids]
+link_id_columns = fields_link_ids.keys()
 
 
 #%% COLUMNS TOOLS
@@ -32,6 +35,14 @@ def add_the_amount_to_df(df):
         return (100*series.fillna(0)).abs().astype(int).astype(str)
     the_amounts = turn_amount_to_string(get_one_field(df, amount_field))
     assign_new_column(df, amount_name, the_amounts)
+
+    the_o_currency = get_one_field(df, o_currency_field).fillna('EUR')
+    assign_new_column(df, currency_name, the_o_currency)
+
+    the_o_amounts = (100 * get_one_field(df, o_amount_field).fillna(get_one_field(df, amount_field))).abs().astype(
+        int).astype(str)
+    assign_new_column(df, o_amount_name, the_o_amounts)
+
 
 
 def add_link_fields(df):
@@ -53,7 +64,7 @@ def add_link_ids(df, normal_sign, reverse_sign):
     add_the_sign_to_df(df, normal_sign, reverse_sign)
     add_the_amount_to_df(df)
     add_link_fields(df)
-    drop_columns(df, [sign_name, amount_name])
+    drop_columns(df, [sign_name, amount_name, o_amount_name])
 
 
 def remove_link_ids(df):
