@@ -10,8 +10,7 @@ name_field, account_field, amount_field = 'bank_name', 'account', 'amount'
 
 sep_link_ids = "__"
 
-
-#%% CALCULATED PARAMTERS
+# %% CALCULATED PARAMETERS
 
 fields_link_ids = dict({'link_id': [sign_name, amount_name, name_field, account_field],
                         'link_id_no_name': [sign_name, amount_name, account_field],

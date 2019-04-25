@@ -1,5 +1,5 @@
 from operations.data_operations import missing_valid_amount, missing_mandatory_field, get_bank_name_from_id
-from operations.df_operations import add_field_with_default_value, reverse_amount
+from operations.df_operations import add_field_with_default_value, reverse_amount, set_pandas_print_parameters
 from operations.types_operations import dict_to_df
 from parameters.param import auto_accounts
 from read_write.file_manager import add_new_data, remove_data_on_id, get_transaction_with_id
@@ -11,8 +11,10 @@ from web.status import success_response, is_successful, failure_response, merge_
 
 
 def create_manual_transaction(transaction_fields):
+    print(transaction_fields)
     df = dict_to_df(transaction_fields)
-
+    set_pandas_print_parameters()
+    print(df)
     valid_response = is_valid_transaction_df(df)
     if is_successful(valid_response):
         format_manual_transaction(df)

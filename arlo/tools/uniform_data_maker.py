@@ -8,7 +8,7 @@ from arlo.operations.df_operations import drop_other_columns, add_prefix_to_colu
     apply_function_to_field_overrule, add_field_with_default_value, sort_df_by_descending_date, \
     apply_function_to_field_no_overrule, assign_new_column, disable_chained_assigment_warning, \
     enable_chained_assigment_warning, assign_value_to_empty_in_existing_column, both_series_are_true, get_one_field, \
-    assign_value_to_loc
+    assign_value_to_loc, field_is, assign_value_to_bool_rows
 from arlo.operations.formatting import make_bank_name
 from arlo.operations.types_operations import encode_id
 from arlo.tools.autofill_df import add_new_column_autofilled, fill_existing_column_with_autofill
@@ -94,6 +94,10 @@ def format_manual_transaction(man_df):
     fill_existing_column_with_autofill(man_df, 'name', 'category')
 
     set_amounts_to_numeric(man_df, (man_df["isCredit"] == "true").all())
+
+    is_provision = field_is(man_df, 'isCredit', 'prov')
+    assign_value_to_bool_rows(man_df, is_provision, 'type', 'PROV')
+
     fill_columns_with_default_values(man_df)
 
     create_id(man_df)

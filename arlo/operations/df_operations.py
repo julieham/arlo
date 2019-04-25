@@ -22,13 +22,21 @@ def disable_chained_assigment_warning():
 
 #%% SORT & FILTER
 
+def field_is(df, field, value):
+    return df[field] == value
+
+
+def field_is_not(df, field, value):
+    return df[field] != value
+
+
 def sort_df_by_descending_date(df):
     df.sort_values("date", ascending=False, inplace=True)
     df.reset_index(drop=True, inplace=True)
 
 
 def filter_df_one_value(df, field_name, field_value):
-    return df[df[field_name] == field_value]
+    return df[field_is(df, field_name, field_value)]
 
 
 def filter_df_several_values(df, field_name, field_values):
@@ -36,7 +44,7 @@ def filter_df_several_values(df, field_name, field_values):
 
 
 def filter_df_not_this_value(df, field_name, field_value):
-    return df[df[field_name] != field_value]
+    return df[field_is_not(df, field_name, field_value)]
 
 
 def df_is_not_empty(df):
@@ -124,6 +132,12 @@ def assign_value_to_empty_in_existing_column(df, column_name, column_value):
     disable_chained_assigment_warning()
     indexes = pd.isnull(df[column_name])
     df.loc[indexes, column_name] = column_value
+    enable_chained_assigment_warning()
+
+
+def assign_value_to_bool_rows(df, bool_series, column_name, value):
+    disable_chained_assigment_warning()
+    df.loc[bool_series, column_name] = value
     enable_chained_assigment_warning()
 
 

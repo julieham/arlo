@@ -1,6 +1,6 @@
 import pandas as pd
 
-from arlo.operations.df_operations import df_is_not_empty, add_field_with_default_value
+from arlo.operations.df_operations import df_is_not_empty, add_field_with_default_value, filter_df_not_this_value
 from arlo.parameters.param import *
 from arlo.read_write.file_manager import read_data, add_new_data
 from arlo.tools.clean_lunchr import get_latest_lunchr
@@ -16,7 +16,6 @@ from web.status import is_successful, merge_status
 
 
 def refresh_data():
-
     print('REFRESHING ? ')
     if minutes_since_last_update() > delay_refresh_minutes:
         print('YES')
@@ -66,10 +65,12 @@ def get_recap_categories(cycle='now'):
 def get_balances(cycle='now'):
     cycle = decode_cycle(cycle)
     data = read_data()
-    data = data[['amount', 'account', 'cycle']]
+    data = data[['amount', 'account', 'cycle', 'type']]
 
     data_this_cycle = filter_df_on_cycle(data, cycle)
+
     valid_accounts = set(data_this_cycle['account'])
+    data = filter_df_not_this_value(data, 'type', 'PROV')
 
     data = data.groupby('account').apply(lambda x: x.sum(skipna=False))
     data_this_cycle = data_this_cycle.groupby('account').apply(lambda x: x.sum(skipna=False))
