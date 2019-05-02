@@ -4,7 +4,7 @@ from flask_restful import Resource
 from services.create_delete import create_manual_transaction, create_single_recurring, \
     create_name_references_if_possible, remove_data_on_id_if_possible, create_several_recurring, \
     create_transfer_if_possible
-from services.list import all_categories, all_accounts, all_cycles, all_recurring, data
+from services.list import all_categories, all_accounts, all_cycles, all_recurring, data, local_cycles
 from services.services import force_refresh, get_recap_categories, get_balances, split_transaction
 from services.set_fields import link_ids_if_possible, unlink_ids_if_possible, edit_transaction
 # %% CREATE
@@ -66,6 +66,13 @@ class GetAllCycles(Resource):
     @staticmethod
     def get():
         return json.loads(all_cycles())
+
+
+class GetLocalCycles(Resource):
+    @staticmethod
+    def get():
+        cycle = request.args.get('cycle')
+        return json.loads(local_cycles(cycle))
 
 
 class GetAccounts(Resource):
@@ -145,6 +152,7 @@ class EditTransaction(Resource):
     @staticmethod
     def post():
         json_input = request.json
+        print(json_input)
         result = edit_transaction(json_input)
         return result
 

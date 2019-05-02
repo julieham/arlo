@@ -10,6 +10,7 @@ ipa = Api(app)
 
 ipa.add_resource(GetRecurring, "/list/recurring")
 ipa.add_resource(GetAllCycles, "/list/cycle")
+ipa.add_resource(GetLocalCycles, "/list/local_cycle")
 ipa.add_resource(GetAccounts, "/list/account")
 ipa.add_resource(GetCategories, "/list/category")
 

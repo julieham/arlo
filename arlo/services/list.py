@@ -8,13 +8,13 @@ from parameters.param import column_names_for_front
 from read_write.file_manager import read_data
 from services.services import refresh_data
 from tools.autofill_manager import read_autofill_dictionary
-from tools.cycle_manager import cycle_now, filter_df_on_cycle
+from tools.cycle_manager import cycle_now, filter_df_on_cycle, cycles_before_after
 from tools.recap_by_category import get_budgets
 from tools.recurring_manager import get_possible_recurring
 from tools.uniform_data_maker import format_for_front
 
 
-def all_categories(cycle='now'):
+def all_categories(cycle='all'):
     budgets = get_budgets(cycle)
     return json.dumps(list(budgets.index) + ['Input'])
 
@@ -31,6 +31,10 @@ def all_cycles():
     now_index = set_cycles.index(cycle_now())
     selected_cycles = set_cycles[now_index - 3:now_index + 2] + two_next_cycles()
     return json.dumps(['Lagos19', 'Feb19', 'Mar19', 'Apr19', 'Pyr19', 'May19', 'Jun19', 'DK19', 'Cali19'])
+
+
+def local_cycles(cycle):
+    return json.dumps(cycles_before_after(cycle))
 
 
 def all_recurring():

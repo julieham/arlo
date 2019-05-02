@@ -18,7 +18,6 @@ def cycle_now():
 
 def decode_cycle(cycle):
     if cycle == 'now':
-        # if cycle in ['now', 'undefined']:
         return cycle_now()
     return cycle
 
@@ -35,6 +34,23 @@ def get_first_last_day_cycles():
     start_cycles = series_swap_index_values(d.drop_duplicates(keep='first')).rename('first')
     end_cycles = series_swap_index_values(d.drop_duplicates(keep='last')).rename('last')
     return concat_columns([start_cycles, end_cycles])
+
+
+def get_names_cycles_ordered():
+    d = read_autofill_dictionary(make_dictioname('date', 'cycle'))
+    start_cycles = series_swap_index_values(d.drop_duplicates(keep='first')).rename('first')
+    return start_cycles.index.tolist()
+
+
+def cycles_before_after(cycle):
+    cycle = decode_cycle(cycle)
+    cycle_names = get_names_cycles_ordered()
+    try:
+        index_cycle = cycle_names.index(cycle)
+    except ValueError:
+        return []
+    before_after = cycle_names[index_cycle - 1:index_cycle] + cycle_names[index_cycle + 1:index_cycle + 7]
+    return before_after
 
 
 def nb_days_in_cycle(cycle='now'):
