@@ -67,3 +67,8 @@ def layered_dict_to_df(payments):
 
 def encode_id(id_value):
     return hashlib.md5(id_value.encode()).hexdigest()
+
+
+def clean_parenthesis(name):
+    name = name.split(' (')
+    return name[0]

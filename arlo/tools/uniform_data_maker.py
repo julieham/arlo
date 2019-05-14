@@ -10,7 +10,7 @@ from arlo.operations.df_operations import drop_other_columns, add_prefix_to_colu
     enable_chained_assigment_warning, assign_value_to_empty_in_existing_column, both_series_are_true, get_one_field, \
     assign_value_to_loc, field_is, assign_value_to_bool_rows
 from arlo.operations.formatting import make_bank_name
-from arlo.operations.types_operations import encode_id
+from arlo.operations.types_operations import encode_id, clean_parenthesis
 from arlo.tools.autofill_df import add_new_column_autofilled, fill_existing_column_with_autofill
 from arlo.tools.cycle_manager import date_to_cycle
 from read_write.file_manager import default_value
@@ -96,10 +96,12 @@ def format_manual_transaction(man_df):
     set_amounts_to_numeric(man_df, (man_df["isCredit"] == "true").all())
 
     is_provision = field_is(man_df, 'isCredit', 'prov')
+
     assign_value_to_bool_rows(man_df, is_provision, 'type', 'PROV')
+    assign_value_to_bool_rows(man_df, is_provision, 'account', 'HB')
 
     fill_columns_with_default_values(man_df)
-
+    assign_value_to_bool_rows(man_df, man_df['type'] == 'PROV', 'bank_name', man_df['name'].apply(clean_parenthesis))
     create_id(man_df)
 
     drop_other_columns(man_df, arlo.parameters.param.column_names_stored)
