@@ -8,6 +8,8 @@ from arlo.operations.types_operations import layered_dict_to_df
 from arlo.parameters.credentials import login_lunchr
 from arlo.parameters.param import lunchr_url, lunchr_dictionary
 from arlo.tools.uniform_data_maker import format_lunchr_df
+from read_write.reader import empty_data_dataframe
+from web.status import success_response, failure_response, is_successful
 
 
 def get_token(login):
@@ -23,12 +25,18 @@ def get_token(login):
 def get_content_page_number(access_token, num_page):
     headers = {'authorization': 'Bearer ' + str(access_token), 'x-api-key': '9f93b63a760f915878da4f97d6a4c4eef16c6eb3'}
     response = requests.get(lunchr_url + '/api/v0/payments_history?page=' + str(num_page) + '&per=30', headers=headers)
-    return json.loads(response.content.decode('utf8'))
+    try:
+        return success_response(), json.loads(response.content.decode('utf8'))
+    except:
+        return failure_response('Lunchr refresh failed'), ''
+
+
 
 
 def how_many_pages(access_token):
-    content = get_content_page_number(access_token, 100000)
-    return content['pagination']['pages_count']
+    response, content = get_content_page_number(access_token, 100000)
+    return response, (content['pagination']['pages_count'] if is_successful(response) else 0)
+
 
 
 def extract_lunchr_refunds(transactions_list):
@@ -42,16 +50,21 @@ def extract_lunchr_refunds(transactions_list):
 
 
 def lunchr_df_page_num(access_token, num_page):
-    content = get_content_page_number(access_token, num_page)
+    response, content = get_content_page_number(access_token, num_page)
+    if not is_successful(response):
+        return response, empty_data_dataframe()
+
     payments = content['payments_history']
     payments = extract_lunchr_refunds(payments)
 
-    return layered_dict_to_df(payments)
+    return response, layered_dict_to_df(payments)
 
 
 def get_latest_lunchr():
     access_token = get_token(login_lunchr)
-    lunchr_df = lunchr_df_page_num(access_token, 0)
+    response, lunchr_df = lunchr_df_page_num(access_token, 0)
+    if not is_successful(response):
+        return empty_data_dataframe()
     drop_other_columns(lunchr_df, lunchr_dictionary.keys())
     format_lunchr_df(lunchr_df)
     account = list(lunchr_df['account'])[0]
@@ -62,7 +75,7 @@ def get_all_lunchr_data():
     access_token = get_token(login_lunchr)
     num_pages = how_many_pages(access_token)
 
-    all_content = [lunchr_df_page_num(access_token, page_num) for page_num in range(num_pages)]
+    all_content = [lunchr_df_page_num(access_token, page_num)[1] for page_num in range(num_pages)]
     all_data = concat_lines(all_content)
     format_lunchr_df(all_data)
 

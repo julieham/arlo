@@ -67,7 +67,7 @@ def find_matches_gone_newsettled(new, gone, link_name, links_to_add):
             drop_line_with_index(gone, index_gone)
             drop_line_with_index(data, index_gone)
             assign_value_to_loc(new, index_new_settled, 'replaces_a_pending', True)
-    save_data(data)
+            save_data(data)
 
 
 def recover_editable_fields(appeared_data, index_appeared, gone_data, index_gone):

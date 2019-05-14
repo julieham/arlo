@@ -30,7 +30,9 @@ def all_cycles():
     set_cycles = sorted_set(all_cycles_with_duplicates[::-1])
     now_index = set_cycles.index(cycle_now())
     selected_cycles = set_cycles[now_index - 3:now_index + 2] + two_next_cycles()
-    return json.dumps(['Lagos19', 'Feb19', 'Mar19', 'Apr19', 'Pyr19', 'May19', 'Jun19', 'DK19', 'Cali19'])
+    cycles = {'all_cycles': ['Lagos19', 'Feb19', 'Mar19', 'Apr19', 'Pyr19', 'May19', 'Jun19', 'DK19', 'Cali19'],
+              'current_cycle': 'May19'}
+    return json.dumps(cycles)
 
 
 def local_cycles(cycle):

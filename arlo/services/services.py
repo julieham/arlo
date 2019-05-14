@@ -43,7 +43,6 @@ def force_refresh():
     return status_n26
 
 
-
 def get_recap_categories(cycle='now'):
     data = read_data()
 

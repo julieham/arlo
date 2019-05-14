@@ -1,5 +1,5 @@
 from arlo.operations.df_operations import sort_df_by_descending_date, change_field_on_several_ids_to_value, \
-    concat_lines, null_value, filter_df_not_this_value
+    concat_lines, null_value, filter_df_not_this_value, df_is_not_empty
 from arlo.parameters.param import column_names_stored, directory, default_values
 from arlo.read_write.reader import read_df_file
 from arlo.read_write.writer import write_df_to_csv
@@ -66,8 +66,9 @@ def get_last_update_string():
 
 
 def add_new_data(new_data):
-    data = concat_lines([read_data(), new_data])
-    save_data(data)
+    if df_is_not_empty(new_data):
+        data = concat_lines([read_data(), new_data])
+        save_data(data)
 
 
 def get_field_data(field_name):
@@ -84,7 +85,11 @@ def write_dictionary_to_file(dictionary, filename):
 
 
 def remove_data_on_id(id_to_remove):
-    data = filter_df_not_this_value(read_data(), 'id', id_to_remove)
+    data = read_data()
+    print('size before removal : ', data.shape[0])
+    data = filter_df_not_this_value(data, 'id', id_to_remove)
+    print('removing this id :', id_to_remove)
+    print('size after removal : ', data.shape[0])
     save_data(data)
 
 
