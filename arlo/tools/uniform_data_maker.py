@@ -1,9 +1,8 @@
 from numpy import NaN
 
-import arlo.parameters.param
 from arlo.operations.data_operations import set_amounts_to_numeric
 from arlo.operations.date_operations import timestamp_to_datetime, string_to_datetime, angular_string_to_timestamp, \
-    datetime_to_timestamp
+    datetime_to_timestamp, now
 from arlo.operations.df_operations import drop_other_columns, add_prefix_to_column, remove_invalid_ids, \
     apply_function_to_field_overrule, add_field_with_default_value, sort_df_by_descending_date, \
     apply_function_to_field_no_overrule, assign_new_column, disable_chained_assigment_warning, \
@@ -11,9 +10,11 @@ from arlo.operations.df_operations import drop_other_columns, add_prefix_to_colu
     assign_value_to_loc, field_is, assign_value_to_bool_rows
 from arlo.operations.formatting import make_bank_name
 from arlo.operations.types_operations import encode_id, clean_parenthesis
+from arlo.parameters.param import *
 from arlo.tools.autofill_df import add_new_column_autofilled, fill_existing_column_with_autofill
 from arlo.tools.cycle_manager import date_to_cycle
 from read_write.file_manager import default_value
+from read_write.writer import write_df_to_csv
 
 
 def create_id(df):
@@ -29,20 +30,20 @@ def create_id(df):
 
 
 def fill_columns_with_default_values(df):
-    for field_name in arlo.parameters.param.default_values:
-        assign_value_to_empty_in_existing_column(df, field_name, arlo.parameters.param.default_values[field_name])
+    for field_name in default_values:
+        assign_value_to_empty_in_existing_column(df, field_name, default_values[field_name])
 
 
 def add_missing_columns(df):
-    for column_name in set(arlo.parameters.param.column_names_stored) - set(df.columns):
+    for column_name in set(column_names_stored) - set(df.columns):
         df.insert(0, column_name, NaN)
 
 
 def format_lunchr_df(lunchr_df):
-    lunchr_df.rename(columns=arlo.parameters.param.lunchr_dictionary, inplace=True)
+    lunchr_df.rename(columns=lunchr_dictionary, inplace=True)
     add_missing_columns(lunchr_df)
 
-    add_prefix_to_column(lunchr_df, arlo.parameters.param.lunchr_id_prefix, 'id')
+    add_prefix_to_column(lunchr_df, lunchr_id_prefix, 'id')
 
     remove_invalid_ids(lunchr_df)
 
@@ -52,7 +53,7 @@ def format_lunchr_df(lunchr_df):
 
     fill_columns_with_default_values(lunchr_df)
 
-    add_field_with_default_value(lunchr_df, 'account', arlo.parameters.param.lunchr_account_name)
+    add_field_with_default_value(lunchr_df, 'account', lunchr_account_name)
     add_field_with_default_value(lunchr_df, "originalAmount", '')
     add_field_with_default_value(lunchr_df, 'originalCurrency', '')
 
@@ -61,7 +62,7 @@ def format_lunchr_df(lunchr_df):
     add_new_column_autofilled(lunchr_df, 'lunchr_type', 'type', star_fill=True)
 
     sort_df_by_descending_date(lunchr_df)
-    drop_other_columns(lunchr_df, arlo.parameters.param.column_names_stored)
+    drop_other_columns(lunchr_df, column_names_stored)
 
 
 def format_n26_df(n26_df, account):
@@ -80,6 +81,9 @@ def format_n26_df(n26_df, account):
     add_new_column_autofilled(n26_df, 'bank_name', 'name', star_fill=True)
     add_new_column_autofilled(n26_df, 'name', 'category')
 
+    write_df_to_csv(n26_df,
+                    directory + 'data/input_n26/' + account + '_' + now().strftime('%Y_%m_%d_%a_%Hh%M') + '.csv')
+
     return n26_df
 
 
@@ -93,18 +97,22 @@ def format_manual_transaction(man_df):
     fill_existing_column_with_autofill(man_df, 'account', 'type')
     fill_existing_column_with_autofill(man_df, 'name', 'category')
 
-    set_amounts_to_numeric(man_df, (man_df["isCredit"] == "true").all())
+    set_amounts_to_numeric(man_df, (man_df["isCredit"].isin(["true", "deprov"]).all()))
 
     is_provision = field_is(man_df, 'isCredit', 'prov')
-
-    assign_value_to_bool_rows(man_df, is_provision, 'type', 'PROV')
+    assign_value_to_bool_rows(man_df, is_provision, 'type', provisions_type)
     assign_value_to_bool_rows(man_df, is_provision, 'account', 'HB')
 
+    is_deprov = field_is(man_df, 'isCredit', 'deprov')
+    assign_value_to_bool_rows(man_df, is_deprov, 'type', provisions_type)
+    assign_value_to_bool_rows(man_df, is_deprov, 'account', 'HB')
+
     fill_columns_with_default_values(man_df)
-    assign_value_to_bool_rows(man_df, man_df['type'] == 'PROV', 'bank_name', man_df['name'].apply(clean_parenthesis))
+    assign_value_to_bool_rows(man_df, is_provision, 'bank_name', man_df['name'].apply(clean_parenthesis))
+    assign_value_to_bool_rows(man_df, is_deprov, 'bank_name', man_df['name'].apply(clean_parenthesis))
     create_id(man_df)
 
-    drop_other_columns(man_df, arlo.parameters.param.column_names_stored)
+    drop_other_columns(man_df, column_names_stored)
 
 
 def format_recurring_transaction(rec_df):
@@ -122,7 +130,7 @@ def format_recurring_transaction(rec_df):
     fill_columns_with_default_values(rec_df)
 
     create_id(rec_df)
-    drop_other_columns(rec_df, arlo.parameters.param.column_names_stored)
+    drop_other_columns(rec_df, column_names_stored)
 
 
 def format_for_front(data):

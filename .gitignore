@@ -4,6 +4,7 @@ venv/*
 *.csv
 *credentials.py
 */sandbox/*
+arlo/log
 *.pyc
 .DS_Store
 arlo/data/backup

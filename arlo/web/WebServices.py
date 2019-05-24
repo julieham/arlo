@@ -7,8 +7,20 @@ from services.create_delete import create_manual_transaction, create_single_recu
 from services.list import all_categories, all_accounts, all_cycles, all_recurring, data, local_cycles
 from services.services import force_refresh, get_recap_categories, get_balances, split_transaction
 from services.set_fields import link_ids_if_possible, unlink_ids_if_possible, edit_transaction
+# %% LOGIN
+from tools.logging import warn
+
+
+class Login(Resource):
+    @staticmethod
+    def post():
+        user = request.json['user']
+        password = request.json['password']
+        # print('user : ' + user + ' ; password: ' + password)
+        return failure_response('')
+
 # %% CREATE
-from web.status import success_response
+from web.status import success_response, failure_response
 
 
 class AddNameReference(Resource):
@@ -152,7 +164,7 @@ class EditTransaction(Resource):
     @staticmethod
     def post():
         json_input = request.json
-        print(json_input)
+        warn('#edit_transaction\n' + str(json_input))
         result = edit_transaction(json_input)
         return result
 

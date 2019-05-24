@@ -1,6 +1,6 @@
 import pandas as pd
 
-from arlo.operations.df_operations import df_is_not_empty, add_field_with_default_value, filter_df_not_this_value
+from arlo.operations.df_operations import df_is_not_empty, add_field_with_default_value, filter_df_not_provisions
 from arlo.parameters.param import *
 from arlo.read_write.file_manager import read_data, add_new_data
 from arlo.tools.clean_lunchr import get_latest_lunchr
@@ -10,18 +10,19 @@ from arlo.tools.refresh import minutes_since_last_update, change_last_update_to_
 from parameters.credentials import login_N26
 from tools.backup_email import send_email_backup_data
 from tools.clean_n26 import get_last_transactions_as_df
+from tools.logging import info, warn
 from tools.merge_data import merge_with_data
 from tools.split import split_transaction_if_possible
 from web.status import is_successful, merge_status
 
 
 def refresh_data():
-    print('REFRESHING ? ')
+    warn('REFRESHING ? ')
     if minutes_since_last_update() > delay_refresh_minutes:
-        print('YES')
-        print(force_refresh())
+        warn('YES')
+        info(force_refresh())
     else:
-        print('NO')
+        warn('NO')
 
 
 def refresh_n26():
@@ -34,7 +35,7 @@ def refresh_n26():
 
 
 def force_refresh():
-    print('Refreshing')
+    info('Refreshing')
     send_email_backup_data()
     refresh_lunchr()
     status_n26 = refresh_n26()
@@ -69,7 +70,7 @@ def get_balances(cycle='now'):
     data_this_cycle = filter_df_on_cycle(data, cycle)
 
     valid_accounts = set(data_this_cycle['account'])
-    data = filter_df_not_this_value(data, 'type', 'PROV')
+    data = filter_df_not_provisions(data)
 
     data = data.groupby('account').apply(lambda x: x.sum(skipna=False))
     data_this_cycle = data_this_cycle.groupby('account').apply(lambda x: x.sum(skipna=False))

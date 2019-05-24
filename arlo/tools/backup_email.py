@@ -7,9 +7,10 @@ from email.mime.text import MIMEText
 
 from parameters.credentials import login_gmail
 from read_write.file_manager import get_last_update_string
+from tools.logging import error
 
 
-def send_email_backup_data(body='Hi Arlo, here is your data.', subject='-'):
+def send_email_backup_data(body='Hi Arlo, here is your data.', subject=' Refresh backup'):
 
     sender = login_gmail.username
     passwd = login_gmail.password
@@ -33,9 +34,12 @@ def send_email_backup_data(body='Hi Arlo, here is your data.', subject='-'):
     msg.attach(attachment)
 
     mailserver = smtplib.SMTP('smtp.gmail.com', 587)
-    mailserver.ehlo()
-    mailserver.starttls()
-    mailserver.ehlo()
-    mailserver.login(sender, passwd)
-    mailserver.sendmail(sender, sender, msg.as_string())
-    mailserver.quit()
+    try:
+        mailserver.ehlo()
+        mailserver.starttls()
+        mailserver.ehlo()
+        mailserver.login(sender, passwd)
+        mailserver.sendmail(sender, sender, msg.as_string())
+        mailserver.quit()
+    except smtplib.SMTPAuthenticationError:
+        error('#backup_mail authentication failed, refreshing anyway')

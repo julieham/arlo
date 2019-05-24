@@ -1,13 +1,14 @@
 from arlo.operations.df_operations import sort_df_by_descending_date, change_field_on_several_ids_to_value, \
-    concat_lines, null_value, filter_df_not_this_value, df_is_not_empty
-from arlo.parameters.param import column_names_stored, directory, default_values
+    concat_lines, null_value, filter_df_not_this_value, df_is_not_empty, set_pandas_print_parameters
+from arlo.parameters.param import column_names_stored, data_directory, default_values
 from arlo.read_write.reader import read_df_file
 from arlo.read_write.writer import write_df_to_csv
 from operations.date_operations import date_parser_for_reading
+from tools.logging import info, warn
 from web.status import success_response, failure_response
 
-data_file = directory + "data.csv"
-last_update_file = directory + "last_update.txt"
+data_file = data_directory + "data.csv"
+last_update_file = data_directory + "last_update.txt"
 
 
 def read_data():
@@ -67,6 +68,10 @@ def get_last_update_string():
 
 def add_new_data(new_data):
     if df_is_not_empty(new_data):
+        set_pandas_print_parameters()
+        warn('#add_data ------- Adding : -------')
+        info('\n' + str(new_data))
+        info('#add_data -----------------------------\n')
         data = concat_lines([read_data(), new_data])
         save_data(data)
 
@@ -86,10 +91,7 @@ def write_dictionary_to_file(dictionary, filename):
 
 def remove_data_on_id(id_to_remove):
     data = read_data()
-    print('size before removal : ', data.shape[0])
     data = filter_df_not_this_value(data, 'id', id_to_remove)
-    print('removing this id :', id_to_remove)
-    print('size after removal : ', data.shape[0])
     save_data(data)
 
 

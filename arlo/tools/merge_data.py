@@ -2,9 +2,10 @@ from arlo.operations.df_operations import filter_df_one_value, df_is_not_empty, 
     get_loc_df, drop_line_with_index, assign_value_to_loc, add_column_with_value, set_pandas_print_parameters, is_empty
 from arlo.tools.link_id import add_link_ids, fields_link_ids
 from parameters.param import editable_fields_to_recover
-from read_write.file_manager import read_data, save_data, default_value, add_new_data
+from read_write.file_manager import read_data, save_data, default_value, add_new_data, remove_data_on_id
 from read_write.reader import empty_data_dataframe
 from services.set_fields import link_ids_if_possible, all_transactions_linked_to_this, unlink_ids_if_possible
+from tools.logging import info, warn
 from tools.uniform_data_maker import add_pending_column, add_refund_column
 from web.status import is_successful
 
@@ -53,21 +54,26 @@ def find_matches_gone_newsettled(new, gone, link_name, links_to_add):
         match = filter_df_one_value(free_new, link_name, link_value)
 
         if df_is_not_empty(match):
+            set_pandas_print_parameters()
+
             index_new_settled = max(match.index)
+
             gone_transaction = gone.loc[index_gone]
             settled_transaction = new.loc[index_new_settled]
             set_pandas_print_parameters()
-            print('#merge_data ------- Identified : -------')
-            print(concat_lines([gone_transaction.to_frame().T, settled_transaction.to_frame().T]))
-            print('merge_data -----------------------------')
+            warn('\n#merge_data ------- Identified : -------')
+            info('\n' + str(concat_lines([gone_transaction.to_frame().T, settled_transaction.to_frame().T])))
+            info('merge_data -----------------------------\n')
 
             to_relink_after_gone_replaced_with_settled(data, gone_transaction, settled_transaction, links_to_add)
             data = read_data()
+            id_to_remove = gone.loc[index_gone, 'id']
             recover_editable_fields(new, index_new_settled, gone, index_gone)
+
             drop_line_with_index(gone, index_gone)
-            drop_line_with_index(data, index_gone)
+            remove_data_on_id(id_to_remove)
+            warn('#merge_data removing transaction' + '\n' + str(filter_df_one_value(data, 'id', id_to_remove)))
             assign_value_to_loc(new, index_new_settled, 'replaces_a_pending', True)
-            save_data(data)
 
 
 def recover_editable_fields(appeared_data, index_appeared, gone_data, index_gone):
@@ -80,7 +86,11 @@ def to_relink_after_gone_replaced_with_settled(data, gone_transaction, settled_t
     id_gone = gone_transaction['id']
     id_settled = settled_transaction['id']
     if link_gone != default_value('link'):
-        all_links = ','.join(all_transactions_linked_to_this(data, id_gone))
+        info('LINKED GONE TRANSACTION')
+        all_linked = all_transactions_linked_to_this(data, id_gone)
+        info('id gone : ' + str(id_gone))
+        info(all_linked)
+        all_links = ','.join(all_linked)
         unlink_ids_if_possible(id_gone)
         links_to_add.append(all_links.replace(id_gone, id_settled))
 
@@ -104,9 +114,11 @@ def identify_new_and_gone(data, latest_data, account):
 
 def delete_gone_from_data(data, gone):
     if df_is_not_empty(gone):
-        print('#merge_data NOT FOUND GONE TRANSACTIONS :')
+        warn('#merge_data NOT FOUND GONE TRANSACTIONS :')
+        info('\n#delete_data ------- Deleting : -------')
+        info('\n' + str(gone))
+        info('#delete_data -----------------------------\n')
         set_pandas_print_parameters()
-        print(gone)
         for index in gone.index:
             drop_line_with_index(data, index)
         save_data(data)

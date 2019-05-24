@@ -8,6 +8,8 @@ app = Flask(__name__)
 CORS(app)
 ipa = Api(app)
 
+ipa.add_resource(Login, "/login")
+
 ipa.add_resource(GetRecurring, "/list/recurring")
 ipa.add_resource(GetAllCycles, "/list/cycle")
 ipa.add_resource(GetLocalCycles, "/list/local_cycle")

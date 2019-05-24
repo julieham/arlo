@@ -1,7 +1,7 @@
-from arlo.parameters.param import directory
+from arlo.parameters.param import data_directory
 from arlo.read_write.reader import read_df_file
 
-recurring_filename = directory + 'recurring.txt'
+recurring_filename = data_directory + 'recurring.txt'
 
 
 def get_default_recurring():

@@ -17,12 +17,18 @@ immutable_values = dict({'category': {'Link'}})
 column_names_for_front = 'id,name,amount,category,pending,originalAmount,account' \
                          ',originalCurrency,method,cycle,linked,bank_name,date,manual'.split(',')
 
-directory = '/Users/julie/PycharmProjects/arlo/arlo/data/'
-budgets_filename = directory + 'budgets.csv'
+directory = '/Users/julie/PycharmProjects/arlo/arlo/'
+data_directory = directory + 'data/'
+log_directory = directory + 'log/'
+
+budgets_filename = data_directory + 'budgets.csv'
 
 auto_accounts = ['T_N26', 'J_N26', 'lunchr']
 
 editable_fields_to_recover = ['name', 'category', 'comment', 'cycle']
+
+provisions_type = 'PROV'
+deprovisions_type = 'UNPROV'
 
 
 #%% N26

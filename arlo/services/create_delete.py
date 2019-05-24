@@ -5,21 +5,22 @@ from parameters.param import auto_accounts
 from read_write.file_manager import add_new_data, remove_data_on_id, get_transaction_with_id
 from services.set_fields import rename, categorize, link_ids_if_possible
 from tools.autofill_manager import add_reference
+from tools.logging import warn, info
 from tools.recurring_manager import get_possible_recurring
 from tools.uniform_data_maker import format_manual_transaction, format_recurring_transaction, create_id
 from web.status import success_response, is_successful, failure_response, merge_status
 
 
 def create_manual_transaction(transaction_fields):
-    print(transaction_fields)
+    warn('#create_manual ---------------')
     df = dict_to_df(transaction_fields)
     set_pandas_print_parameters()
-    print(df)
+    info('\n' + str(df))
     valid_response = is_valid_transaction_df(df)
     if is_successful(valid_response):
         format_manual_transaction(df)
         add_new_data(df)
-    print(valid_response)
+    info('Response : ' + str(valid_response))
     return valid_response
 
 
@@ -33,7 +34,7 @@ def create_single_recurring(name, number=None):
     if is_successful(valid_response):
         format_recurring_transaction(df)
         if number:
-            df['name'] = str(number) + ' ' + df['name'] + 's'
+            df['name'] = (str(number) + ' ' + df['name'] + 's') if number > 1 else df['name']
             df['amount'] = int(number) * df['amount']
         add_new_data(df)
     return valid_response

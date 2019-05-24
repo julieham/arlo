@@ -1,8 +1,10 @@
+from logging import info
+
 import pandas as pd
 
 # %% PANDAS STUFF
 from operations.series_operations import get_first_value_from_series
-from parameters.param import immutable_values
+from parameters.param import immutable_values, provisions_type, deprovisions_type
 
 
 def set_pandas_print_parameters():
@@ -47,6 +49,14 @@ def filter_df_not_this_value(df, field_name, field_value):
     return df[field_is_not(df, field_name, field_value)]
 
 
+def filter_df_not_provisions(df):
+    return df[field_is_not(df, 'type', provisions_type)]
+
+
+def filter_df_only_provisions(df):
+    return df[field_is(df, 'type', deprovisions_type)]
+
+
 def df_is_not_empty(df):
     return df.shape[0] > 0
 
@@ -68,6 +78,7 @@ def remove_invalid_ids(df):
     df.drop(list(invalid_ids.index), inplace=True)
 
 
+
 #%% LOC
 
 
@@ -87,7 +98,8 @@ def add_prefix_to_column(df, prefix, column):
 
 def change_field_on_several_ids_to_value(df, ids, field_name, field_value, force_code=None):
     if force_code:
-        print('Editing immutable field', field_name, 'for reason :', force_code)
+        info(
+            'Editing immutable field ' + field_name + ' for reason : ' + str(force_code) + ' on id :' + ' ; '.join(ids))
     if force_code not in ['unlink_ok', 'clean_ok']:
         ids = remove_immutable_ids(df, ids, field_name)
     df.loc[df['id'].isin(ids), [field_name]] = field_value

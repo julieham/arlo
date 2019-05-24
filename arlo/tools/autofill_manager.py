@@ -1,4 +1,4 @@
-from arlo.parameters.param import directory
+from arlo.parameters.param import data_directory
 from arlo.read_write.file_manager import read_series, write_dictionary_to_file
 from web.status import is_fail, success_response, is_successful, failure_response
 
@@ -17,7 +17,7 @@ def remove_star_fill(name):
 
 
 def _autofill_directory(filename):
-    return directory + 'autofill/' + filename + '.csv'
+    return data_directory + 'autofill/' + filename + '.csv'
 
 
 def series_dictioname(dictionary):
