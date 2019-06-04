@@ -1,5 +1,6 @@
 from arlo.operations.df_operations import filter_df_one_value, df_is_not_empty, concat_lines, both_series_are_true, \
-    get_loc_df, drop_line_with_index, assign_value_to_loc, add_column_with_value, set_pandas_print_parameters, is_empty
+    get_loc_df, drop_line_with_index, assign_value_to_loc, add_column_with_value, set_pandas_print_parameters, \
+    df_is_empty
 from arlo.tools.link_id import add_link_ids, fields_link_ids
 from parameters.param import editable_fields_to_recover
 from read_write.file_manager import read_data, save_data, default_value, add_new_data, remove_data_on_id
@@ -127,11 +128,11 @@ def delete_gone_from_data(data, gone):
 def process_gone_transactions(latest, account):
     data = read_data()
     new_data, gone_data = identify_new_and_gone(data, latest, account)
-    if is_empty(new_data):
+    if df_is_empty(new_data):
         delete_gone_from_data(data, gone_data)
         return
 
-    if is_empty(gone_data):
+    if df_is_empty(gone_data):
         add_new_data(new_data)
         return
 

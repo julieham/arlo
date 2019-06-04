@@ -4,7 +4,7 @@ import pandas as pd
 
 # %% PANDAS STUFF
 from operations.series_operations import get_first_value_from_series
-from parameters.param import immutable_values, provisions_type, deprovisions_type
+from parameters.param import immutable_values
 
 
 def set_pandas_print_parameters():
@@ -14,11 +14,11 @@ def set_pandas_print_parameters():
     pd.set_option("display.max_columns", 100)
 
 
-def enable_chained_assigment_warning():
+def enable_chained_assignment_warning():
     pd.set_option('mode.chained_assignment', 'warn')
 
 
-def disable_chained_assigment_warning():
+def disable_chained_assignment_warning():
     pd.set_option('mode.chained_assignment', None)
 
 
@@ -49,12 +49,8 @@ def filter_df_not_this_value(df, field_name, field_value):
     return df[field_is_not(df, field_name, field_value)]
 
 
-def filter_df_not_provisions(df):
-    return df[field_is_not(df, 'type', provisions_type)]
-
-
-def filter_df_only_provisions(df):
-    return df[field_is(df, 'type', deprovisions_type)]
+def filter_df_not_these_values(df, field_name, values):
+    return df[df[field_name].isin(values) == False]
 
 
 def df_is_not_empty(df):
@@ -67,9 +63,9 @@ def drop_other_columns(df, fields):
 
 
 def drop_columns(df, fields):
-    disable_chained_assigment_warning()
+    disable_chained_assignment_warning()
     df.drop(columns=fields, inplace=True)
-    enable_chained_assigment_warning()
+    enable_chained_assignment_warning()
 
 
 def remove_invalid_ids(df):
@@ -84,16 +80,16 @@ def remove_invalid_ids(df):
 
 def add_field_with_default_value(df, field, value):
     if df_is_not_empty(df):
-        disable_chained_assigment_warning()
+        disable_chained_assignment_warning()
         df[field] = value
-        enable_chained_assigment_warning()
+        enable_chained_assignment_warning()
 
 
 def add_prefix_to_column(df, prefix, column):
     if df_is_not_empty(df):
-        disable_chained_assigment_warning()
+        disable_chained_assignment_warning()
         df.loc[:, column] = prefix + df[column]
-        enable_chained_assigment_warning()
+        enable_chained_assignment_warning()
 
 
 def change_field_on_several_ids_to_value(df, ids, field_name, field_value, force_code=None):
@@ -107,18 +103,18 @@ def change_field_on_several_ids_to_value(df, ids, field_name, field_value, force
 
 def change_field_on_several_indexes_to_value(df, indexes, field_name, field_value, force_code=None):
     if df_is_not_empty(df) and len(indexes) > 0:
-        disable_chained_assigment_warning()
+        disable_chained_assignment_warning()
         if force_code == None:
             indexes = remove_immutable_indexes(df, indexes, field_name)
         df.loc[indexes, field_name] = field_value
-        enable_chained_assigment_warning()
+        enable_chained_assignment_warning()
 
 
 def change_field_on_single_id_to_value(df, id_value, field_name, field_value):
     if df_is_not_empty(df):
-        disable_chained_assigment_warning()
+        disable_chained_assignment_warning()
         df.loc[df['id'] == id_value, [field_name]] = field_value
-        enable_chained_assigment_warning()
+        enable_chained_assignment_warning()
 
 
 def extract_line_from_df(index, df):
@@ -129,28 +125,28 @@ def extract_line_from_df(index, df):
 
 def assign_new_column(df, column_name, column_content):
     if df_is_not_empty(df):
-        disable_chained_assigment_warning()
+        disable_chained_assignment_warning()
         df.loc[:, column_name] = column_content[:]
-        enable_chained_assigment_warning()
+        enable_chained_assignment_warning()
 
 
 def assign_content_to_existing_column(df, column_name, column_content, overrule=False):
-    disable_chained_assigment_warning()
+    disable_chained_assignment_warning()
     indexes = df.index if overrule else pd.isnull(df[column_name])
     df.loc[indexes, column_name] = column_content[indexes]
 
 
 def assign_value_to_empty_in_existing_column(df, column_name, column_value):
-    disable_chained_assigment_warning()
+    disable_chained_assignment_warning()
     indexes = pd.isnull(df[column_name])
     df.loc[indexes, column_name] = column_value
-    enable_chained_assigment_warning()
+    enable_chained_assignment_warning()
 
 
 def assign_value_to_bool_rows(df, bool_series, column_name, value):
-    disable_chained_assigment_warning()
+    disable_chained_assignment_warning()
     df.loc[bool_series, column_name] = value
-    enable_chained_assigment_warning()
+    enable_chained_assignment_warning()
 
 
 #%% ACCESSING GENERAL
@@ -248,9 +244,9 @@ def reverse_amount(df):
 
 
 def set_value_to_column(df, column_name, column_value):
-    disable_chained_assigment_warning()
+    disable_chained_assignment_warning()
     df.loc[:, column_name] = column_value
-    enable_chained_assigment_warning()
+    enable_chained_assignment_warning()
 
 
 def both_series_are_true(serie1, serie2):
@@ -258,9 +254,9 @@ def both_series_are_true(serie1, serie2):
 
 
 def assign_value_to_loc(df, index_loc, column_loc, value):
-    disable_chained_assigment_warning()
+    disable_chained_assignment_warning()
     df.loc[index_loc, column_loc] = value
-    enable_chained_assigment_warning()
+    enable_chained_assignment_warning()
 
 
 def get_loc_df(df, index, column_name):
@@ -268,16 +264,16 @@ def get_loc_df(df, index, column_name):
 
 
 def drop_line_with_index(df, index):
-    disable_chained_assigment_warning()
+    disable_chained_assignment_warning()
     df.drop(index, inplace=True)
-    enable_chained_assigment_warning()
+    enable_chained_assignment_warning()
 
 
 def add_column_with_value(df, column_name, column_value):
-    disable_chained_assigment_warning()
+    disable_chained_assignment_warning()
     df[column_name] = column_value
-    enable_chained_assigment_warning()
+    enable_chained_assignment_warning()
 
 
-def is_empty(df):
+def df_is_empty(df):
     return df.shape[0] == 0

@@ -6,11 +6,12 @@ from operations.series_operations import filter_series_on_value
 from operations.types_operations import sorted_set
 from parameters.param import column_names_for_front
 from read_write.file_manager import read_data
+from read_write.select_data import get_data_from_cycle
 from services.services import refresh_data
 from tools.autofill_manager import read_autofill_dictionary
-from tools.cycle_manager import cycle_now, filter_df_on_cycle, cycles_before_after
-from tools.recap_by_category import get_budgets
+from tools.cycle_manager import cycle_now, cycles_before_after
 from tools.recurring_manager import get_possible_recurring
+from tools.summary_by_field import get_budgets
 from tools.uniform_data_maker import format_for_front
 
 
@@ -47,10 +48,7 @@ def data(refresh=None, cycle="now"):
     if refresh:
         refresh_data()
 
-    data = read_data()
-    # TODO recup link disappearing transactions
+    this_cycle_data = get_data_from_cycle(cycle)
+    format_for_front(this_cycle_data)
 
-    data = filter_df_on_cycle(data, cycle)
-    format_for_front(data)
-
-    return select_columns(data, column_names_for_front).to_json(orient="records")
+    return select_columns(this_cycle_data, column_names_for_front).to_json(orient="records")

@@ -1,18 +1,32 @@
 from arlo.operations.df_operations import sort_df_by_descending_date, change_field_on_several_ids_to_value, \
-    concat_lines, null_value, filter_df_not_this_value, df_is_not_empty, set_pandas_print_parameters
-from arlo.parameters.param import column_names_stored, data_directory, default_values
+    concat_lines, null_value, df_is_not_empty, set_pandas_print_parameters, \
+    disable_chained_assignment_warning, filter_df_not_this_value
+from arlo.parameters.param import data_columns, data_directory, default_values, deposit_columns
 from arlo.read_write.reader import read_df_file
 from arlo.read_write.writer import write_df_to_csv
 from operations.date_operations import date_parser_for_reading
 from tools.logging import info, warn
 from web.status import success_response, failure_response
 
-data_file = data_directory + "data.csv"
+transactions_file = data_directory + "data.csv"
+provisions_file = data_directory + "provisions.csv"
 last_update_file = data_directory + "last_update.txt"
 
 
 def read_data():
-    return read_data_from_file(data_file)
+    return read_data_from_file(transactions_file)
+
+
+def save_data(data):
+    save_data_in_file(data, transactions_file)
+
+
+def read_deposit():
+    return read_data_from_file(provisions_file)
+
+
+def save_deposit(data):
+    save_deposit_in_file(data, provisions_file)
 
 
 def read_data_from_file(filename):
@@ -20,15 +34,20 @@ def read_data_from_file(filename):
     return data.dropna(how='all')
 
 
-def save_data(data):
-    save_data_in_file(data, data_file)
-
-
 def save_data_in_file(data, filename):
-    data.dropna(how='all', inplace=True)
-    data.drop_duplicates(inplace=True)
-    sort_df_by_descending_date(data)
-    write_df_to_csv(data[column_names_stored], filename, index=False)
+    save_df_in_file(data[data_columns], filename)
+
+
+def save_deposit_in_file(data, filename):
+    save_df_in_file(data[deposit_columns], filename)
+
+
+def save_df_in_file(df, filename):
+    disable_chained_assignment_warning()
+    df.dropna(how='all', inplace=True)
+    df.drop_duplicates(inplace=True)
+    sort_df_by_descending_date(df)
+    write_df_to_csv(df, filename, index=False)
 
 
 def set_field_to_value_on_ids(ids, field_name, field_value):
@@ -76,11 +95,6 @@ def add_new_data(new_data):
         save_data(data)
 
 
-def get_field_data(field_name):
-    data = read_data()
-    return data[field_name]
-
-
 def read_series(filename, parse_dates=False):
     return read_df_file(filename, sep=';', index_col=0, squeeze=True, parse_dates=parse_dates)
 
@@ -90,11 +104,5 @@ def write_dictionary_to_file(dictionary, filename):
 
 
 def remove_data_on_id(id_to_remove):
-    data = read_data()
-    data = filter_df_not_this_value(data, 'id', id_to_remove)
+    data = filter_df_not_this_value(read_data(), 'id', id_to_remove)
     save_data(data)
-
-
-def get_transaction_with_id(id_to_find):
-    data = read_data()
-    return data[data['id'] == id_to_find]

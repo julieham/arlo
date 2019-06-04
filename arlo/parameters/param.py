@@ -3,8 +3,10 @@ delay_refresh_minutes = 10
 mandatory_fields = ['name', 'account']
 no_recap_categories = ['link', 'Input']
 
-column_names_stored = 'name,amount,category,account,cycle,date,type,comment,' \
+data_columns = 'name,amount,category,account,cycle,date,type,comment,' \
                'bank_name,originalAmount,originalCurrency,id,link'.split(',')
+
+deposit_columns = 'name,amount,account,category,cycle,date,bank_name,id'.split(',')
 
 typed_columns = dict({'amount': float, 'originalAmount': float, 'date': 'datetime64[ns]'})
 

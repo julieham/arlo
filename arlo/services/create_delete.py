@@ -2,7 +2,8 @@ from operations.data_operations import missing_valid_amount, missing_mandatory_f
 from operations.df_operations import add_field_with_default_value, reverse_amount, set_pandas_print_parameters
 from operations.types_operations import dict_to_df
 from parameters.param import auto_accounts
-from read_write.file_manager import add_new_data, remove_data_on_id, get_transaction_with_id
+from read_write.file_manager import add_new_data, remove_data_on_id
+from read_write.select_data import get_transaction_with_id
 from services.set_fields import rename, categorize, link_ids_if_possible
 from tools.autofill_manager import add_reference
 from tools.logging import warn, info
