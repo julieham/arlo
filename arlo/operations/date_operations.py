@@ -1,3 +1,6 @@
+import datetime
+import time
+
 import pandas as pd
 
 
@@ -50,3 +53,10 @@ def two_next_cycles():
 
 def string_date_now():
     return date_today().strftime('%Y-%m-%d')
+
+
+def now_for_lunchr():
+    utc_offset_sec = time.altzone if time.localtime().tm_isdst else time.timezone
+    utc_offset = datetime.timedelta(seconds=-utc_offset_sec)
+    now = datetime.datetime.now() + datetime.timedelta(days=1)
+    return now.replace(microsecond=0, tzinfo=datetime.timezone(offset=utc_offset)).isoformat()
