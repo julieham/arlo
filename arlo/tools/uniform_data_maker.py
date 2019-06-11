@@ -1,3 +1,4 @@
+import pandas as pd
 from numpy import NaN
 
 from arlo.operations.data_operations import set_amounts_to_numeric
@@ -9,7 +10,7 @@ from arlo.operations.df_operations import drop_other_columns, add_prefix_to_colu
     enable_chained_assignment_warning, assign_value_to_empty_in_existing_column, both_series_are_true, get_one_field, \
     assign_value_to_loc
 from arlo.operations.formatting import make_bank_name
-from arlo.operations.types_operations import encode_id
+from arlo.operations.types_operations import encode_id, clean_parenthesis
 from arlo.parameters.param import *
 from arlo.tools.autofill_df import add_new_column_autofilled, fill_existing_column_with_autofill
 from arlo.tools.cycle_manager import date_to_cycle
@@ -34,14 +35,19 @@ def fill_columns_with_default_values(df):
         assign_value_to_empty_in_existing_column(df, field_name, default_values[field_name])
 
 
-def add_missing_columns(df):
+def add_missing_data_columns(df):
     for column_name in set(data_columns) - set(df.columns):
+        df.insert(0, column_name, NaN)
+
+
+def add_missing_deposit_columns(df):
+    for column_name in set(deposit_columns) - set(df.columns):
         df.insert(0, column_name, NaN)
 
 
 def format_lunchr_df(lunchr_df):
     lunchr_df.rename(columns=lunchr_dictionary, inplace=True)
-    add_missing_columns(lunchr_df)
+    add_missing_data_columns(lunchr_df)
 
     add_prefix_to_column(lunchr_df, lunchr_id_prefix, 'id')
 
@@ -71,7 +77,7 @@ def format_n26_df(n26_df, account):
     _remove_original_amount_when_euro(n26_df)
 
     add_field_with_default_value(n26_df, 'account', account)
-    add_missing_columns(n26_df)
+    add_missing_data_columns(n26_df)
 
     apply_function_to_field_overrule(n26_df, 'visibleTS', timestamp_to_datetime, destination='date')
     apply_function_to_field_overrule(n26_df, 'date', date_to_cycle, destination='cycle')
@@ -88,7 +94,7 @@ def format_n26_df(n26_df, account):
 
 
 def format_manual_transaction(man_df):
-    add_missing_columns(man_df)
+    add_missing_data_columns(man_df)
 
     apply_function_to_field_overrule(man_df, 'angular_date', angular_string_to_timestamp, destination='timestamp')
     apply_function_to_field_overrule(man_df, 'timestamp', timestamp_to_datetime, destination='date')
@@ -106,7 +112,7 @@ def format_manual_transaction(man_df):
 
 
 def format_recurring_transaction(rec_df):
-    add_missing_columns(rec_df)
+    add_missing_data_columns(rec_df)
     apply_function_to_field_overrule(rec_df, 'date', angular_string_to_timestamp, destination='timestamp')
     apply_function_to_field_overrule(rec_df, 'timestamp', timestamp_to_datetime, destination='date')
     apply_function_to_field_no_overrule(rec_df, 'date', date_to_cycle, destination='cycle')
@@ -121,6 +127,21 @@ def format_recurring_transaction(rec_df):
 
     create_id(rec_df)
     drop_other_columns(rec_df, data_columns)
+
+
+def format_deposit_df(dep_df):
+    add_missing_deposit_columns(dep_df)
+
+    add_field_with_default_value(dep_df, 'account', 'HB')
+    apply_function_to_field_overrule(dep_df, 'angular_date', angular_string_to_timestamp, destination='timestamp')
+    apply_function_to_field_overrule(dep_df, 'timestamp', timestamp_to_datetime, destination='date')
+    apply_function_to_field_no_overrule(dep_df, 'date', date_to_cycle, destination='cycle')
+    apply_function_to_field_overrule(dep_df, 'name', clean_parenthesis, destination='bank_name')
+
+    fill_existing_column_with_autofill(dep_df, 'name', 'category')
+
+    create_id(dep_df)
+    return dep_df[deposit_columns]
 
 
 def format_for_front(data):
@@ -162,3 +183,22 @@ def add_manual_column(data):
 
 def add_refund_column(data):
     assign_new_column(data, 'refund', _calculate_refund_column(data))
+
+
+def turn_deposit_data_into_df(deposit_data):
+    how_many = len(deposit_data) // 3
+    actives = [False for _ in range(how_many)]
+    amounts = [0 for _ in range(how_many)]
+    names = ['' for _ in range(how_many)]
+    ang_date = deposit_data['angular_date'] if deposit_data['angular_date'] else None
+    for key, item in deposit_data.items():
+        if key[:2] in ['na', 'ac', 'am']:
+            key_id = int(key.split('_')[1])
+            if key[0] == 'n':
+                names[key_id] = item if item else ""
+            elif key[:2] == 'ac':
+                actives[key_id] = item
+            else:
+                amounts[key_id] = item
+    deposit_df = pd.DataFrame({'amount': amounts, 'name': names, 'angular_date': ang_date})
+    return deposit_df[actives]

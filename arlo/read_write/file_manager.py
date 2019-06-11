@@ -10,6 +10,7 @@ from web.status import success_response, failure_response
 
 transactions_file = data_directory + "data.csv"
 provisions_file = data_directory + "provisions.csv"
+recurring_deposit_file = data_directory + "recurring_deposit.csv"
 last_update_file = data_directory + "last_update.txt"
 
 
@@ -40,6 +41,10 @@ def save_data_in_file(data, filename):
 
 def save_deposit_in_file(data, filename):
     save_df_in_file(data[deposit_columns], filename)
+
+
+def read_recurring_deposit():
+    return read_df_file(recurring_deposit_file)
 
 
 def save_df_in_file(df, filename):
@@ -93,6 +98,16 @@ def add_new_data(new_data):
         info('#add_data -----------------------------\n')
         data = concat_lines([read_data(), new_data])
         save_data(data)
+
+
+def add_new_deposit(new_dep):
+    if df_is_not_empty(new_dep):
+        set_pandas_print_parameters()
+        warn('#add_deposit ------- Adding DEPOSIT: -------')
+        info('\n' + str(new_dep))
+        info('#add_deposit -----------------------------\n')
+        deposit = concat_lines([read_deposit(), new_dep])
+        save_deposit(deposit)
 
 
 def read_series(filename, parse_dates=False):

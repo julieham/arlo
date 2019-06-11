@@ -5,7 +5,7 @@ from operations.df_operations import select_columns
 from operations.series_operations import filter_series_on_value
 from operations.types_operations import sorted_set
 from parameters.param import column_names_for_front
-from read_write.file_manager import read_data
+from read_write.file_manager import read_data, read_recurring_deposit
 from read_write.select_data import get_data_from_cycle
 from services.services import refresh_data
 from tools.autofill_manager import read_autofill_dictionary
@@ -52,3 +52,7 @@ def data(refresh=None, cycle="now"):
     format_for_front(this_cycle_data)
 
     return select_columns(this_cycle_data, column_names_for_front).to_json(orient="records")
+
+
+def all_deposit():
+    return read_recurring_deposit().to_json(orient="records")

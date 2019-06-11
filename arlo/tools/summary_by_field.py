@@ -31,6 +31,7 @@ def summary_on_field(data, field_name):
 
     return summary
 
+
 def get_budgets(cycle):
     budgets = read_df_file(budgets_filename, sep=';')
 

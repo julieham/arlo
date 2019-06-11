@@ -2,13 +2,14 @@ from operations.data_operations import missing_valid_amount, missing_mandatory_f
 from operations.df_operations import add_field_with_default_value, reverse_amount, set_pandas_print_parameters
 from operations.types_operations import dict_to_df
 from parameters.param import auto_accounts
-from read_write.file_manager import add_new_data, remove_data_on_id
+from read_write.file_manager import add_new_data, remove_data_on_id, add_new_deposit
 from read_write.select_data import get_transaction_with_id
 from services.set_fields import rename, categorize, link_ids_if_possible
 from tools.autofill_manager import add_reference
 from tools.logging import warn, info
 from tools.recurring_manager import get_possible_recurring
-from tools.uniform_data_maker import format_manual_transaction, format_recurring_transaction, create_id
+from tools.uniform_data_maker import format_manual_transaction, format_recurring_transaction, create_id, \
+    turn_deposit_data_into_df, format_deposit_df
 from web.status import success_response, is_successful, failure_response, merge_status
 
 
@@ -118,3 +119,12 @@ def _create_transfer(transaction, account_destination):
     u = link_ids_if_possible(','.join(ids_to_link))
     print(u)
     return u
+
+
+def create_deposit(deposit_data):
+    try:
+        deposit_df = turn_deposit_data_into_df(deposit_data)
+        add_new_deposit(format_deposit_df(deposit_df))
+        return success_response()
+    except:
+        return failure_response('Unknown deposit error')

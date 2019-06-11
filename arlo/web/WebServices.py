@@ -3,8 +3,8 @@ from flask_restful import Resource
 
 from services.create_delete import create_manual_transaction, create_single_recurring, \
     create_name_references_if_possible, remove_data_on_id_if_possible, create_several_recurring, \
-    create_transfer_if_possible
-from services.list import all_categories, all_accounts, all_cycles, all_recurring, data, local_cycles
+    create_transfer_if_possible, create_deposit
+from services.list import all_categories, all_accounts, all_cycles, all_recurring, data, local_cycles, all_deposit
 from services.services import force_refresh, get_recap_categories, get_balances, split_transaction
 from services.set_fields import link_ids_if_possible, unlink_ids_if_possible, edit_transaction
 # %% LOGIN
@@ -56,6 +56,14 @@ class CreateSeveralRecurring(Resource):
         return response
 
 
+class CreateDeposit(Resource):
+    @staticmethod
+    def post():
+        deposit_data = request.json
+        # TODO LESS DISGUSTING SHIT
+        return create_deposit(deposit_data)
+
+
 #%% LIST
 
 class ListOperations (Resource):
@@ -97,6 +105,12 @@ class GetCategories(Resource):
     @staticmethod
     def get():
         return json.loads(all_categories())
+
+
+class GetRecurringDeposit(Resource):
+    @staticmethod
+    def get():
+        return json.loads(all_deposit())
 
 
 #%% SERVICE
