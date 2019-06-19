@@ -1,5 +1,5 @@
 from arlo.operations.df_operations import df_is_not_empty, assign_new_column, concat_columns, empty_series, df_is_empty, \
-    filter_df_not_these_values, drop_columns, select_columns, concat_lines
+    filter_df_not_these_values, select_columns, concat_lines
 from arlo.operations.series_operations import positive_part, ceil_series, floor_series
 from arlo.parameters.param import budgets_filename, no_recap_categories, auto_accounts
 from arlo.read_write.reader import read_df_file
@@ -34,14 +34,11 @@ def summary_on_field(data, field_name):
 
 def get_budgets(cycle):
     budgets = read_df_file(budgets_filename, sep=';')
-
     if cycle != 'all':
         budgets = budgets[budgets['cycle'] == decode_cycle(cycle)]
 
     if df_is_not_empty(budgets):
-
         budgets = budgets.groupby('category').apply(sum)['amount']
-        budgets['Input'] = - sum(budgets)
         return budgets.rename('budget')
 
     return empty_series().rename('budget')
@@ -91,9 +88,7 @@ def recap_by_cat(cycle, round_it=True):
     assign_new_column(recap, 'remaining', floor_series(remaining) if round_it else remaining)
     assign_new_column(recap, 'spent', ceil_series(spent) if round_it else spent)
 
-    drop_columns(recap, ['amount', 'budget'])
-
-    return recap.to_json(orient="records")
+    return recap
 
 
 def recap_by_account(cycle):
@@ -112,7 +107,7 @@ def recap_by_account(cycle):
     return summary_on_field(all_outputs, field_name).round(decimals=2)
 
 
-def recap_balances(cycle):
+def recap_balances(cycle='now'):
     this_cycle = recap_by_account(cycle).rename(columns={'amount': 'this_cycle'})
     all_times = recap_by_account('all').rename(columns={'amount': 'all_times'})
 

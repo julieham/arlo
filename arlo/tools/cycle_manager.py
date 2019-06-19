@@ -54,8 +54,16 @@ def cycles_before_after(cycle):
 
 
 def nb_days_in_cycle(cycle='now'):
-    dates = read_autofill_dictionary(make_dictioname('date', 'cycle'))
-    cycle = decode_cycle(cycle)
-    dates_this_cycle = dates[dates == cycle]
-    total = dates_this_cycle.shape[0]
-    return sum(dates_this_cycle.index <= string_date_now()), total
+    all_days = all_days_in_cycle(cycle)
+    days_done = [date for date in all_days if date <= string_date_now()]
+    return dict({'days_done': len(days_done), 'all_days': len(all_days)})
+
+
+def all_days_in_cycle(cycle):
+    d = read_autofill_dictionary(make_dictioname('date', 'cycle'))
+    return d[d == decode_cycle(cycle)].index.tolist()
+
+
+def cycle_is_finished(cycle):
+    days = nb_days_in_cycle(cycle)
+    return days['days_done'] == days['all_days']

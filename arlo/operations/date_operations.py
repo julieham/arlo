@@ -17,6 +17,10 @@ def string_to_datetime(date):
     return pd.datetime.strptime(date[:19], '%Y-%m-%d %H:%M:%S')
 
 
+def short_string_to_datetime(date):
+    return pd.datetime.strptime(date, '%Y-%m-%d')
+
+
 def angular_string_to_timestamp(date):
     if pd.isnull(date):
         return get_timestamp_now()

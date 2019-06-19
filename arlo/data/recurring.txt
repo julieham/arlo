@@ -1,3 +1,4 @@
 name;amount;account
 Washer;4;Cash
 Dryer;1;Cash
+Weekly Parking;9;HB

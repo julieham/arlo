@@ -41,7 +41,7 @@ def force_refresh():
 
 
 def get_recap_categories(cycle='now'):
-    return recap_by_cat(cycle, False)
+    return recap_by_cat(cycle, False).drop(columns=['amount', 'budget']).to_json(orient="records")
 
 
 def get_balances(cycle='now'):

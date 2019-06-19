@@ -17,7 +17,7 @@ from tools.uniform_data_maker import format_for_front
 
 def all_categories(cycle='all'):
     budgets = get_budgets(cycle)
-    return json.dumps(list(budgets.index) + ['Input'])
+    return json.dumps(sorted(list(budgets.index) + ['Input']))
 
 
 def all_accounts():

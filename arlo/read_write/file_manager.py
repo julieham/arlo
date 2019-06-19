@@ -1,11 +1,10 @@
 from arlo.operations.df_operations import sort_df_by_descending_date, change_field_on_several_ids_to_value, \
-    concat_lines, null_value, df_is_not_empty, set_pandas_print_parameters, \
-    disable_chained_assignment_warning, filter_df_not_this_value
+    concat_lines, null_value, df_is_not_empty, disable_chained_assignment_warning, filter_df_not_this_value
 from arlo.parameters.param import data_columns, data_directory, default_values, deposit_columns
 from arlo.read_write.reader import read_df_file
 from arlo.read_write.writer import write_df_to_csv
 from operations.date_operations import date_parser_for_reading
-from tools.logging import info, warn
+from tools.logging import info, warn, info_df
 from web.status import success_response, failure_response
 
 transactions_file = data_directory + "data.csv"
@@ -92,9 +91,8 @@ def get_last_update_string():
 
 def add_new_data(new_data):
     if df_is_not_empty(new_data):
-        set_pandas_print_parameters()
         warn('#add_data ------- Adding : -------')
-        info('\n' + str(new_data))
+        info_df(new_data)
         info('#add_data -----------------------------\n')
         data = concat_lines([read_data(), new_data])
         save_data(data)
@@ -102,9 +100,8 @@ def add_new_data(new_data):
 
 def add_new_deposit(new_dep):
     if df_is_not_empty(new_dep):
-        set_pandas_print_parameters()
         warn('#add_deposit ------- Adding DEPOSIT: -------')
-        info('\n' + str(new_dep))
+        info_df(new_dep)
         info('#add_deposit -----------------------------\n')
         deposit = concat_lines([read_deposit(), new_dep])
         save_deposit(deposit)

@@ -1,6 +1,7 @@
 import logging
 
 from operations.date_operations import now
+from operations.df_operations import set_pandas_print_parameters
 from parameters.param import log_directory
 
 
@@ -11,6 +12,12 @@ def logging_filename():
 def info(text):
     logging.basicConfig(filename=logging_filename(), level=logging.DEBUG)
     logging.info(text)
+
+
+def info_df(df):
+    set_pandas_print_parameters()
+    logging.basicConfig(filename=logging_filename(), level=logging.DEBUG)
+    logging.info('\n' + str(df))
 
 
 def warn(text):

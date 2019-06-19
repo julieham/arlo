@@ -1,12 +1,12 @@
 from arlo.operations.df_operations import filter_df_one_value, df_is_not_empty, concat_lines, both_series_are_true, \
-    get_loc_df, drop_line_with_index, assign_value_to_loc, add_column_with_value, set_pandas_print_parameters, \
-    df_is_empty
+    get_loc_df, drop_line_with_index, assign_value_to_loc, add_column_with_value, \
+    df_is_empty, filter_df_not_this_value
 from arlo.tools.link_id import add_link_ids, fields_link_ids
 from parameters.param import editable_fields_to_recover
 from read_write.file_manager import read_data, save_data, default_value, add_new_data, remove_data_on_id
 from read_write.reader import empty_data_dataframe
 from services.set_fields import link_ids_if_possible, all_transactions_linked_to_this, unlink_ids_if_possible
-from tools.logging import info, warn
+from tools.logging import info, warn, info_df
 from tools.uniform_data_maker import add_pending_column, add_refund_column
 from web.status import is_successful
 
@@ -55,15 +55,12 @@ def find_matches_gone_newsettled(new, gone, link_name, links_to_add):
         match = filter_df_one_value(free_new, link_name, link_value)
 
         if df_is_not_empty(match):
-            set_pandas_print_parameters()
-
             index_new_settled = max(match.index)
 
             gone_transaction = gone.loc[index_gone]
             settled_transaction = new.loc[index_new_settled]
-            set_pandas_print_parameters()
             warn('\n#merge_data ------- Identified : -------')
-            info('\n' + str(concat_lines([gone_transaction.to_frame().T, settled_transaction.to_frame().T])))
+            info_df(concat_lines([gone_transaction.to_frame().T, settled_transaction.to_frame().T]))
             info('merge_data -----------------------------\n')
 
             to_relink_after_gone_replaced_with_settled(data, gone_transaction, settled_transaction, links_to_add)
@@ -117,9 +114,12 @@ def delete_gone_from_data(data, gone):
     if df_is_not_empty(gone):
         warn('#merge_data NOT FOUND GONE TRANSACTIONS :')
         info('\n#delete_data ------- Deleting : -------')
-        info('\n' + str(gone))
+        info_df(gone)
+        info('Filtering out PT transactions')
+        gone = filter_df_not_this_value(gone, 'type', 'PT')
+        info('\n#delete_data ------- TO DELETE : -------')
+        info_df(gone)
         info('#delete_data -----------------------------\n')
-        set_pandas_print_parameters()
         for index in gone.index:
             drop_line_with_index(data, index)
         save_data(data)
