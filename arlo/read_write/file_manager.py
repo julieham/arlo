@@ -1,6 +1,6 @@
 from arlo.operations.df_operations import sort_df_by_descending_date, change_field_on_several_ids_to_value, \
     concat_lines, null_value, df_is_not_empty, disable_chained_assignment_warning, filter_df_not_this_value
-from arlo.parameters.param import data_columns, data_directory, default_values, deposit_columns
+from arlo.parameters.param import data_columns_all, data_directory, default_values, deposit_columns_all
 from arlo.read_write.reader import read_df_file
 from arlo.read_write.writer import write_df_to_csv
 from operations.date_operations import date_parser_for_reading
@@ -35,11 +35,11 @@ def read_data_from_file(filename):
 
 
 def save_data_in_file(data, filename):
-    save_df_in_file(data[data_columns], filename)
+    save_df_in_file(data[data_columns_all], filename)
 
 
 def save_deposit_in_file(data, filename):
-    save_df_in_file(data[deposit_columns], filename)
+    save_df_in_file(data[deposit_columns_all], filename)
 
 
 def read_recurring_deposit():

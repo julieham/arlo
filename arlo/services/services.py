@@ -1,5 +1,5 @@
 from arlo.parameters.param import *
-from arlo.read_write.file_manager import add_new_data
+from arlo.read_write.file_manager import add_new_data, set_field_to_value_on_ids
 from arlo.tools.clean_lunchr import get_latest_lunchr
 from arlo.tools.refresh import minutes_since_last_update, change_last_update_to_now
 from parameters.credentials import login_N26
@@ -54,3 +54,7 @@ def refresh_lunchr():
 
 def split_transaction(fields):
     return split_transaction_if_possible(fields)
+
+
+def create_deposit_debit(id_tr, deposit_name):
+    set_field_to_value_on_ids([id_tr], deposit_name_col, deposit_name)

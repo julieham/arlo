@@ -211,8 +211,20 @@ def null_value():
     return pd.np.NaN
 
 
+def series_is_null(series):
+    return pd.isnull(series)
+
+
 def filter_df_on_id(data, id):
     return filter_df_one_value(data, 'id', id)
+
+
+def filter_df_on_bools(df, bools):
+    return df[bools == True]
+
+
+def column_is_null(df, field_name):
+    return series_is_null(get_one_field(df, field_name))
 
 
 def get_this_field_from_this_id(data, id, field):

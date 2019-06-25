@@ -70,7 +70,7 @@ def _split_transaction(the_input, refund_transaction):
     refund_id = get_first_value_from_series(refund_transaction['id'])
 
     all_transactions = concat_lines([split, refund_transaction])
-    set_value_to_column(all_transactions, 'comment', refund_id)
+    set_value_to_column(all_transactions, 'split_field', refund_id)
 
     add_new_data(all_transactions)
     link_ids_if_possible(refund_id + ',' + the_input['id'])

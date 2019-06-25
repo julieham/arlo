@@ -2,7 +2,7 @@ from arlo.operations.df_operations import filter_df_one_value, df_is_not_empty, 
     get_loc_df, drop_line_with_index, assign_value_to_loc, add_column_with_value, \
     df_is_empty, filter_df_not_this_value
 from arlo.tools.link_id import add_link_ids, fields_link_ids
-from parameters.param import editable_fields_to_recover
+from parameters.param import data_columns_to_recover
 from read_write.file_manager import read_data, save_data, default_value, add_new_data, remove_data_on_id
 from read_write.reader import empty_data_dataframe
 from services.set_fields import link_ids_if_possible, all_transactions_linked_to_this, unlink_ids_if_possible
@@ -75,7 +75,7 @@ def find_matches_gone_newsettled(new, gone, link_name, links_to_add):
 
 
 def recover_editable_fields(appeared_data, index_appeared, gone_data, index_gone):
-    for field in editable_fields_to_recover:
+    for field in data_columns_to_recover:
         assign_value_to_loc(appeared_data, index_appeared, field, get_loc_df(gone_data, index_gone, field))
 
 

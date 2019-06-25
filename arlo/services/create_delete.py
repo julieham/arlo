@@ -122,8 +122,11 @@ def _create_transfer(transaction, account_destination):
 
 def create_deposit(deposit_data):
     try:
+        print(deposit_data)
         deposit_df = turn_deposit_data_into_df(deposit_data)
+        print(deposit_df)
         add_new_deposit(format_deposit_df(deposit_df))
+        print('----')
         return success_response()
     except:
         return failure_response('Unknown deposit error')

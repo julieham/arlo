@@ -1,10 +1,11 @@
 from arlo.operations.df_operations import df_is_not_empty, assign_new_column, concat_columns, empty_series, df_is_empty, \
-    filter_df_not_these_values, select_columns, concat_lines
+    filter_df_not_these_values, select_columns, concat_lines, filter_df_on_bools, column_is_null
 from arlo.operations.series_operations import positive_part, ceil_series, floor_series
+from arlo.parameters.column_names import category_col, amount_euro_col, cycle_col, deposit_name_col
 from arlo.parameters.param import budgets_filename, no_recap_categories, auto_accounts
 from arlo.read_write.reader import read_df_file
-from read_write.select_data import get_data_from_cycle, get_deposit_debits_from_cycle
-from tools.cycle_manager import decode_cycle
+from arlo.read_write.select_data import get_data_from_cycle, get_deposit_debits_from_cycle
+from arlo.tools.cycle_manager import decode_cycle
 
 """
 def get_euro_amount(row, exchange_rate):
@@ -13,10 +14,12 @@ def get_euro_amount(row, exchange_rate):
     return row.loc['amount']
 """
 
+budgets_col = 'budget'
+
 
 def group_amount_by(df, field_name):
-    df = df[[field_name, 'amount']]
-    return df.groupby(field_name).apply(lambda x: x.sum(skipna=False))['amount']
+    df = df[[field_name, amount_euro_col]]
+    return df.groupby(field_name).apply(lambda x: x.sum(skipna=False))[amount_euro_col]
 
 
 def sum_no_skip_na(x):
@@ -26,8 +29,8 @@ def sum_no_skip_na(x):
 def summary_on_field(data, field_name):
     if df_is_empty(data):
         return empty_series()
-    data = data[["amount", field_name]]
-    summary = (data.groupby([field_name])).agg({"amount": sum_no_skip_na})
+    data = data[[amount_euro_col, field_name]]
+    summary = (data.groupby([field_name])).agg({amount_euro_col: sum_no_skip_na})
 
     return summary
 
@@ -35,13 +38,13 @@ def summary_on_field(data, field_name):
 def get_budgets(cycle):
     budgets = read_df_file(budgets_filename, sep=';')
     if cycle != 'all':
-        budgets = budgets[budgets['cycle'] == decode_cycle(cycle)]
+        budgets = budgets[budgets[cycle_col] == decode_cycle(cycle)]
 
     if df_is_not_empty(budgets):
-        budgets = budgets.groupby('category').apply(sum)['amount']
-        return budgets.rename('budget')
+        budgets = budgets.groupby(category_col).apply(sum)[amount_euro_col]
+        return budgets.rename(budgets_col)
 
-    return empty_series().rename('budget')
+    return empty_series().rename(budgets_col)
 
 
 """
@@ -62,9 +65,9 @@ def recap_by_cat(cycle, round_it=True):
     data = get_data_from_cycle(cycle)
     deposit = get_deposit_debits_from_cycle(cycle)
 
-    field_name = 'category'
-    selected_columns = ['amount', field_name]
-
+    field_name = category_col
+    selected_columns = [amount_euro_col, field_name]
+    data = filter_df_on_bools(data, column_is_null(data, deposit_name_col))
     data = select_columns(data, selected_columns)
     deposit = select_columns(deposit, selected_columns)
 
@@ -73,16 +76,16 @@ def recap_by_cat(cycle, round_it=True):
     if df_is_empty(all_output):
         return '{}'
 
-    spent = summary_on_field(all_output, 'category')
+    spent = summary_on_field(all_output, category_col)
     if df_is_empty(spent):
         return '{}'
 
     recap = concat_columns([spent, get_budgets(cycle)], keep_index_name=True).round(2).fillna(0).reset_index()
-    recap = filter_df_not_these_values(recap, 'category', no_recap_categories)
+    recap = filter_df_not_these_values(recap, category_col, no_recap_categories)
 
-    over = positive_part(- recap['amount'] - recap['budget'])
-    remaining = positive_part(recap['budget'] + recap['amount'])
-    spent = positive_part(- recap['amount'] - over)
+    over = positive_part(- recap[amount_euro_col] - recap[budgets_col])
+    remaining = positive_part(recap[budgets_col] + recap[amount_euro_col])
+    spent = positive_part(- recap[amount_euro_col] - over)
 
     assign_new_column(recap, 'over', ceil_series(over) if round_it else over)
     assign_new_column(recap, 'remaining', floor_series(remaining) if round_it else remaining)
@@ -102,7 +105,8 @@ def recap_by_account(cycle):
 
     if cycle != 'all':
         deposit = get_deposit_debits_from_cycle(cycle)
-        all_outputs = concat_lines([select_columns(deposit, selected_columns), all_outputs])
+        data = filter_df_on_bools(data, column_is_null(data, deposit_name_col))
+        all_outputs = concat_lines([select_columns(deposit, selected_columns), data])
 
     return summary_on_field(all_outputs, field_name).round(decimals=2)
 

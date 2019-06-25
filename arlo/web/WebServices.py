@@ -4,8 +4,9 @@ from flask_restful import Resource
 from services.create_delete import create_manual_transaction, create_single_recurring, \
     create_name_references_if_possible, remove_data_on_id_if_possible, create_several_recurring, \
     create_transfer_if_possible, create_deposit
-from services.list import all_categories, all_accounts, all_cycles, all_recurring, data, local_cycles, all_deposit
-from services.services import force_refresh, get_recap_categories, get_balances, split_transaction
+from services.list import all_categories, all_accounts, all_cycles, all_recurring, data, local_cycles, \
+    all_recurring_deposit, all_deposit_names
+from services.services import force_refresh, get_recap_categories, get_balances, split_transaction, create_deposit_debit
 from services.set_fields import link_ids_if_possible, unlink_ids_if_possible, edit_transaction
 # %% LOGIN
 from tools.logging import warn
@@ -64,6 +65,15 @@ class CreateDeposit(Resource):
         return create_deposit(deposit_data)
 
 
+class CreateDepositDebit(Resource):
+    @staticmethod
+    def post():
+        the_id = request.args.get('id')
+        the_deposit_name = request.args.get('deposit')
+        create_deposit_debit(the_id, the_deposit_name)
+        return success_response()
+
+
 #%% LIST
 
 class ListOperations (Resource):
@@ -110,7 +120,13 @@ class GetCategories(Resource):
 class GetRecurringDeposit(Resource):
     @staticmethod
     def get():
-        return json.loads(all_deposit())
+        return json.loads(all_recurring_deposit())
+
+
+class GetDepositNames(Resource):
+    @staticmethod
+    def get():
+        return all_deposit_names()
 
 
 #%% SERVICE
