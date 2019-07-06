@@ -1,11 +1,10 @@
 import json
 
-from operations.date_operations import two_next_cycles
 from operations.df_operations import select_columns
 from operations.series_operations import filter_series_on_value
-from operations.types_operations import sorted_set
+from parameters.column_names import deposit_name_col
 from parameters.param import data_columns_front
-from read_write.file_manager import read_data, read_recurring_deposit, read_deposit
+from read_write.file_manager import read_recurring_deposit, read_deposit_input
 from read_write.select_data import get_data_from_cycle
 from services.services import refresh_data
 from tools.autofill_manager import read_autofill_dictionary
@@ -26,18 +25,15 @@ def all_accounts():
 
 
 def all_cycles():
-    data = read_data().sort_values("date", ascending=False).reset_index(drop=True)
-    all_cycles_with_duplicates = list(data['cycle'])
-    set_cycles = sorted_set(all_cycles_with_duplicates[::-1])
-    now_index = set_cycles.index(cycle_now())
-    selected_cycles = set_cycles[now_index - 3:now_index + 2] + two_next_cycles()
-    cycles = {'all_cycles': ['Lagos19', 'Feb19', 'Mar19', 'Apr19', 'Pyr19', 'May19', 'Jun19', 'DK19', 'Cali19'],
-              'current_cycle': 'May19'}
+    cycle_today = cycle_now()
+    surrounding_cycles = cycles_before_after(cycle_today)
+    cycles = {'all_cycles': surrounding_cycles,
+              'current_cycle': cycle_today}
     return json.dumps(cycles)
 
 
 def local_cycles(cycle):
-    return json.dumps(cycles_before_after(cycle))
+    return json.dumps(cycles_before_after(cycle, exclude=True))
 
 
 def all_recurring():
@@ -59,4 +55,4 @@ def all_recurring_deposit():
 
 
 def all_deposit_names():
-    return sorted(set(read_recurring_deposit()['name']) | set(read_deposit()['bank_name']))
+    return sorted(set(read_recurring_deposit()['name']) | set(read_deposit_input()[deposit_name_col]))

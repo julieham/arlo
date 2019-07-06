@@ -6,10 +6,15 @@ from services.create_delete import create_manual_transaction, create_single_recu
     create_transfer_if_possible, create_deposit
 from services.list import all_categories, all_accounts, all_cycles, all_recurring, data, local_cycles, \
     all_recurring_deposit, all_deposit_names
-from services.services import force_refresh, get_recap_categories, get_balances, split_transaction, create_deposit_debit
+from services.services import force_refresh, get_recap_categories, get_balances, split_transaction, \
+    create_deposit_debit, get_state_deposit, bank_balances, cycle_balances
 from services.set_fields import link_ids_if_possible, unlink_ids_if_possible, edit_transaction
 # %% LOGIN
 from tools.logging import warn
+
+
+def make_this_amount_item(series):
+    return json.loads(series.rename_axis('description').reset_index().to_json(orient='records'))
 
 
 class Login(Resource):
@@ -84,6 +89,29 @@ class ListOperations (Resource):
         cycle = request.args.get('cycle')
         operations = data(cycle=cycle, refresh=refresh)
         return json.loads(operations)
+
+
+class AmountsDeposit(Resource):
+
+    @staticmethod
+    def get():
+        return make_this_amount_item(get_state_deposit())
+
+
+class AmountsBank(Resource):
+
+    @staticmethod
+    def get():
+        cycle = request.args.get('cycle')
+        return make_this_amount_item(bank_balances(cycle))
+
+
+class AmountsCycle(Resource):
+
+    @staticmethod
+    def get():
+        cycle = request.args.get('cycle')
+        return make_this_amount_item(cycle_balances(cycle))
 
 
 class GetRecurring(Resource):

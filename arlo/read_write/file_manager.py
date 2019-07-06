@@ -21,7 +21,7 @@ def save_data(data):
     save_data_in_file(data, transactions_file)
 
 
-def read_deposit():
+def read_deposit_input():
     return read_data_from_file(provisions_file)
 
 
@@ -103,7 +103,7 @@ def add_new_deposit(new_dep):
         warn('#add_deposit ------- Adding DEPOSIT: -------')
         info_df(new_dep)
         info('#add_deposit -----------------------------\n')
-        deposit = concat_lines([read_deposit(), new_dep])
+        deposit = concat_lines([read_deposit_input(), new_dep])
         save_deposit(deposit)
 
 

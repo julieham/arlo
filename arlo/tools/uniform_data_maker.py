@@ -3,7 +3,7 @@ from numpy import NaN
 
 from arlo.operations.data_operations import set_amounts_to_numeric
 from arlo.operations.date_operations import timestamp_to_datetime, string_to_datetime, angular_string_to_timestamp, \
-    datetime_to_timestamp, now
+    datetime_to_timestamp
 from arlo.operations.df_operations import drop_other_columns, add_prefix_to_column, remove_invalid_ids, \
     apply_function_to_field_overrule, add_field_with_default_value, sort_df_by_descending_date, \
     apply_function_to_field_no_overrule, assign_new_column, disable_chained_assignment_warning, \
@@ -15,7 +15,6 @@ from arlo.parameters.param import *
 from arlo.tools.autofill_df import add_new_column_autofilled, fill_existing_column_with_autofill
 from arlo.tools.cycle_manager import date_to_cycle
 from read_write.file_manager import default_value
-from read_write.writer import write_df_to_csv
 
 
 def create_id(df):
@@ -28,6 +27,7 @@ def create_id(df):
     df[id_col] += '*' + df[account_col]
     apply_function_to_field_overrule(df, id_col, encode_id)
     enable_chained_assignment_warning()
+
 
 
 def fill_columns_with_default_values(df):
@@ -87,9 +87,6 @@ def format_n26_df(n26_df, account):
     add_new_column_autofilled(n26_df, bank_name_col, name_col, star_fill=True)
     add_new_column_autofilled(n26_df, name_col, category_col)
 
-    write_df_to_csv(n26_df,
-                    directory + 'data/input_n26/' + account + '_' + now().strftime('%Y_%m_%d_%a_%Hh%M') + '.csv')
-
     return n26_df
 
 
@@ -136,7 +133,7 @@ def format_deposit_df(dep_df):
     apply_function_to_field_overrule(dep_df, 'angular_date', angular_string_to_timestamp, destination='timestamp')
     apply_function_to_field_overrule(dep_df, 'timestamp', timestamp_to_datetime, destination=date_col)
     apply_function_to_field_no_overrule(dep_df, date_col, date_to_cycle, destination=cycle_col)
-    apply_function_to_field_overrule(dep_df, name_col, clean_parenthesis, destination=bank_name_col)
+    apply_function_to_field_overrule(dep_df, name_col, clean_parenthesis, destination=deposit_name_col)
 
     fill_existing_column_with_autofill(dep_df, name_col, category_col)
 

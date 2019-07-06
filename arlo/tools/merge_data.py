@@ -1,6 +1,6 @@
 from arlo.operations.df_operations import filter_df_one_value, df_is_not_empty, concat_lines, both_series_are_true, \
     get_loc_df, drop_line_with_index, assign_value_to_loc, add_column_with_value, \
-    df_is_empty, filter_df_not_this_value
+    df_is_empty, filter_df_not_this_value, get_one_field, filter_df_not_these_values
 from arlo.tools.link_id import add_link_ids, fields_link_ids
 from parameters.param import data_columns_to_recover
 from read_write.file_manager import read_data, save_data, default_value, add_new_data, remove_data_on_id
@@ -110,7 +110,7 @@ def identify_new_and_gone(data, latest_data, account):
     return empty_data_dataframe(), empty_data_dataframe()
 
 
-def delete_gone_from_data(data, gone):
+def delete_gone_from_data(gone):
     if df_is_not_empty(gone):
         warn('#merge_data NOT FOUND GONE TRANSACTIONS :')
         info('\n#delete_data ------- Deleting : -------')
@@ -120,8 +120,7 @@ def delete_gone_from_data(data, gone):
         info('\n#delete_data ------- TO DELETE : -------')
         info_df(gone)
         info('#delete_data -----------------------------\n')
-        for index in gone.index:
-            drop_line_with_index(data, index)
+        data = filter_df_not_these_values(read_data(), 'id', get_one_field(gone, 'id'))
         save_data(data)
 
 
@@ -129,7 +128,7 @@ def process_gone_transactions(latest, account):
     data = read_data()
     new_data, gone_data = identify_new_and_gone(data, latest, account)
     if df_is_empty(new_data):
-        delete_gone_from_data(data, gone_data)
+        delete_gone_from_data(gone_data)
         return
 
     if df_is_empty(gone_data):
@@ -140,7 +139,7 @@ def process_gone_transactions(latest, account):
     for link_name in fields_link_ids:
         find_matches_gone_newsettled(new_data, gone_data, link_name, links_to_add)
     add_new_data(new_data)
-    delete_gone_from_data(data, gone_data)
+    delete_gone_from_data(gone_data)
     for link_ids in links_to_add:
         link_ids_if_possible(link_ids)
 

@@ -1,7 +1,7 @@
 from arlo.operations.df_operations import df_is_not_empty, assign_new_column, concat_columns, empty_series, df_is_empty, \
     filter_df_not_these_values, select_columns, concat_lines, filter_df_on_bools, column_is_null
 from arlo.operations.series_operations import positive_part, ceil_series, floor_series
-from arlo.parameters.column_names import category_col, amount_euro_col, cycle_col, deposit_name_col
+from arlo.parameters.column_names import category_col, amount_euro_col, cycle_col, deposit_name_col, account_col
 from arlo.parameters.param import budgets_filename, no_recap_categories, auto_accounts
 from arlo.read_write.reader import read_df_file
 from arlo.read_write.select_data import get_data_from_cycle, get_deposit_debits_from_cycle
@@ -72,7 +72,6 @@ def recap_by_cat(cycle, round_it=True):
     deposit = select_columns(deposit, selected_columns)
 
     all_output = concat_lines([data, deposit])
-
     if df_is_empty(all_output):
         return '{}'
 
@@ -95,8 +94,8 @@ def recap_by_cat(cycle, round_it=True):
 
 
 def recap_by_account(cycle):
-    field_name = 'account'
-    selected_columns = ['amount', field_name]
+    field_name = account_col
+    selected_columns = [amount_euro_col, field_name]
 
     cycle = decode_cycle(cycle)
     data = get_data_from_cycle(cycle)
@@ -105,15 +104,14 @@ def recap_by_account(cycle):
 
     if cycle != 'all':
         deposit = get_deposit_debits_from_cycle(cycle)
-        data = filter_df_on_bools(data, column_is_null(data, deposit_name_col))
-        all_outputs = concat_lines([select_columns(deposit, selected_columns), data])
+        all_outputs = concat_lines([select_columns(deposit, selected_columns), all_outputs])
 
     return summary_on_field(all_outputs, field_name).round(decimals=2)
 
 
 def recap_balances(cycle='now'):
-    this_cycle = recap_by_account(cycle).rename(columns={'amount': 'this_cycle'})
-    all_times = recap_by_account('all').rename(columns={'amount': 'all_times'})
+    this_cycle = recap_by_account(cycle).rename(columns={amount_euro_col: 'this_cycle'})
+    all_times = recap_by_account('all').rename(columns={amount_euro_col: 'all_times'})
 
     balances = concat_columns([this_cycle, all_times])
 

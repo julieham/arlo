@@ -22,6 +22,10 @@ ipa.add_resource(ListOperations, "/transactions")
 ipa.add_resource(GetRecap, "/recap")
 ipa.add_resource(GetBalances, "/balances")
 
+ipa.add_resource(AmountsDeposit, "/amounts/deposit")
+ipa.add_resource(AmountsBank, "/amounts/bank")
+ipa.add_resource(AmountsCycle, "/amounts/cycle")
+
 ipa.add_resource(RefreshOperations, "/refresh")
 
 ipa.add_resource(CreateManualTransaction, "/create/manual")

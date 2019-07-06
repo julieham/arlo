@@ -34,8 +34,8 @@ def datetime_to_timestamp(date):
     return date.timestamp()
 
 
-def time_since(date):
-    return now() - date
+def minutes_since(date):
+    return (now() - date).total_seconds() // 60
 
 
 def get_timestamp_now():

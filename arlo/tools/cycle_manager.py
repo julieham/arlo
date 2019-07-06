@@ -1,7 +1,10 @@
+import datetime
+
 from arlo.operations.date_operations import date_today, string_date_now
 from arlo.tools.autofill_manager import autofill_single_value, read_autofill_dictionary, make_dictioname
-from operations.df_operations import concat_columns
+from operations.df_operations import concat_columns, apply_function_to_field_overrule, filter_df_on_bools, get_one_field
 from operations.series_operations import series_swap_index_values
+from parameters.column_names import cycle_col
 
 source = 'date'
 destination = 'cycle'
@@ -38,19 +41,39 @@ def get_first_last_day_cycles():
 
 def get_names_cycles_ordered():
     d = read_autofill_dictionary(make_dictioname('date', 'cycle'))
-    start_cycles = series_swap_index_values(d.drop_duplicates(keep='first')).rename('first')
-    return start_cycles.index.tolist()
+    start_cycles = series_swap_index_values(d.drop_duplicates(keep='last')).rename('last')
+    return start_cycles.reset_index()[['cycle']]
 
 
-def cycles_before_after(cycle):
+def cycle_is_travel(cycle):
+    month_names_3_letters = [datetime.date(1900, j + 1, 1).strftime('%b') for j in range(12)]
+    cycle = decode_cycle(cycle)
+    return (len(cycle) != 5) or cycle[:3] not in month_names_3_letters or not cycle[-2:].isnumeric()
+
+
+def cycles_before_after(cycle, exclude=False):
     cycle = decode_cycle(cycle)
     cycle_names = get_names_cycles_ordered()
+    apply_function_to_field_overrule(cycle_names, cycle_col, cycle_is_travel, destination='travel')
+    travel_cycles = filter_df_on_bools(cycle_names, cycle_names['travel']).index.tolist()
+    life_cycles = filter_df_on_bools(cycle_names, cycle_names['travel'], keep=False).index.tolist()
+
     try:
-        index_cycle = cycle_names.index(cycle)
+        index_cycle = min(cycle_names[cycle_names[cycle_col] == cycle].index)
+
+        travel_past = [u for u in travel_cycles if u < index_cycle]
+        travel_future = [u for u in travel_cycles if u >= index_cycle]
+        life_past = [u for u in life_cycles if u < index_cycle]
+        life_future = [u for u in life_cycles if u >= index_cycle]
+
+        selected_indexes = sorted(travel_past[-2:] + travel_future + life_past[-3:] + life_future[:3])
+        selected_cycles = get_one_field(cycle_names.iloc[selected_indexes], cycle_col).tolist()
+        if exclude:
+            selected_cycles = [u for u in selected_cycles if u != cycle]
+        return selected_cycles
+
     except ValueError:
         return []
-    before_after = cycle_names[index_cycle - 1:index_cycle] + cycle_names[index_cycle + 1:index_cycle + 7]
-    return before_after
 
 
 def nb_days_in_cycle(cycle='now'):

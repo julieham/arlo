@@ -2,13 +2,15 @@ from arlo.parameters.param import *
 from arlo.read_write.file_manager import add_new_data, set_field_to_value_on_ids
 from arlo.tools.clean_lunchr import get_latest_lunchr
 from arlo.tools.refresh import minutes_since_last_update, change_last_update_to_now
+from operations.df_operations import select_columns
 from parameters.credentials import login_N26
+from read_write.select_data import get_deposit_input_and_output
 from tools.backup_email import send_email_backup_data
 from tools.clean_n26 import get_last_transactions_as_df
 from tools.logging import info, warn
 from tools.merge_data import merge_with_data
 from tools.split import split_transaction_if_possible
-from tools.summary_by_field import recap_by_cat, recap_balances
+from tools.summary_by_field import recap_by_cat, recap_balances, summary_on_field, recap_by_account
 from web.status import is_successful, merge_status
 
 
@@ -45,7 +47,17 @@ def get_recap_categories(cycle='now'):
 
 
 def get_balances(cycle='now'):
+    # TODO clean this out
     return recap_balances(cycle).to_json(orient="records")
+
+
+def cycle_balances(cycle):
+    return recap_by_account(cycle)
+
+
+def bank_balances(cycle):
+    # TODO select interesting accounts
+    return recap_by_account('all')
 
 
 def refresh_lunchr():
@@ -58,3 +70,11 @@ def split_transaction(fields):
 
 def create_deposit_debit(id_tr, deposit_name):
     set_field_to_value_on_ids([id_tr], deposit_name_col, deposit_name)
+    set_field_to_value_on_ids([id_tr], cycle_col, deposit_name_col)
+
+
+def get_state_deposit():
+    selected_columns = [deposit_name_col, amount_euro_col]
+
+    deposit = select_columns(get_deposit_input_and_output(), selected_columns)
+    return summary_on_field(deposit, deposit_name_col)

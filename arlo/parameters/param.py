@@ -18,7 +18,8 @@ data_columns_front = [id_col, name_col, amount_euro_col, category_col, pending_c
 
 data_columns_to_recover = [name_col, category_col, split_id_col, cycle_col, deposit_name_col]
 
-deposit_columns_all = [name_col, amount_euro_col, account_col, category_col, cycle_col, date_col, bank_name_col, id_col]
+deposit_columns_all = [name_col, amount_euro_col, account_col, category_col, cycle_col, date_col, deposit_name_col,
+                       id_col]
 
 typed_columns = dict({amount_euro_col: float, amount_orig_col: float, date_col: 'datetime64[ns]'})
 
@@ -61,7 +62,22 @@ lunchr_dictionary = dict({'created_at': date_col,
                           'name': bank_name_col,
                           'type':  'lunchr_type'})
 
+# %% BANKIN
+
+bankin_acc_name = 'Hello'
+hello_acc_id = '5470431'
+bankin_id_prefix = 'hello-' + hello_acc_id + '-'
+hello_type_trans = 'HB'
+
+bankin_dictionary = dict({'date': date_col,
+                          'description': bank_name_col,
+                          'id': id_col,
+                          'amount': amount_euro_col})
+
+
+
 # %% VALUES
 
 auto_accounts = [thomus_account, julie_account, lunchr_account_name]
 no_recap_categories = [link_category, input_category]
+minutes_valid_token = 60

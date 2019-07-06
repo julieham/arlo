@@ -8,7 +8,7 @@ from parameters.param import immutable_values
 
 
 def set_pandas_print_parameters():
-    desired_width = 10000
+    desired_width = 100000
     pd.set_option('display.width', desired_width)
     pd.np.set_printoptions(linewidth=desired_width)
     pd.set_option("display.max_columns", 100)
@@ -74,7 +74,6 @@ def remove_invalid_ids(df):
     df.drop(list(invalid_ids.index), inplace=True)
 
 
-
 #%% LOC
 
 
@@ -88,7 +87,7 @@ def add_field_with_default_value(df, field, value):
 def add_prefix_to_column(df, prefix, column):
     if df_is_not_empty(df):
         disable_chained_assignment_warning()
-        df.loc[:, column] = prefix + df[column]
+        df.loc[:, column] = prefix + df[column].astype(str)
         enable_chained_assignment_warning()
 
 
@@ -177,8 +176,8 @@ def result_function_applied_to_field(df, field_name, function_to_apply):
     return function_to_apply(df[field_name])
 
 
-def concat_lines(df_list, sort=False):
-    return pd.concat(df_list, axis=0, sort=sort, ignore_index=True)
+def concat_lines(df_list, sort=False, join='outer'):
+    return pd.concat(df_list, axis=0, sort=sort, ignore_index=True, join=join)
 
 
 def concat_columns(df_list, sort=False, keep_index_name=False):
@@ -219,8 +218,10 @@ def filter_df_on_id(data, id):
     return filter_df_one_value(data, 'id', id)
 
 
-def filter_df_on_bools(df, bools):
-    return df[bools == True]
+def filter_df_on_bools(df, bools, keep=True):
+    if keep is not True:
+        keep = False
+    return df[bools == keep]
 
 
 def column_is_null(df, field_name):
