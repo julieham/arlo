@@ -1,4 +1,4 @@
-from flask import json, request
+from flask import json, request, make_response
 from flask_restful import Resource
 
 from services.create_delete import create_manual_transaction, create_single_recurring, \
@@ -9,12 +9,17 @@ from services.list import all_categories, all_accounts, all_cycles, all_recurrin
 from services.services import force_refresh, get_recap_categories, get_balances, split_transaction, \
     create_deposit_debit, get_state_deposit, bank_balances, cycle_balances
 from services.set_fields import link_ids_if_possible, unlink_ids_if_possible, edit_transaction
-# %% LOGIN
+
 from tools.logging import warn
+from web.authentication import generate_new_token, ResourceWithAuth, login_is_valid
 
 
 def make_this_amount_item(series):
     return json.loads(series.rename_axis('description').reset_index().to_json(orient='records'))
+
+from web.status import success_response, failure_response
+
+# %% LOGIN
 
 
 class Login(Resource):
@@ -22,11 +27,12 @@ class Login(Resource):
     def post():
         user = request.json['user']
         password = request.json['password']
-        # print('user : ' + user + ' ; password: ' + password)
-        return failure_response('')
+        if login_is_valid(user, password):
+            token = generate_new_token()
+            return json.loads(json.dumps({'token': token}))
+        return failure_response(' - incorrect user or password')
 
 # %% CREATE
-from web.status import success_response, failure_response
 
 
 class AddNameReference(Resource):
@@ -114,7 +120,7 @@ class AmountsCycle(Resource):
         return make_this_amount_item(cycle_balances(cycle))
 
 
-class GetRecurring(Resource):
+class GetRecurring(ResourceWithAuth):
     @staticmethod
     def get():
         return all_recurring()

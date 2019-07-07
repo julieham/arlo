@@ -11,6 +11,7 @@ transactions_file = data_directory + "data.csv"
 provisions_file = data_directory + "provisions.csv"
 recurring_deposit_file = data_directory + "recurring_deposit.csv"
 last_update_file = data_directory + "last_update.txt"
+tokens_file = data_directory + "tokens.csv"
 
 
 def read_data():

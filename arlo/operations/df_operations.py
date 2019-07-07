@@ -4,6 +4,7 @@ import pandas as pd
 
 # %% PANDAS STUFF
 from operations.series_operations import get_first_value_from_series
+from parameters.column_names import date_col
 from parameters.param import immutable_values
 
 
@@ -33,7 +34,7 @@ def field_is_not(df, field, value):
 
 
 def sort_df_by_descending_date(df):
-    df.sort_values("date", ascending=False, inplace=True)
+    df.sort_values(date_col, ascending=False, inplace=True)
     df.reset_index(drop=True, inplace=True)
 
 
