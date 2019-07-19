@@ -30,15 +30,15 @@ def read_autofill_dictionary(dictioname):
     return read_series(_autofill_directory(dictioname))
 
 
-def autofill_series_with_series(source, dictionary, star_fill=False):
+def autofill_series_with_series(source, dictionary, star_fill=False, default_value='-'):
     dictionary.index = dictionary.index.str.upper()
-    default_fill = '**' + source.str.title() + star_fill_characters if star_fill else '-'
+    default_fill = '**' + source.str.title() + star_fill_characters if star_fill else default_value
     return source.str.upper().map(dictionary).fillna(default_fill)
 
 
-def _autofill_series(series, dictioname, star_fill=False):
+def _autofill_series(series, dictioname, star_fill=False, default_value='-'):
     dictionary = read_autofill_dictionary(dictioname)
-    return autofill_series_with_series(series, dictionary, star_fill=star_fill)
+    return autofill_series_with_series(series, dictionary, star_fill=star_fill, default_value=default_value)
 
 
 def _clean_dictionary(dictionary):

@@ -1,4 +1,4 @@
-from flask import json, request, make_response
+from flask import json, request
 from flask_restful import Resource
 
 from services.create_delete import create_manual_transaction, create_single_recurring, \
@@ -9,9 +9,8 @@ from services.list import all_categories, all_accounts, all_cycles, all_recurrin
 from services.services import force_refresh, get_recap_categories, get_balances, split_transaction, \
     create_deposit_debit, get_state_deposit, bank_balances, cycle_balances
 from services.set_fields import link_ids_if_possible, unlink_ids_if_possible, edit_transaction
-
 from tools.logging import warn
-from web.authentication import generate_new_token, ResourceWithAuth, login_is_valid
+from web.authentication import generate_new_token, login_is_valid
 
 
 def make_this_amount_item(series):
@@ -120,7 +119,7 @@ class AmountsCycle(Resource):
         return make_this_amount_item(cycle_balances(cycle))
 
 
-class GetRecurring(ResourceWithAuth):
+class GetRecurring(Resource):
     @staticmethod
     def get():
         return all_recurring()

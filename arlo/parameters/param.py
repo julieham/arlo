@@ -60,12 +60,13 @@ lunchr_dictionary = dict({'created_at': date_col,
                           'amount_value': amount_euro_col,
                           'transaction_number': id_col,
                           'name': bank_name_col,
-                          'type':  'lunchr_type'})
+                          'type': 'lunchr_type',
+                          'details': 'lunchr_details'})
 
 # %% BANKIN
 
 bankin_acc_name = 'Hello'
-hello_acc_id = '5470431'
+hello_acc_id = '15661423'
 bankin_id_prefix = 'hello-' + hello_acc_id + '-'
 hello_type_trans = 'HB'
 

@@ -4,16 +4,19 @@ from numpy import NaN
 from arlo.operations.data_operations import set_amounts_to_numeric
 from arlo.operations.date_operations import timestamp_to_datetime, string_to_datetime, angular_string_to_timestamp, \
     datetime_to_timestamp
-from arlo.operations.df_operations import drop_other_columns, add_prefix_to_column, remove_invalid_ids, \
+from arlo.operations.df_operations import drop_other_columns, remove_invalid_ids, \
     apply_function_to_field_overrule, add_field_with_default_value, sort_df_by_descending_date, \
-    apply_function_to_field_no_overrule, assign_new_column, disable_chained_assignment_warning, \
-    enable_chained_assignment_warning, assign_value_to_empty_in_existing_column, both_series_are_true, get_one_field, \
+    apply_function_to_field_no_overrule, disable_chained_assignment_warning, \
+    enable_chained_assignment_warning, assign_value_to_empty_in_existing_column, both_series_are_true, \
     assign_value_to_loc
 from arlo.operations.formatting import make_bank_name
 from arlo.operations.types_operations import encode_id, clean_parenthesis
 from arlo.parameters.param import *
 from arlo.tools.autofill_df import add_new_column_autofilled, fill_existing_column_with_autofill
 from arlo.tools.cycle_manager import date_to_cycle
+from operations.df_operations import get_one_field, filter_df_on_bools, reverse_amount, add_prefix_to_column, \
+    assign_new_column, concat_lines
+from parameters.column_names import type_trans_col, category_col, deposit_name_col
 from read_write.file_manager import default_value
 
 
@@ -27,7 +30,6 @@ def create_id(df):
     df[id_col] += '*' + df[account_col]
     apply_function_to_field_overrule(df, id_col, encode_id)
     enable_chained_assignment_warning()
-
 
 
 def fill_columns_with_default_values(df):
@@ -45,8 +47,17 @@ def add_missing_deposit_columns(df):
         df.insert(0, column_name, NaN)
 
 
+def lunchr_credit_card_amount(details):
+    if type(details) != list:
+        return 0
+    return sum(sub_transaction['amount'] * (sub_transaction['type'] == 'CREDIT_CARD') for sub_transaction in details)
+
+
 def format_lunchr_df(lunchr_df):
+
     lunchr_df.rename(columns=lunchr_dictionary, inplace=True)
+    apply_function_to_field_overrule(lunchr_df, 'lunchr_details', lunchr_credit_card_amount,
+                                     destination='credit_card_amount')
     add_missing_data_columns(lunchr_df)
 
     add_prefix_to_column(lunchr_df, lunchr_id_prefix, id_col)
@@ -68,7 +79,7 @@ def format_lunchr_df(lunchr_df):
     add_new_column_autofilled(lunchr_df, 'lunchr_type', 'type', star_fill=True)
 
     sort_df_by_descending_date(lunchr_df)
-    drop_other_columns(lunchr_df, data_columns_all)
+    drop_other_columns(lunchr_df, data_columns_all + ['credit_card_amount'])
 
 
 def format_n26_df(n26_df, account):
@@ -86,6 +97,7 @@ def format_n26_df(n26_df, account):
 
     add_new_column_autofilled(n26_df, bank_name_col, name_col, star_fill=True)
     add_new_column_autofilled(n26_df, name_col, category_col)
+    add_new_column_autofilled(n26_df, name_col, deposit_name_col, default_value=NaN)
 
     return n26_df
 
@@ -201,3 +213,29 @@ def turn_deposit_data_into_df(deposit_data):
                 amounts[key_id] = item
     deposit_df = pd.DataFrame({amount_euro_col: amounts, name_col: names, 'angular_date': ang_date})
     return deposit_df[actives]
+
+
+def process_lunchr_cb_transaction(lunchr_df):
+    is_split = get_one_field(lunchr_df, 'credit_card_amount') < 0
+    split_transactions = filter_df_on_bools(lunchr_df, is_split)
+    actual_transactions = filter_df_on_bools(lunchr_df, is_split)
+    regular_transactions = filter_df_on_bools(lunchr_df, is_split, keep=False)
+
+    refunds_transactions = filter_df_on_bools(lunchr_df, is_split)
+
+    reverse_amount(refunds_transactions)
+
+    add_prefix_to_column(split_transactions, 'FIC-', type_trans_col)
+    add_prefix_to_column(split_transactions, 'TOTAL-', 'id')
+    add_prefix_to_column(actual_transactions, 'REAL-', 'id')
+    add_prefix_to_column(refunds_transactions, 'REF-', 'id')
+
+    assign_new_column(refunds_transactions, 'type', 'TOTAL-FIC-')
+    assign_new_column(actual_transactions, 'amount',
+                      split_transactions['amount'] - split_transactions['credit_card_amount'])
+    assign_new_column(refunds_transactions, category_col, 'Lunchr Buffer')
+    assign_new_column(refunds_transactions, deposit_name_col, 'Lunchr Buffer')
+    assign_new_column(actual_transactions, category_col, 'Lunchr Buffer')
+    assign_new_column(actual_transactions, deposit_name_col, 'Lunchr Buffer')
+
+    return concat_lines([refunds_transactions, split_transactions, actual_transactions, regular_transactions])

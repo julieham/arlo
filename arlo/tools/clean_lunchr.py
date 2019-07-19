@@ -10,6 +10,7 @@ from arlo.parameters.param import lunchr_url, lunchr_dictionary
 from arlo.tools.uniform_data_maker import format_lunchr_df
 from operations.date_operations import now_for_lunchr
 from read_write.reader import empty_data_dataframe
+from tools.uniform_data_maker import process_lunchr_cb_transaction
 from web.status import success_response, failure_response, is_successful
 
 
@@ -63,5 +64,9 @@ def get_latest_lunchr():
     drop_other_columns(lunchr_df, lunchr_dictionary.keys())
     format_lunchr_df(lunchr_df)
     account = list(lunchr_df['account'])[0]
-    lunchr_new_data = remove_already_present_id(lunchr_df, account, limit=30)
-    return lunchr_new_data
+
+    lunchr_new_data = remove_already_present_id(lunchr_df, account, limit=90)
+
+    real_lunchr_df = process_lunchr_cb_transaction(lunchr_new_data)
+
+    return real_lunchr_df

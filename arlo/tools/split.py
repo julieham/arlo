@@ -2,7 +2,7 @@ from copy import deepcopy
 
 from operations.date_operations import datetime_to_timestamp, get_timestamp_now
 from operations.df_operations import filter_df_on_id, concat_lines, reverse_amount, assign_new_column, \
-    apply_function_to_field_overrule, set_value_to_column
+    apply_function_to_field_overrule, set_value_to_column, df_is_not_empty
 from operations.series_operations import get_first_value_from_series
 from read_write.file_manager import read_data, add_new_data
 from services.set_fields import link_ids_if_possible
@@ -11,10 +11,11 @@ from web.status import failure_response, success_response
 
 
 def make_refund_split_transaction(transaction):
-    reverse_amount(transaction)
-    assign_new_column(transaction, 'type', 'FIC')
-    apply_function_to_field_overrule(transaction, 'date', datetime_to_timestamp, destination='timestamp')
-    create_id(transaction)
+    if df_is_not_empty(transaction):
+        reverse_amount(transaction)
+        assign_new_column(transaction, 'type', 'FIC')
+        apply_function_to_field_overrule(transaction, 'date', datetime_to_timestamp, destination='timestamp')
+        create_id(transaction)
     return transaction
 
 

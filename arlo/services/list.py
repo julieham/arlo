@@ -5,7 +5,7 @@ from operations.series_operations import filter_series_on_value
 from parameters.column_names import deposit_name_col
 from parameters.param import data_columns_front
 from read_write.file_manager import read_recurring_deposit, read_deposit_input
-from read_write.select_data import get_data_from_cycle
+from read_write.select_data import get_data_this_cycle_not_deposit
 from services.services import refresh_data
 from tools.autofill_manager import read_autofill_dictionary
 from tools.cycle_manager import cycle_now, cycles_before_after
@@ -44,7 +44,7 @@ def data(refresh=None, cycle="now"):
     if refresh:
         refresh_data()
 
-    this_cycle_data = get_data_from_cycle(cycle)
+    this_cycle_data = get_data_this_cycle_not_deposit(cycle)
     format_for_front(this_cycle_data)
 
     return select_columns(this_cycle_data, data_columns_front).to_json(orient="records")

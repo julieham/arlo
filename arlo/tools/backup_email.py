@@ -22,16 +22,19 @@ def send_email_backup_data(body='Hi Arlo, here is your data.', subject=' Refresh
     msg['Subject'] = subject
     msg.attach(MIMEText(body))
 
-    attachment = './arlo/data/data.csv'
-    ctype, _ = mimetypes.guess_type(attachment)
-    maintype, subtype = ctype.split("/", 1)
-    fp = open(attachment, "rb")
-    attachment = MIMEBase(maintype, subtype)
-    attachment.set_payload(fp.read())
-    fp.close()
-    encoders.encode_base64(attachment)
-    attachment.add_header("Content-Disposition", "attachment", filename=name + '.csv')
-    msg.attach(attachment)
+    for filename in ['data', 'provisions']:
+        attachment = './arlo/data/' + filename + '.csv'
+        ctype, _ = mimetypes.guess_type(attachment)
+        maintype, subtype = ctype.split("/", 1)
+        fp = open(attachment, "rb")
+        attachment = MIMEBase(maintype, subtype)
+        attachment.set_payload(fp.read())
+        fp.close()
+        encoders.encode_base64(attachment)
+        attachment.add_header("Content-Disposition", "attachment", filename=filename + '_name' + '.csv')
+        msg.attach(attachment)
+
+
 
     mailserver = smtplib.SMTP('smtp.gmail.com', 587)
     try:

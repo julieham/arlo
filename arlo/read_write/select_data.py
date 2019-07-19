@@ -38,3 +38,9 @@ def get_deposit_input_and_output():
     deposit_input = read_deposit_input()
     deposit_output = get_deposit_output()
     return concat_lines([deposit_input, deposit_output], join='inner')
+
+
+def get_data_this_cycle_not_deposit(cycle):
+    data = get_data_from_cycle(cycle)
+    is_not_deposit = column_is_null(data, deposit_name_col)
+    return filter_df_on_bools(data, is_not_deposit, keep=True)
