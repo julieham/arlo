@@ -31,7 +31,7 @@ def send_email_backup_data(body='Hi Arlo, here is your data.', subject=' Refresh
         attachment.set_payload(fp.read())
         fp.close()
         encoders.encode_base64(attachment)
-        attachment.add_header("Content-Disposition", "attachment", filename=filename + '_name' + '.csv')
+        attachment.add_header("Content-Disposition", "attachment", filename=filename + '_' + name + '.csv')
         msg.attach(attachment)
 
 

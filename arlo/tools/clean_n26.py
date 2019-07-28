@@ -3,7 +3,7 @@ import requests
 from arlo.operations.types_operations import list_of_dict_to_df
 from arlo.parameters.param import n26_url
 from parameters.credentials import login_N26
-from parameters.param import n26_max_transactions_per_user
+from parameters.param import n26_fetched_transactions
 from read_write.reader import empty_data_dataframe
 from tools.uniform_data_maker import format_n26_df
 from web.status import failure_response, success_response
@@ -28,7 +28,7 @@ def get_balance(name):
     return req_balance.json()
 
 
-def get_last_transactions_as_df(name, limit=n26_max_transactions_per_user):
+def get_latest_n26(name, limit=n26_fetched_transactions):
     if name not in login_N26:
         return failure_response('Invalid name to log in to N26'), empty_data_dataframe()
     valid_token, access_token = get_token(name)

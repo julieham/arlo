@@ -10,9 +10,9 @@ from parameters.param import immutable_values
 
 def set_pandas_print_parameters():
     desired_width = 100000
-    pd.set_option('display.width', desired_width)
     pd.np.set_printoptions(linewidth=desired_width)
     pd.set_option("display.max_columns", 100)
+    pd.set_option('display.width', 2000)
 
 
 def enable_chained_assignment_warning():
@@ -291,3 +291,7 @@ def add_column_with_value(df, column_name, column_value):
 
 def df_is_empty(df):
     return df.shape[0] == 0
+
+
+def total_amount(df):
+    return sum(df['amount'])

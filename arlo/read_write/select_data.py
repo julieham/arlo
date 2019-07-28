@@ -1,5 +1,6 @@
-from operations.df_operations import filter_df_not_this_value, column_is_null, filter_df_on_bools, concat_lines
-from parameters.column_names import deposit_name_col
+from operations.df_operations import filter_df_not_this_value, column_is_null, filter_df_on_bools, concat_lines, \
+    filter_df_one_value, sort_df_by_descending_date
+from parameters.column_names import deposit_name_col, account_col
 from read_write.file_manager import read_data, read_deposit_input
 from tools.cycle_manager import filter_df_on_cycle
 
@@ -37,10 +38,16 @@ def get_deposit_output():
 def get_deposit_input_and_output():
     deposit_input = read_deposit_input()
     deposit_output = get_deposit_output()
-    return concat_lines([deposit_input, deposit_output], join='inner')
+    all_deposit = concat_lines([deposit_input, deposit_output], join='inner')
+    sort_df_by_descending_date(all_deposit)
+    return all_deposit
 
 
 def get_data_this_cycle_not_deposit(cycle):
     data = get_data_from_cycle(cycle)
     is_not_deposit = column_is_null(data, deposit_name_col)
     return filter_df_on_bools(data, is_not_deposit, keep=True)
+
+
+def get_data_this_account(account):
+    return filter_df_one_value(read_data(), account_col, account)

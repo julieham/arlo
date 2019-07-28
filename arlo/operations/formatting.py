@@ -20,8 +20,4 @@ def make_bank_name(row):
     merchant, partner, reference, trans_type = [row[u].strip() for u in ['merchantName', 'partnerName', 'referenceText', 'type']]
     if merchant:
         return merchant
-    if trans_type == 'DD':
-        return '#PRLV ' + partner
-    if reference:
-        return row['referenceText'] + ' #VIR'
-    return '#VIR ' + ['to ', 'from '][row['amount'] > 0] + partner
+    return (reference + (' (' + partner + ')') if partner else '').strip()

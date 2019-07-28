@@ -3,7 +3,7 @@ from numpy import NaN
 
 from arlo.operations.data_operations import set_amounts_to_numeric
 from arlo.operations.date_operations import timestamp_to_datetime, string_to_datetime, angular_string_to_timestamp, \
-    datetime_to_timestamp
+    datetime_to_timestamp, short_string_to_datetime
 from arlo.operations.df_operations import drop_other_columns, remove_invalid_ids, \
     apply_function_to_field_overrule, add_field_with_default_value, sort_df_by_descending_date, \
     apply_function_to_field_no_overrule, disable_chained_assignment_warning, \
@@ -54,8 +54,8 @@ def lunchr_credit_card_amount(details):
 
 
 def format_lunchr_df(lunchr_df):
-
     lunchr_df.rename(columns=lunchr_dictionary, inplace=True)
+
     apply_function_to_field_overrule(lunchr_df, 'lunchr_details', lunchr_credit_card_amount,
                                      destination='credit_card_amount')
     add_missing_data_columns(lunchr_df)
@@ -213,6 +213,72 @@ def turn_deposit_data_into_df(deposit_data):
                 amounts[key_id] = item
     deposit_df = pd.DataFrame({amount_euro_col: amounts, name_col: names, 'angular_date': ang_date})
     return deposit_df[actives]
+
+
+def bankin_name_to_type(name):
+    name = name.split(' ')
+    if name[0] == 'Virement':
+        return 'VIR'
+    if name[0] in ['Prlv', 'CB', 'Vir']:
+        return name[0].upper()
+    if name[0] == 'Retrait':
+        return 'CASH_W'
+    if name[0] == 'Rembourst':
+        return 'RBST'
+    return 'MISC'
+
+
+def clean_bankin_name(name):
+    expressions = ['Virement Faveur Tiers Vr. Permanent ', 'Virement Recu Tiers ', 'Retrait Dab ']
+    for expression in expressions:
+        if name[:len(expression)] == expression:
+            return name.replace(expression, '')
+
+    expression = 'Remise Cheques'
+    if name[:len(expression)] == expression:
+        return expression.strip()
+
+    if 'Vir' == name[:3]:
+        virement = name.split('/')
+        if len(virement) < 3:
+            return virement[0].strip()
+        motif, origin = (virement[1], virement[2]) if virement[1][:5].lower() == 'motif' else (virement[2], virement[1])
+        name = motif[6:].strip() + ' (' + origin.replace('de ', '').strip() + ')'
+    else:
+        expressions = ['Prlv Sepa ', 'CB ', ' Id Emetteur', ' Id', ' Paris', 'Rembourst Du ', 'Cart']
+        for exp in expressions:
+            name = name.replace(exp, '')
+
+    return name.strip()
+
+
+def format_bankin_df(bankin_df):
+    bankin_df.rename(columns=bankin_dictionary, inplace=True)
+
+    apply_function_to_field_overrule(bankin_df, bank_name_col, bankin_name_to_type, destination='type')
+
+    apply_function_to_field_overrule(bankin_df, bank_name_col, clean_bankin_name)
+    add_missing_data_columns(bankin_df)
+
+    add_prefix_to_column(bankin_df, bankin_id_prefix, id_col)
+
+    remove_invalid_ids(bankin_df)
+
+    apply_function_to_field_overrule(bankin_df, date_col, short_string_to_datetime)
+    apply_function_to_field_overrule(bankin_df, date_col, date_to_cycle, destination=cycle_col)
+    apply_function_to_field_overrule(bankin_df, bank_name_col, str.upper)
+
+    fill_columns_with_default_values(bankin_df)
+
+    add_field_with_default_value(bankin_df, account_col, bankin_acc_name)
+    add_field_with_default_value(bankin_df, amount_orig_col, '')
+    add_field_with_default_value(bankin_df, currency_orig_col, '')
+
+    add_new_column_autofilled(bankin_df, bank_name_col, name_col, star_fill=True)
+    add_new_column_autofilled(bankin_df, name_col, category_col)
+
+    sort_df_by_descending_date(bankin_df)
+    drop_other_columns(bankin_df, data_columns_all)
 
 
 def process_lunchr_cb_transaction(lunchr_df):

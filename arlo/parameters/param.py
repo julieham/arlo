@@ -39,7 +39,7 @@ budgets_filename = data_directory + 'budgets.csv'
 
 # %% DEPOSIT
 
-deposit_account = 'HB'
+deposit_account = 'Hello'
 
 #%% N26
 
@@ -47,7 +47,7 @@ julie_account = 'J_N26'
 thomus_account = 'T_N26'
 
 n26_url = 'https://api.tech26.de'
-n26_max_transactions_per_user = 200
+n26_fetched_transactions = 200
 
 
 #%% LUNCHR
@@ -68,7 +68,7 @@ lunchr_dictionary = dict({'created_at': date_col,
 bankin_acc_name = 'Hello'
 hello_acc_id = '15661423'
 bankin_id_prefix = 'hello-' + hello_acc_id + '-'
-hello_type_trans = 'HB'
+hello_fetched_transactions = 100
 
 bankin_dictionary = dict({'date': date_col,
                           'description': bank_name_col,

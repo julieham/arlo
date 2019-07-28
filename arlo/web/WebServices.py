@@ -1,14 +1,16 @@
-from flask import json, request
+from flask import json, request, make_response, jsonify
 from flask_restful import Resource
 
+from read_write.select_data import get_deposit_input_and_output
 from services.create_delete import create_manual_transaction, create_single_recurring, \
     create_name_references_if_possible, remove_data_on_id_if_possible, create_several_recurring, \
     create_transfer_if_possible, create_deposit
 from services.list import all_categories, all_accounts, all_cycles, all_recurring, data, local_cycles, \
     all_recurring_deposit, all_deposit_names
-from services.services import force_refresh, get_recap_categories, get_balances, split_transaction, \
-    create_deposit_debit, get_state_deposit, bank_balances, cycle_balances
+from services.services import force_refresh, get_recap_categories, split_transaction, \
+    create_deposit_debit, get_state_deposit, bank_balances, cycle_balances, get_transfers_to_do
 from services.set_fields import link_ids_if_possible, unlink_ids_if_possible, edit_transaction
+from tools.cycle_manager import filter_df_on_cycle
 from tools.logging import warn
 from web.authentication import generate_new_token, login_is_valid
 
@@ -16,7 +18,9 @@ from web.authentication import generate_new_token, login_is_valid
 def make_this_amount_item(series):
     return json.loads(series.rename_axis('description').reset_index().to_json(orient='records'))
 
-from web.status import success_response, failure_response
+
+from web.status import success_response
+
 
 # %% LOGIN
 
@@ -24,12 +28,13 @@ from web.status import success_response, failure_response
 class Login(Resource):
     @staticmethod
     def post():
-        user = request.json['user']
+        user = request.json['username']
         password = request.json['password']
         if login_is_valid(user, password):
             token = generate_new_token()
-            return json.loads(json.dumps({'token': token}))
-        return failure_response(' - incorrect user or password')
+            return json.loads(json.dumps({'username': user, 'token': token}))
+        return make_response(jsonify({'message': ' - authentication failed'}), 400)
+
 
 # %% CREATE
 
@@ -162,6 +167,14 @@ class GetDepositNames(Resource):
         return all_deposit_names()
 
 
+class GetDepositTransactions(Resource):
+    @staticmethod
+    def get():
+        u = get_deposit_input_and_output()
+        u = filter_df_on_cycle(u, 'Jul19')
+        return json.loads(u.to_json(orient="records"))
+
+
 #%% SERVICE
 
 class RefreshOperations(Resource):
@@ -170,6 +183,13 @@ class RefreshOperations(Resource):
     def get():
         result = force_refresh()
         return {"status": result}
+
+
+class Transfers(Resource):
+    @staticmethod
+    def get():
+        cycle = request.args.get('cycle')
+        return json.loads(json.dumps(get_transfers_to_do(cycle)))
 
 
 class GetRecap(Resource):
@@ -189,15 +209,6 @@ class TransferTransaction(Resource):
         account = request.args.get('account')
         create_transfer_if_possible(id_one_way, account)
         return success_response()
-
-
-class GetBalances(Resource):
-
-    @staticmethod
-    def get():
-        cycle = request.args.get('cycle')
-        balances = get_balances(cycle=cycle)
-        return json.loads(balances)
 
 
 #%% SET FIELDS

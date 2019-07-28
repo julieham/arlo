@@ -65,8 +65,7 @@ def get_latest_lunchr():
     format_lunchr_df(lunchr_df)
     account = list(lunchr_df['account'])[0]
 
-    lunchr_new_data = remove_already_present_id(lunchr_df, account, limit=90)
-
-    real_lunchr_df = process_lunchr_cb_transaction(lunchr_new_data)
+    lunchr_df = process_lunchr_cb_transaction(lunchr_df)
+    real_lunchr_df = remove_already_present_id(lunchr_df, account, limit=90)
 
     return real_lunchr_df

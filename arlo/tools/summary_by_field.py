@@ -1,8 +1,9 @@
 from arlo.operations.df_operations import df_is_not_empty, assign_new_column, concat_columns, empty_series, df_is_empty, \
-    filter_df_not_these_values, select_columns, concat_lines, filter_df_on_bools, column_is_null
+    filter_df_not_these_values, select_columns, concat_lines, filter_df_on_bools, column_is_null, \
+    filter_df_not_this_value
 from arlo.operations.series_operations import positive_part, ceil_series, floor_series
 from arlo.parameters.column_names import category_col, amount_euro_col, cycle_col, deposit_name_col, account_col
-from arlo.parameters.param import budgets_filename, no_recap_categories, auto_accounts
+from arlo.parameters.param import budgets_filename, no_recap_categories, deposit_account
 from arlo.read_write.reader import read_df_file
 from arlo.read_write.select_data import get_data_from_cycle, get_deposit_debits_from_cycle
 from arlo.tools.cycle_manager import decode_cycle
@@ -104,26 +105,11 @@ def recap_by_account(cycle):
 
     if cycle != 'all':
         deposit = get_deposit_debits_from_cycle(cycle)
-        all_outputs = concat_lines([select_columns(deposit, selected_columns), all_outputs])
+        deposit = filter_df_not_this_value(deposit, account_col, deposit_account)
+        all_outputs = concat_lines([deposit, data])
 
-    return summary_on_field(all_outputs, field_name).round(decimals=2)
+    return summary_on_field(select_columns(all_outputs, selected_columns), field_name).round(decimals=2)
 
-
-def recap_balances(cycle='now'):
-    this_cycle = recap_by_account(cycle).rename(columns={amount_euro_col: 'this_cycle'})
-    all_times = recap_by_account('all').rename(columns={amount_euro_col: 'all_times'})
-
-    balances = concat_columns([this_cycle, all_times])
-
-    valid_accounts = set(this_cycle.index)
-    balances = balances[balances.index.isin(valid_accounts)]
-
-    balances['manual'] = balances.index.isin(auto_accounts) == False
-    balances['currency'] = 'EUR'
-
-    balances.reset_index(inplace=True)
-    balances.rename(columns={'index': 'acc_name'}, inplace=True)
-    return balances
 
 
 """
