@@ -11,7 +11,7 @@ from tools.clean_n26 import get_latest_n26
 from tools.logging import info, warn
 from tools.merge_data import merge_with_data
 from tools.split import split_transaction_if_possible
-from tools.summary_by_field import recap_by_cat, summary_on_field, recap_by_account
+from tools.summary_by_field import recap_by_cat, group_by_field, recap_by_account
 from tools.transfers import balances_to_transfers, get_end_of_cycle_balances
 from web.status import is_successful, merge_status
 
@@ -83,4 +83,4 @@ def get_state_deposit():
     selected_columns = [deposit_name_col, amount_euro_col]
 
     deposit = select_columns(get_deposit_input_and_output(), selected_columns)
-    return summary_on_field(deposit, deposit_name_col)
+    return group_by_field(deposit, deposit_name_col)

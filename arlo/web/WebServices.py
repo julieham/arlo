@@ -1,10 +1,11 @@
 from flask import json, request, make_response, jsonify
 from flask_restful import Resource
 
+from parameters.param import deposit_type
 from read_write.select_data import get_deposit_input_and_output
 from services.create_delete import create_manual_transaction, create_single_recurring, \
     create_name_references_if_possible, remove_data_on_id_if_possible, create_several_recurring, \
-    create_transfer_if_possible, create_deposit
+    create_transfer_if_possible, create_deposit, remove_deposit_input_on_id_if_possible
 from services.list import all_categories, all_accounts, all_cycles, all_recurring, data, local_cycles, \
     all_recurring_deposit, all_deposit_names
 from services.services import force_refresh, get_recap_categories, split_transaction, \
@@ -255,6 +256,11 @@ class DeleteTransaction(Resource):
 
     @staticmethod
     def post():
-        id_to_delete = request.json['transaction_ids']
-        result = remove_data_on_id_if_possible(id_to_delete)
+        id_to_delete = request.args.get('id')
+        type_to_delete = request.args.get('type')
+        if type_to_delete == deposit_type:
+            result = remove_deposit_input_on_id_if_possible(id_to_delete)
+        else:
+            result = remove_data_on_id_if_possible(id_to_delete)
+
         return {"status": result}

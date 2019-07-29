@@ -1,9 +1,11 @@
 from arlo.operations.df_operations import sort_df_by_descending_date, change_field_on_several_ids_to_value, \
-    concat_lines, null_value, df_is_not_empty, disable_chained_assignment_warning, filter_df_not_this_value
-from arlo.parameters.param import data_columns_all, data_directory, default_values, deposit_columns_all
+    concat_lines, null_value, df_is_not_empty, disable_chained_assignment_warning, filter_df_not_this_value, \
+    add_column_with_value
+from arlo.parameters.param import data_columns_all, data_directory, default_values, deposit_columns_all, deposit_type
 from arlo.read_write.reader import read_df_file
 from arlo.read_write.writer import write_df_to_csv
 from operations.date_operations import date_parser_for_reading
+from parameters.column_names import type_trans_col
 from tools.logging import info, warn, info_df
 from web.status import success_response, failure_response
 
@@ -23,10 +25,12 @@ def save_data(data):
 
 
 def read_deposit_input():
-    return read_data_from_file(provisions_file)
+    deposit_input = read_data_from_file(provisions_file)
+    add_column_with_value(deposit_input, type_trans_col, deposit_type)
+    return deposit_input
 
 
-def save_deposit(data):
+def save_deposit_input(data):
     save_deposit_in_file(data, provisions_file)
 
 
@@ -105,7 +109,7 @@ def add_new_deposit(new_dep):
         info_df(new_dep)
         info('#add_deposit -----------------------------\n')
         deposit = concat_lines([read_deposit_input(), new_dep])
-        save_deposit(deposit)
+        save_deposit_input(deposit)
 
 
 def read_series(filename, parse_dates=False):
@@ -119,3 +123,8 @@ def write_dictionary_to_file(dictionary, filename):
 def remove_data_on_id(id_to_remove):
     data = filter_df_not_this_value(read_data(), 'id', id_to_remove)
     save_data(data)
+
+
+def remove_deposit_input_on_id(id_to_remove):
+    deposit_input = filter_df_not_this_value(read_deposit_input(), 'id', id_to_remove)
+    save_deposit_input(deposit_input)

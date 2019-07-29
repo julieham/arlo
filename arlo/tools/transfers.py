@@ -14,7 +14,7 @@ def get_poorest(balances):
 
 
 def create_transfer(amount, src, dest):
-    return [{'source': src, 'destination': dest, 'amount': amount}]
+    return [{'source': src, 'destination': dest, 'amount': round(amount, ndigits=2)}]
 
 
 def get_transfer_from_eco(balances):

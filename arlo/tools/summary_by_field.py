@@ -1,6 +1,6 @@
 from arlo.operations.df_operations import df_is_not_empty, assign_new_column, concat_columns, empty_series, df_is_empty, \
     filter_df_not_these_values, select_columns, concat_lines, filter_df_on_bools, column_is_null, \
-    filter_df_not_this_value
+    add_column_with_value, reverse_amount
 from arlo.operations.series_operations import positive_part, ceil_series, floor_series
 from arlo.parameters.column_names import category_col, amount_euro_col, cycle_col, deposit_name_col, account_col
 from arlo.parameters.param import budgets_filename, no_recap_categories, deposit_account
@@ -27,7 +27,7 @@ def sum_no_skip_na(x):
     return x.sum(skipna=False)
 
 
-def summary_on_field(data, field_name):
+def group_by_field(data, field_name):
     if df_is_empty(data):
         return empty_series()
     data = data[[amount_euro_col, field_name]]
@@ -76,7 +76,7 @@ def recap_by_cat(cycle, round_it=True):
     if df_is_empty(all_output):
         return '{}'
 
-    spent = summary_on_field(all_output, category_col)
+    spent = group_by_field(all_output, category_col)
     if df_is_empty(spent):
         return '{}'
 
@@ -101,38 +101,17 @@ def recap_by_account(cycle):
     cycle = decode_cycle(cycle)
     data = get_data_from_cycle(cycle)
 
-    all_outputs = select_columns(data, selected_columns)
-
     if cycle != 'all':
+        is_deposit = column_is_null(data, deposit_name_col) == False
+        deposit_transactions = filter_df_on_bools(data, is_deposit)
+
+        add_column_with_value(deposit_transactions, account_col, deposit_account)
+        reverse_amount(deposit_transactions)
+
+        data = select_columns(concat_lines([data, deposit_transactions]), selected_columns)
+
         deposit = get_deposit_debits_from_cycle(cycle)
-        deposit = filter_df_not_this_value(deposit, account_col, deposit_account)
-        all_outputs = concat_lines([deposit, data])
+        data = concat_lines([deposit, data])
 
-    return summary_on_field(select_columns(all_outputs, selected_columns), field_name).round(decimals=2)
-
-
-
-"""
-
-    valid_accounts = set(data_this_cycle['account'])
-
-    data = data.groupby('account').apply(lambda x: x.sum(skipna=False))
-    data_this_cycle = data_this_cycle.groupby('account').apply(lambda x: x.sum(skipna=False))
-
-    data["all_times"] = data["amount"]
-    data = data[["all_times"]]
-    if df_is_not_empty(data_this_cycle):
-        data_this_cycle["this_cycle"] = data_this_cycle[["amount"]]
-        data_this_cycle = data_this_cycle[["this_cycle"]]
-        balances = pd.concat([data[data.index.isin(valid_accounts)], data_this_cycle], axis=1, sort=False).fillna(0)
-    else:
-        balances = data
-        add_field_with_default_value(balances, "this_cycle", 0)
-
-    balances["currency"] = "EUR"
-    balances.reset_index(inplace=True)
-    balances['manual'] = balances['account'].isin(auto_accounts) == False
-    balances.rename(columns={'account': 'acc_name'}, inplace=True)
-
-    return balances.to_json(orient="records")
-"""
+    all_outputs = select_columns(data, selected_columns)
+    return group_by_field(all_outputs, field_name).round(decimals=2)
