@@ -8,3 +8,4 @@ arlo/log
 *.pyc
 .DS_Store
 arlo/data/backup
+last_update.txt
