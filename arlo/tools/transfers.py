@@ -42,7 +42,8 @@ def add_to_balance(balances, name, amount):
 
 
 def not_all_balances_are_zero(balances):
-    return set(balances.values()) != {0}
+    values = [round(bal, ndigits=2) for bal in balances.values()]
+    return set(values) != {0}
 
 
 def make_internal_transfer(balances):
@@ -56,7 +57,8 @@ def make_internal_transfer(balances):
 
 def balances_to_transfers(balances):
     transfers = []
-    transfers = transfers + get_transfer_from_eco(balances)
+    if not_all_balances_are_zero(balances):
+        transfers = transfers + get_transfer_from_eco(balances)
 
     while not_all_balances_are_zero(balances):
         transfers = transfers + make_internal_transfer(balances)
