@@ -1,12 +1,12 @@
 from arlo.operations.df_operations import df_is_not_empty, assign_new_column, concat_columns, empty_series, df_is_empty, \
     filter_df_not_these_values, select_columns, concat_lines, filter_df_on_bools, column_is_null, \
-    add_column_with_value, reverse_amount, empty_df
+    add_column_with_value, reverse_amount, empty_df, drop_columns
 from arlo.operations.series_operations import positive_part, ceil_series, floor_series
 from arlo.parameters.column_names import category_col, amount_euro_col, cycle_col, deposit_name_col, account_col
 from arlo.parameters.param import budgets_filename, no_recap_categories, deposit_account
 from arlo.read_write.reader import read_df_file
 from arlo.read_write.select_data import get_data_from_cycle, get_deposit_debits_from_cycle
-from arlo.tools.cycle_manager import decode_cycle
+from arlo.tools.cycle_manager import decode_cycle, nb_days_in_cycle, cycle_overview_to_cycle_progress
 
 """
 def get_euro_amount(row, exchange_rate):
@@ -91,6 +91,27 @@ def recap_by_cat(cycle, round_it=True):
     assign_new_column(recap, 'remaining', floor_series(remaining) if round_it else remaining)
     assign_new_column(recap, 'spent', ceil_series(spent) if round_it else spent)
 
+    return recap
+
+
+def get_category_groups(cycle):
+    days_in_cycle_overview = nb_days_in_cycle(cycle)
+    nb_days_this_cycle = days_in_cycle_overview['all_days']
+    nb_days_done_this_cycle = days_in_cycle_overview['days_done']
+    this_cycle_progress = cycle_overview_to_cycle_progress(days_in_cycle_overview)
+
+    recap = recap_by_cat(cycle)
+    if df_is_empty(recap):
+        return recap
+
+    recap['progress'] = (- 100 * recap['amount']).div(recap['budget'])  # prog.clip(upper=100, lower=0)
+    recap['authorized'] = recap['budget'] * this_cycle_progress / 100
+    recap['delta_money'] = ceil_series(- recap['amount'] - recap['authorized']).astype(int)
+    recap['delta_days'] = (recap['progress'] - this_cycle_progress) * nb_days_this_cycle / 100
+    recap['delta_days'] = ceil_series(recap['delta_days']).clip(upper=nb_days_this_cycle,
+                                                                lower=-nb_days_done_this_cycle).astype(int)
+    recap['progress'].clip(upper=100, lower=0, inplace=True)
+    drop_columns(recap, ['amount', 'budget', 'authorized'])
     return recap
 
 

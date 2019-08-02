@@ -82,6 +82,12 @@ def nb_days_in_cycle(cycle='now'):
     return dict({'days_done': len(days_done), 'all_days': len(all_days)})
 
 
+def cycle_overview_to_cycle_progress(overview):
+    if overview['all_days'] == 0:
+        return 100
+    return 100 * overview['days_done'] / overview['all_days']
+
+
 def all_days_in_cycle(cycle):
     d = read_autofill_dictionary(make_dictioname('date', 'cycle'))
     return d[d == decode_cycle(cycle)].index.tolist()
