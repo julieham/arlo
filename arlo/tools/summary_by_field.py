@@ -1,6 +1,6 @@
 from arlo.operations.df_operations import df_is_not_empty, assign_new_column, concat_columns, empty_series, df_is_empty, \
     filter_df_not_these_values, select_columns, concat_lines, filter_df_on_bools, column_is_null, \
-    add_column_with_value, reverse_amount
+    add_column_with_value, reverse_amount, empty_df
 from arlo.operations.series_operations import positive_part, ceil_series, floor_series
 from arlo.parameters.column_names import category_col, amount_euro_col, cycle_col, deposit_name_col, account_col
 from arlo.parameters.param import budgets_filename, no_recap_categories, deposit_account
@@ -74,11 +74,11 @@ def recap_by_cat(cycle, round_it=True):
 
     all_output = concat_lines([data, deposit])
     if df_is_empty(all_output):
-        return '{}'
+        return empty_df()
 
     spent = group_by_field(all_output, category_col)
     if df_is_empty(spent):
-        return '{}'
+        return empty_df()
 
     recap = concat_columns([spent, get_budgets(cycle)], keep_index_name=True).round(2).fillna(0).reset_index()
     recap = filter_df_not_these_values(recap, category_col, no_recap_categories)

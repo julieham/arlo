@@ -2,7 +2,7 @@ from arlo.parameters.param import *
 from arlo.read_write.file_manager import add_new_data, set_field_to_value_on_ids
 from arlo.tools.clean_lunchr import get_latest_lunchr
 from arlo.tools.refresh import minutes_since_last_update, change_last_update_to_now
-from operations.df_operations import select_columns
+from operations.df_operations import select_columns, drop_columns
 from parameters.credentials import login_N26
 from read_write.select_data import get_deposit_input_and_output
 from tools.backup_email import send_email_backup_data
@@ -51,7 +51,9 @@ def get_transfers_to_do(cycle):
 
 
 def get_recap_categories(cycle='now'):
-    return recap_by_cat(cycle, False).drop(columns=['amount', 'budget']).to_json(orient="records")
+    recap = recap_by_cat(cycle, False)
+    drop_columns(recap, ['amount', 'budget'])
+    return recap.to_json(orient="records")
 
 
 def cycle_balances(cycle):

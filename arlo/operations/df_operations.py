@@ -65,7 +65,7 @@ def drop_other_columns(df, fields):
 
 def drop_columns(df, fields):
     disable_chained_assignment_warning()
-    df.drop(columns=fields, inplace=True)
+    df.drop(columns=list(set(fields) & set(df.columns)), inplace=True)
     enable_chained_assignment_warning()
 
 
@@ -205,6 +205,10 @@ def apply_function_to_field_no_overrule(df, field, function_to_apply, destinatio
 
 def empty_series():
     return pd.Series()
+
+
+def empty_df():
+    return pd.DataFrame()
 
 
 def null_value():

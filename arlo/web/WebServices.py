@@ -11,7 +11,6 @@ from services.list import all_categories, all_accounts, all_cycles, all_recurrin
 from services.services import force_refresh, get_recap_categories, split_transaction, \
     create_deposit_debit, get_state_deposit, bank_balances, cycle_balances, get_transfers_to_do
 from services.set_fields import link_ids_if_possible, unlink_ids_if_possible, edit_transaction
-from tools.cycle_manager import filter_df_on_cycle
 from tools.logging import warn
 from web.authentication import generate_new_token, login_is_valid
 
@@ -171,9 +170,7 @@ class GetDepositNames(Resource):
 class GetDepositTransactions(Resource):
     @staticmethod
     def get():
-        u = get_deposit_input_and_output()
-        u = filter_df_on_cycle(u, 'Jul19')
-        return json.loads(u.to_json(orient="records"))
+        return json.loads(get_deposit_input_and_output().to_json(orient="records"))
 
 
 #%% SERVICE
