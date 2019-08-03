@@ -2,7 +2,7 @@ from arlo.operations.df_operations import filter_df_one_value, df_is_not_empty, 
     get_loc_df, drop_line_with_index, assign_value_to_loc, add_column_with_value, \
     df_is_empty, filter_df_not_this_value, get_one_field, filter_df_not_these_values
 from arlo.tools.link_id import add_link_ids, fields_link_ids
-from parameters.param import data_columns_to_recover
+from parameters.param import data_columns_to_recover, deposit_name_col, cycle_col
 from read_write.file_manager import read_data, save_data, default_value, add_new_data, remove_data_on_id
 from read_write.reader import empty_data_dataframe
 from services.set_fields import link_ids_if_possible, all_transactions_linked_to_this, unlink_ids_if_possible
@@ -24,7 +24,11 @@ def get_refund_transactions(df):
 def find_matches_pending_refunds(pending, refunds, link_name):
     for index_refund in refunds.index.tolist()[::-1]:
         link_value = get_loc_df(refunds, index_refund, link_name)
+        deposit_value = get_loc_df(refunds, index_refund, deposit_name_col)
+        cycle_value = get_loc_df(refunds, index_refund, cycle_col)
         match = filter_df_one_value(pending, link_name, link_value)
+        match = filter_df_one_value(match, deposit_name_col, deposit_value)
+        match = filter_df_one_value(match, cycle_col, cycle_value)
 
         if df_is_not_empty(match):
             index_pending = max(match.index)
