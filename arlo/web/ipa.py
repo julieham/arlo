@@ -21,6 +21,7 @@ ipa.add_resource(GetDepositTransactions, "/transactions/deposit")
 
 ipa.add_resource(ListOperations, "/transactions")
 ipa.add_resource(GetRecap, "/recap")
+ipa.add_resource(CycleProgress, "/cycle/progress")
 
 ipa.add_resource(AmountsDeposit, "/amounts/deposit")
 ipa.add_resource(AmountsBank, "/amounts/bank")

@@ -11,6 +11,7 @@ from services.list import all_categories, all_accounts, all_cycles, all_recurrin
 from services.services import force_refresh, get_recap_categories, split_transaction, \
     create_deposit_debit, get_state_deposit, bank_balances, cycle_balances, get_transfers_to_do
 from services.set_fields import link_ids_if_possible, unlink_ids_if_possible, edit_transaction
+from tools.cycle_manager import progress
 from tools.logging import warn
 from web.authentication import generate_new_token, login_is_valid
 
@@ -261,3 +262,11 @@ class DeleteTransaction(Resource):
             result = remove_data_on_id_if_possible(id_to_delete)
 
         return {"status": result}
+
+
+class CycleProgress(Resource):
+
+    @staticmethod
+    def get():
+        cycle = request.args.get('cycle')
+        return progress(cycle)

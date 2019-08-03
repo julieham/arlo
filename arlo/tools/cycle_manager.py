@@ -96,3 +96,8 @@ def all_days_in_cycle(cycle):
 def cycle_is_finished(cycle):
     days = nb_days_in_cycle(cycle)
     return days['days_done'] == days['all_days']
+
+
+def progress(cycle):
+    days_in_cycle_overview = nb_days_in_cycle(cycle)
+    return cycle_overview_to_cycle_progress(days_in_cycle_overview)
