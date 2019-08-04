@@ -18,6 +18,7 @@ ipa.add_resource(GetCategories, "/list/category")
 ipa.add_resource(GetRecurringDeposit, "/list/recurring_deposit")
 ipa.add_resource(GetDepositNames, "/list/deposit")
 ipa.add_resource(GetDepositTransactions, "/transactions/deposit")
+ipa.add_resource(GetBudgets, "/list/budgets")
 
 ipa.add_resource(ListOperations, "/transactions")
 ipa.add_resource(GetRecap, "/recap")

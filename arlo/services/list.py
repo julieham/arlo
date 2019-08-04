@@ -56,3 +56,7 @@ def all_recurring_deposit():
 
 def all_deposit_names():
     return sorted(set(read_recurring_deposit()['name']) | set(read_deposit_input()[deposit_name_col]))
+
+
+def cycle_budgets(cycle):
+    return get_budgets(cycle)

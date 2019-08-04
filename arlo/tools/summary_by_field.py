@@ -33,7 +33,7 @@ def group_by_field(data, field_name):
     data = data[[amount_euro_col, field_name]]
     summary = (data.groupby([field_name])).agg({amount_euro_col: sum_no_skip_na})
 
-    return summary
+    return summary[amount_euro_col]
 
 
 def get_budgets(cycle):
@@ -89,7 +89,7 @@ def recap_by_cat(cycle, round_it=True):
 
     assign_new_column(recap, 'over', ceil_series(over) if round_it else over)
     assign_new_column(recap, 'remaining', floor_series(remaining) if round_it else remaining)
-    assign_new_column(recap, 'spent', ceil_series(spent) if round_it else spent)
+    assign_new_column(recap, 'spent_from_budget', ceil_series(spent) if round_it else spent)
 
     return recap
 
@@ -111,7 +111,8 @@ def get_category_groups(cycle):
     recap['delta_days'] = ceil_series(recap['delta_days']).clip(upper=nb_days_this_cycle,
                                                                 lower=-nb_days_done_this_cycle).astype(int)
     recap['progress'].clip(upper=100, lower=0, inplace=True)
-    drop_columns(recap, ['amount', 'budget', 'authorized'])
+    recap['total_spent'] = - ceil_series(recap['amount'])
+    drop_columns(recap, ['budget', 'authorized'])
     return recap
 
 

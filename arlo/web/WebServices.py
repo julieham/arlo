@@ -7,7 +7,7 @@ from services.create_delete import create_manual_transaction, create_single_recu
     create_name_references_if_possible, remove_data_on_id_if_possible, create_several_recurring, \
     create_transfer_if_possible, create_deposit, remove_deposit_input_on_id_if_possible
 from services.list import all_categories, all_accounts, all_cycles, all_recurring, data, local_cycles, \
-    all_recurring_deposit, all_deposit_names
+    all_recurring_deposit, all_deposit_names, cycle_budgets
 from services.services import force_refresh, get_recap_categories, split_transaction, \
     create_deposit_debit, get_state_deposit, bank_balances, cycle_balances, get_transfers_to_do
 from services.set_fields import link_ids_if_possible, unlink_ids_if_possible, edit_transaction
@@ -17,7 +17,8 @@ from web.authentication import generate_new_token, login_is_valid
 
 
 def make_this_amount_item(series):
-    return json.loads(series.rename_axis('description').reset_index().to_json(orient='records'))
+    series = series.rename('amount').rename_axis('description').reset_index()
+    return json.loads(series.to_json(orient='records'))
 
 
 from web.status import success_response
@@ -270,3 +271,11 @@ class CycleProgress(Resource):
     def get():
         cycle = request.args.get('cycle')
         return progress(cycle)
+
+
+class GetBudgets(Resource):
+
+    @staticmethod
+    def get():
+        cycle = request.args.get('cycle')
+        return make_this_amount_item(cycle_budgets(cycle))
