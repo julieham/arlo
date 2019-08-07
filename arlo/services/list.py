@@ -4,8 +4,8 @@ from operations.df_operations import select_columns
 from operations.series_operations import filter_series_on_value
 from parameters.column_names import deposit_name_col
 from parameters.param import data_columns_front
-from read_write.file_manager import read_recurring_deposit, read_deposit_input
-from read_write.select_data import get_data_this_cycle_not_deposit
+from read_write.file_manager import read_recurring_deposit
+from read_write.select_data import get_data_this_cycle_not_deposit, get_deposit_input_and_output
 from services.services import refresh_data
 from tools.autofill_manager import read_autofill_dictionary
 from tools.cycle_manager import cycle_now, cycles_before_after
@@ -55,7 +55,7 @@ def all_recurring_deposit():
 
 
 def all_deposit_names():
-    return sorted(set(read_recurring_deposit()['name']) | set(read_deposit_input()[deposit_name_col]))
+    return sorted(set(get_deposit_input_and_output()[deposit_name_col]))
 
 
 def cycle_budgets(cycle):
