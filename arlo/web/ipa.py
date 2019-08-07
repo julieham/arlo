@@ -38,6 +38,7 @@ ipa.add_resource(CreateSeveralRecurring, "/create/recurring/several")
 ipa.add_resource(AddNameReference, "/create/name_ref")
 ipa.add_resource(CreateDeposit, "/create/deposit")
 ipa.add_resource(CreateDepositDebit, "/create/deposit_debit")
+ipa.add_resource(DeleteDepositDebit, "/delete/deposit_debit")
 ipa.add_resource(DeleteTransaction, "/delete/transaction")
 
 ipa.add_resource(LinkTransactions, "/set-fields/link")
@@ -46,7 +47,6 @@ ipa.add_resource(UnlinkTransactions, "/set-fields/unlink")
 ipa.add_resource(EditTransaction, "/edit/transaction")
 ipa.add_resource(SplitTransaction, "/edit/split")
 ipa.add_resource(TransferTransaction, "/edit/transfer")
-
 
 if __name__ == '__main__':
     app.run(debug=True)

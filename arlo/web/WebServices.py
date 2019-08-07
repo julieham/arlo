@@ -9,7 +9,7 @@ from services.create_delete import create_manual_transaction, create_single_recu
 from services.list import all_categories, all_accounts, all_cycles, all_recurring, data, local_cycles, \
     all_recurring_deposit, all_deposit_names, cycle_budgets
 from services.services import force_refresh, get_recap_categories, split_transaction, \
-    create_deposit_debit, get_state_deposit, bank_balances, cycle_balances, get_transfers_to_do
+    create_deposit_debit, get_state_deposit, bank_balances, cycle_balances, get_transfers_to_do, delete_deposit_debit
 from services.set_fields import link_ids_if_possible, unlink_ids_if_possible, edit_transaction
 from tools.cycle_manager import progress
 from tools.logging import warn
@@ -88,6 +88,14 @@ class CreateDepositDebit(Resource):
         the_id = request.args.get('id')
         the_deposit_name = request.args.get('deposit')
         create_deposit_debit(the_id, the_deposit_name)
+        return success_response()
+
+
+class DeleteDepositDebit(Resource):
+    @staticmethod
+    def post():
+        the_id = request.args.get('id')
+        delete_deposit_debit(the_id)
         return success_response()
 
 

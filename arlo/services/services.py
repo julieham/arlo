@@ -79,7 +79,12 @@ def split_transaction(fields):
 def create_deposit_debit(id_tr, deposit_name):
     # TODO Take into account category input deposit fluff
     set_field_to_value_on_ids([id_tr], deposit_name_col, deposit_name)
-    set_field_to_value_on_ids([id_tr], category_col, deposit_name_col)
+    set_field_to_value_on_ids([id_tr], category_col, deposit_name_col.title())
+
+
+def delete_deposit_debit(id_tr):
+    set_field_to_value_on_ids([id_tr], deposit_name_col, '')
+    set_field_to_value_on_ids([id_tr], category_col, default_values[category_col])
 
 
 def get_state_deposit():
