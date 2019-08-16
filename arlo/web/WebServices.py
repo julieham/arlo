@@ -13,7 +13,7 @@ from services.services import force_refresh, get_recap_categories, split_transac
 from services.set_fields import link_ids_if_possible, unlink_ids_if_possible, edit_transaction
 from tools.cycle_manager import progress
 from tools.logging import warn
-from web.authentication import generate_new_token, login_is_valid
+from web.authentication import generate_new_token, login_is_valid, ResourceWithAuth
 
 
 def make_this_amount_item(series):
@@ -41,7 +41,7 @@ class Login(Resource):
 # %% CREATE
 
 
-class AddNameReference(Resource):
+class AddNameReference(ResourceWithAuth):
     @staticmethod
     def post():
         this_id = request.args.get('id')
@@ -50,7 +50,7 @@ class AddNameReference(Resource):
         return create_name_references_if_possible(this_id, this_name, category)
 
 
-class CreateManualTransaction(Resource):
+class CreateManualTransaction(ResourceWithAuth):
 
     @staticmethod
     def post():
@@ -59,7 +59,7 @@ class CreateManualTransaction(Resource):
         return response
 
 
-class CreateSingleRecurring(Resource):
+class CreateSingleRecurring(ResourceWithAuth):
     @staticmethod
     def post():
         this_name = request.json['name']
@@ -67,14 +67,14 @@ class CreateSingleRecurring(Resource):
         return response
 
 
-class CreateSeveralRecurring(Resource):
+class CreateSeveralRecurring(ResourceWithAuth):
     @staticmethod
     def post():
         response = create_several_recurring(request.json)
         return response
 
 
-class CreateDeposit(Resource):
+class CreateDeposit(ResourceWithAuth):
     @staticmethod
     def post():
         deposit_data = request.json
@@ -82,7 +82,7 @@ class CreateDeposit(Resource):
         return create_deposit(deposit_data)
 
 
-class CreateDepositDebit(Resource):
+class CreateDepositDebit(ResourceWithAuth):
     @staticmethod
     def post():
         the_id = request.args.get('id')
@@ -91,7 +91,7 @@ class CreateDepositDebit(Resource):
         return success_response()
 
 
-class DeleteDepositDebit(Resource):
+class DeleteDepositDebit(ResourceWithAuth):
     @staticmethod
     def post():
         the_id = request.args.get('id')
@@ -101,7 +101,7 @@ class DeleteDepositDebit(Resource):
 
 #%% LIST
 
-class ListOperations (Resource):
+class ListOperations (ResourceWithAuth):
 
     @staticmethod
     def get():
@@ -111,7 +111,7 @@ class ListOperations (Resource):
         return json.loads(operations)
 
 
-class AmountsDeposit(Resource):
+class AmountsDeposit(ResourceWithAuth):
 
     @staticmethod
     def get():
@@ -120,7 +120,7 @@ class AmountsDeposit(Resource):
         return make_this_amount_item(get_state_deposit(filter_null=filter_null))
 
 
-class AmountsBank(Resource):
+class AmountsBank(ResourceWithAuth):
 
     @staticmethod
     def get():
@@ -128,7 +128,7 @@ class AmountsBank(Resource):
         return make_this_amount_item(bank_balances(cycle))
 
 
-class AmountsCycle(Resource):
+class AmountsCycle(ResourceWithAuth):
 
     @staticmethod
     def get():
@@ -136,50 +136,50 @@ class AmountsCycle(Resource):
         return make_this_amount_item(cycle_balances(cycle))
 
 
-class GetRecurring(Resource):
+class GetRecurring(ResourceWithAuth):
     @staticmethod
     def get():
         return all_recurring()
 
 
-class GetAllCycles(Resource):
+class GetAllCycles(ResourceWithAuth):
     @staticmethod
     def get():
         return json.loads(all_cycles())
 
 
-class GetLocalCycles(Resource):
+class GetLocalCycles(ResourceWithAuth):
     @staticmethod
     def get():
         cycle = request.args.get('cycle')
         return json.loads(local_cycles(cycle))
 
 
-class GetAccounts(Resource):
+class GetAccounts(ResourceWithAuth):
     @staticmethod
     def get():
         return json.loads(all_accounts())
 
 
-class GetCategories(Resource):
+class GetCategories(ResourceWithAuth):
     @staticmethod
     def get():
         return json.loads(all_categories())
 
 
-class GetRecurringDeposit(Resource):
+class GetRecurringDeposit(ResourceWithAuth):
     @staticmethod
     def get():
         return json.loads(all_recurring_deposit())
 
 
-class GetDepositNames(Resource):
+class GetDepositNames(ResourceWithAuth):
     @staticmethod
     def get():
         return all_deposit_names()
 
 
-class GetDepositTransactions(Resource):
+class GetDepositTransactions(ResourceWithAuth):
     @staticmethod
     def get():
         return json.loads(get_deposit_input_and_output().to_json(orient="records"))
@@ -187,7 +187,7 @@ class GetDepositTransactions(Resource):
 
 #%% SERVICE
 
-class RefreshOperations(Resource):
+class RefreshOperations(ResourceWithAuth):
 
     @staticmethod
     def get():
@@ -195,14 +195,14 @@ class RefreshOperations(Resource):
         return {"status": result}
 
 
-class Transfers(Resource):
+class Transfers(ResourceWithAuth):
     @staticmethod
     def get():
         cycle = request.args.get('cycle')
         return json.loads(json.dumps(get_transfers_to_do(cycle)))
 
 
-class GetRecap(Resource):
+class GetRecap(ResourceWithAuth):
 
     @staticmethod
     def get():
@@ -211,7 +211,7 @@ class GetRecap(Resource):
         return json.loads(recap)
 
 
-class TransferTransaction(Resource):
+class TransferTransaction(ResourceWithAuth):
 
     @staticmethod
     def post():
@@ -224,7 +224,7 @@ class TransferTransaction(Resource):
 #%% SET FIELDS
 
 
-class LinkTransactions(Resource):
+class LinkTransactions(ResourceWithAuth):
 
     @staticmethod
     def post():
@@ -233,7 +233,7 @@ class LinkTransactions(Resource):
         return {"status": result}
 
 
-class UnlinkTransactions(Resource):
+class UnlinkTransactions(ResourceWithAuth):
 
     @staticmethod
     def post():
@@ -244,7 +244,7 @@ class UnlinkTransactions(Resource):
 
 # %% EDIT
 
-class EditTransaction(Resource):
+class EditTransaction(ResourceWithAuth):
     @staticmethod
     def post():
         json_input = request.json
@@ -253,7 +253,7 @@ class EditTransaction(Resource):
         return result
 
 
-class SplitTransaction(Resource):
+class SplitTransaction(ResourceWithAuth):
     @staticmethod
     def post():
         json_input = request.json
@@ -261,7 +261,7 @@ class SplitTransaction(Resource):
         return result
 
 
-class DeleteTransaction(Resource):
+class DeleteTransaction(ResourceWithAuth):
 
     @staticmethod
     def post():
@@ -275,7 +275,7 @@ class DeleteTransaction(Resource):
         return {"status": result}
 
 
-class CycleProgress(Resource):
+class CycleProgress(ResourceWithAuth):
 
     @staticmethod
     def get():
@@ -283,7 +283,7 @@ class CycleProgress(Resource):
         return progress(cycle)
 
 
-class GetBudgets(Resource):
+class GetBudgets(ResourceWithAuth):
 
     @staticmethod
     def get():

@@ -9,3 +9,5 @@ arlo/log
 .DS_Store
 arlo/data/backup
 last_update.txt
+arlo_venv/*
+.environnement
