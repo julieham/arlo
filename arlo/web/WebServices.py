@@ -115,7 +115,9 @@ class AmountsDeposit(Resource):
 
     @staticmethod
     def get():
-        return make_this_amount_item(get_state_deposit())
+        filter_null = request.args.get('hide_null')
+        print(filter_null)
+        return make_this_amount_item(get_state_deposit(filter_null=filter_null))
 
 
 class AmountsBank(Resource):

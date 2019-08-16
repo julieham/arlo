@@ -51,7 +51,7 @@ def get_transfers_to_do(cycle):
 
 
 def get_recap_categories(cycle='now'):
-    recap = get_category_groups(cycle)
+    recap = get_category_groups(cycle).sort_values(category_col)
     return recap.to_json(orient="records")
 
 
@@ -87,7 +87,10 @@ def delete_deposit_debit(id_tr):
     set_field_to_value_on_ids([id_tr], category_col, default_values[category_col])
 
 
-def get_state_deposit():
+def get_state_deposit(filter_null):
     selected_columns = [deposit_name_col, amount_euro_col]
     deposit = select_columns(get_deposit_input_and_output(), selected_columns)
-    return group_by_field(deposit, deposit_name_col)
+    deposit_state = group_by_field(deposit, deposit_name_col).round(decimals=2)
+    if filter_null:
+        deposit_state = deposit_state[deposit_state != 0]
+    return deposit_state
