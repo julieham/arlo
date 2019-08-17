@@ -11,3 +11,5 @@ arlo/data/backup
 last_update.txt
 arlo_venv/*
 .environnement
+arlo.pid
+launch_arlo.sh
