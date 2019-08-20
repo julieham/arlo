@@ -6,6 +6,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 from parameters.credentials import login_gmail
+from parameters.param import data_directory
 from read_write.file_manager import get_last_update_string
 from tools.logging import error
 
@@ -23,7 +24,7 @@ def send_email_backup_data(body='Hi Arlo, here is your data.', subject=' Refresh
     msg.attach(MIMEText(body))
 
     for filename in ['data', 'provisions']:
-        attachment = './arlo/data/' + filename + '.csv'
+        attachment = data_directory + filename + '.csv'
         ctype, _ = mimetypes.guess_type(attachment)
         maintype, subtype = ctype.split("/", 1)
         fp = open(attachment, "rb")
