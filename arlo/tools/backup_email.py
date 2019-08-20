@@ -52,6 +52,6 @@ def save_backup_with_data():
     name = get_last_update_string().replace(' ', '_')
     for filename in ['data', 'provisions']:
         with open(data_directory + filename + '.csv', 'r') as file:
-            with open(data_directory + 'backup/' + filename + '-' + name + '.csv', "w") as file_dest:
+            with open(data_directory + 'backup/' + filename + '-' + name + '.csv', "w+") as file_dest:
                 for line in file.readlines():
                     file_dest.write(line)
