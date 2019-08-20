@@ -36,7 +36,6 @@ def send_email_backup_data(body='Hi Arlo, here is your data.', subject=' Refresh
         msg.attach(attachment)
 
 
-
     mailserver = smtplib.SMTP('smtp.gmail.com', 587)
     try:
         mailserver.ehlo()
