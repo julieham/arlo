@@ -5,7 +5,7 @@ from arlo.tools.refresh import minutes_since_last_update, change_last_update_to_
 from operations.df_operations import select_columns
 from parameters.credentials import login_N26
 from read_write.select_data import get_deposit_input_and_output
-from tools.backup_email import send_email_backup_data
+from tools.backup_email import save_backup_with_data
 from tools.clean_bankin import get_latest_bankin
 from tools.clean_n26 import get_latest_n26
 from tools.logging import info, warn
@@ -36,7 +36,7 @@ def refresh_n26():
 
 def force_refresh():
     info('Refreshing')
-    send_email_backup_data()
+    save_backup_with_data()
     refresh_lunchr()
     refresh_bankin()
     status_n26 = refresh_n26()
