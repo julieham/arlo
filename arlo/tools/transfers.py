@@ -1,5 +1,3 @@
-from operations.df_operations import total_amount
-from parameters.column_names import amount_euro_col
 from tools.summary_by_field import recap_by_account
 
 TRANSFER = '>>'
@@ -69,5 +67,5 @@ def balances_to_transfers(balances):
 def get_end_of_cycle_balances(cycle):
     bilan_this_cycle = recap_by_account(cycle)
     other_accounts = [acc for acc in bilan_this_cycle.index.tolist() if acc.endswith('N26') == False]
-    bilan_this_cycle.at['Hello & Co'] = total_amount(bilan_this_cycle.loc[other_accounts])
-    return bilan_this_cycle.drop(labels=other_accounts).to_dict()[amount_euro_col]
+    bilan_this_cycle.at['Hello & Co'] = sum(bilan_this_cycle.loc[other_accounts])
+    return bilan_this_cycle.drop(labels=other_accounts).to_dict()
