@@ -3,10 +3,10 @@ from arlo.operations.df_operations import df_is_not_empty, assign_new_column, co
     add_column_with_value, reverse_amount, empty_df, drop_columns
 from arlo.operations.series_operations import positive_part, ceil_series, floor_series
 from arlo.parameters.column_names import category_col, amount_euro_col, cycle_col, deposit_name_col, account_col
-from arlo.parameters.param import budgets_filename, no_recap_categories, deposit_account
-from arlo.read_write.reader import read_df_file
+from arlo.parameters.param import no_recap_categories, deposit_account
 from arlo.read_write.select_data import get_data_from_cycle, get_deposit_debits_from_cycle
 from arlo.tools.cycle_manager import decode_cycle, nb_days_in_cycle, cycle_overview_to_cycle_progress
+from read_write.file_manager import read_budgets
 
 """
 def get_euro_amount(row, exchange_rate):
@@ -37,7 +37,7 @@ def group_by_field(data, field_name):
 
 
 def get_budgets(cycle):
-    budgets = read_df_file(budgets_filename, sep=';')
+    budgets = read_budgets()
     if cycle != 'all':
         budgets = budgets[budgets[cycle_col] == decode_cycle(cycle)]
 

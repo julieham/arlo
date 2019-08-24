@@ -9,7 +9,8 @@ from services.create_delete import create_manual_transaction, create_single_recu
 from services.list import all_categories, all_accounts, all_cycles, all_recurring, data, local_cycles, \
     all_recurring_deposit, all_deposit_names, cycle_budgets
 from services.services import force_refresh, get_recap_categories, split_transaction, \
-    create_deposit_debit, get_state_deposit, bank_balances, cycle_balances, get_transfers_to_do, delete_deposit_debit
+    create_deposit_debit, get_state_deposit, bank_balances, cycle_balances, get_transfers_to_do, delete_deposit_debit, \
+    edit_budgets
 from services.set_fields import link_ids_if_possible, unlink_ids_if_possible, edit_transaction
 from tools.cycle_manager import progress
 from tools.logging import warn
@@ -219,6 +220,17 @@ class TransferTransaction(ResourceWithAuth):
         account = request.args.get('account')
         create_transfer_if_possible(id_one_way, account)
         return success_response()
+
+
+class EditBudget(ResourceWithAuth):
+
+    @staticmethod
+    def post():
+        cycle = request.args.get('cycle')
+        budgets = json.dumps(request.json['budgets'])
+        print(budgets)
+        print(cycle)
+        edit_budgets(budgets, cycle)
 
 
 #%% SET FIELDS

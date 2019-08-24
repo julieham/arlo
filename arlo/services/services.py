@@ -2,10 +2,12 @@ from arlo.parameters.param import *
 from arlo.read_write.file_manager import add_new_data, set_field_to_value_on_ids
 from arlo.tools.clean_lunchr import get_latest_lunchr
 from arlo.tools.refresh import minutes_since_last_update, change_last_update_to_now
-from operations.df_operations import select_columns
+from operations.df_operations import select_columns, add_column_with_value
+from operations.types_operations import json_to_df
 from parameters.credentials import login_N26
 from read_write.select_data import get_deposit_input_and_output
 from tools.backup_email import save_backup_with_data
+from tools.budgets_manager import edit_budgets_cycle
 from tools.clean_bankin import get_latest_bankin
 from tools.clean_n26 import get_latest_n26
 from tools.logging import info, warn
@@ -94,3 +96,10 @@ def get_state_deposit(filter_null):
     if filter_null:
         deposit_state = deposit_state[deposit_state != 0]
     return deposit_state
+
+
+def edit_budgets(budgets, cycle):
+    print(budgets)
+    budgets_df = json_to_df(budgets, orient='records')
+    add_column_with_value(budgets_df, cycle_col, cycle)
+    return edit_budgets_cycle(budgets_df)

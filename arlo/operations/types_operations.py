@@ -72,3 +72,7 @@ def encode_id(id_value):
 def clean_parenthesis(name):
     name = name.split(' (')
     return name[0]
+
+
+def json_to_df(json_input, orient):
+    return pd.read_json(json_input, orient=orient)

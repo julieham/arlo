@@ -1,11 +1,12 @@
 from arlo.operations.df_operations import sort_df_by_descending_date, change_field_on_several_ids_to_value, \
     concat_lines, null_value, df_is_not_empty, disable_chained_assignment_warning, filter_df_not_this_value, \
     add_column_with_value
-from arlo.parameters.param import data_columns_all, data_directory, default_values, deposit_columns_all, deposit_type
+from arlo.parameters.param import data_columns_all, data_directory, default_values, deposit_columns_all, deposit_type, \
+    budgets_filename, amount_euro_col
 from arlo.read_write.reader import read_df_file
 from arlo.read_write.writer import write_df_to_csv
 from operations.date_operations import date_parser_for_reading
-from parameters.column_names import type_trans_col
+from parameters.column_names import type_trans_col, category_col, cycle_col
 from tools.logging import info, warn, info_df
 from web.status import success_response, failure_response
 
@@ -28,6 +29,15 @@ def read_deposit_input():
     deposit_input = read_data_from_file(provisions_file)
     add_column_with_value(deposit_input, type_trans_col, deposit_type)
     return deposit_input
+
+
+def read_budgets():
+    return read_df_file(budgets_filename, sep=';')
+
+
+def save_budgets(budgets):
+    columns = [cycle_col, category_col, amount_euro_col]
+    write_df_to_csv(budgets[columns], budgets_filename, index=False)
 
 
 def save_deposit_input(data):
