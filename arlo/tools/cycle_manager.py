@@ -53,7 +53,7 @@ def cycle_is_travel(cycle):
 
 
 def cycles_before_after(cycle, exclude=False, long=False):
-    num_life_past = -2 if long else 3
+    num_life_past = -2 if long else -3
     num_life_future = 8 if long else 3
 
     cycle = decode_cycle(cycle)
