@@ -19,6 +19,7 @@ ipa.add_resource(GetRecurringDeposit, "/list/recurring_deposit")
 ipa.add_resource(GetDepositNames, "/list/deposit")
 ipa.add_resource(GetDepositTransactions, "/transactions/deposit")
 ipa.add_resource(GetBudgets, "/list/budgets")
+ipa.add_resource(GetCyclesCalendar, "/cycle/calendar")
 
 ipa.add_resource(ListOperations, "/transactions")
 ipa.add_resource(GetRecap, "/recap")
@@ -48,6 +49,8 @@ ipa.add_resource(EditTransaction, "/edit/transaction")
 ipa.add_resource(SplitTransaction, "/edit/split")
 ipa.add_resource(TransferTransaction, "/edit/transfer")
 ipa.add_resource(EditBudget, "/edit/budget")
+ipa.add_resource(EditCalendar, "/edit/calendar")
+
 
 if __name__ == '__main__':
     app.run(debug=True)

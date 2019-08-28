@@ -32,8 +32,8 @@ def all_cycles():
     return json.dumps(cycles)
 
 
-def local_cycles(cycle):
-    return json.dumps(cycles_before_after(cycle, exclude=True))
+def local_cycles(cycle, long=False):
+    return json.dumps(cycles_before_after(cycle, exclude=True, long=long))
 
 
 def all_recurring():

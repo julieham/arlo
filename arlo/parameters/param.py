@@ -29,6 +29,10 @@ default_values = dict({link_id_col: '-',
 
 immutable_values = dict({category_col: {link_category}})
 
+# %% CALENDAR
+view_months_before = 1
+view_months_after = 4
+
 # %% FILES
 
 directory = '/Users/julie/PycharmProjects/arlo/arlo/'

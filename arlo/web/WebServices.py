@@ -1,6 +1,7 @@
 from flask import json, request, make_response, jsonify
 from flask_restful import Resource
 
+from operations.types_operations import string_to_bool
 from parameters.param import deposit_type
 from read_write.select_data import get_deposit_input_and_output
 from services.create_delete import create_manual_transaction, create_single_recurring, \
@@ -10,7 +11,7 @@ from services.list import all_categories, all_accounts, all_cycles, all_recurrin
     all_recurring_deposit, all_deposit_names, cycle_budgets
 from services.services import force_refresh, get_recap_categories, split_transaction, \
     create_deposit_debit, get_state_deposit, bank_balances, cycle_balances, get_transfers_to_do, delete_deposit_debit, \
-    edit_budgets
+    edit_budgets, cycle_calendar, edit_calendar
 from services.set_fields import link_ids_if_possible, unlink_ids_if_possible, edit_transaction
 from tools.cycle_manager import progress
 from tools.logging import warn
@@ -22,7 +23,7 @@ def make_this_amount_item(series):
     return json.loads(series.to_json(orient='records'))
 
 
-from web.status import success_response
+from web.status import success_response, failure_response
 
 
 # %% LOGIN
@@ -117,7 +118,6 @@ class AmountsDeposit(ResourceWithAuth):
     @staticmethod
     def get():
         filter_null = request.args.get('hide_null')
-        print(filter_null)
         return make_this_amount_item(get_state_deposit(filter_null=filter_null))
 
 
@@ -152,8 +152,9 @@ class GetAllCycles(ResourceWithAuth):
 class GetLocalCycles(ResourceWithAuth):
     @staticmethod
     def get():
+        long = request.args.get('long')
         cycle = request.args.get('cycle')
-        return json.loads(local_cycles(cycle))
+        return json.loads(local_cycles(cycle, long=string_to_bool(long) if long != None else False))
 
 
 class GetAccounts(ResourceWithAuth):
@@ -301,3 +302,23 @@ class GetBudgets(ResourceWithAuth):
     def get():
         cycle = request.args.get('cycle')
         return make_this_amount_item(cycle_budgets(cycle))
+
+
+class GetCyclesCalendar(ResourceWithAuth):
+
+    @staticmethod
+    def get():
+        return json.loads(json.dumps(cycle_calendar()))
+
+
+class EditCalendar(ResourceWithAuth):
+
+    @staticmethod
+    def post():
+        json_input = request.json
+        try:
+            dates = json_input['dates']
+            cycle = json_input['cycle']
+            edit_calendar(dates, cycle)
+        except:
+            return failure_response('invalid data')

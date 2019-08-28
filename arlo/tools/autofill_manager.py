@@ -74,6 +74,20 @@ def add_reference(name_source, name_destination, value_source, value_destination
     return response
 
 
+def edit_reference(name_source, name_destination, value_source, value_destination):
+    dictioname = make_dictioname(name_source, name_destination)
+    dictionary = read_autofill_dictionary(dictioname)
+    value_source = remove_star_fill(value_source)
+    value_destination = remove_star_fill(value_destination)
+
+    if value_source not in dictionary.index:
+        return failure_response(value_source + ' not found in dictionary')
+
+    dictionary[value_source] = value_destination
+    _write_autofill_dictionary(dictionary)
+    return success_response()
+
+
 def reference_is_valid(source, destination, dictionary):
     if len(source) * len(destination) == 0:
         return failure_response("impossible to add null reference")

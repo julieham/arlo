@@ -1,10 +1,11 @@
 import datetime
 
 from arlo.operations.date_operations import date_today, string_date_now
-from arlo.tools.autofill_manager import autofill_single_value, read_autofill_dictionary, make_dictioname
+from arlo.tools.autofill_manager import autofill_single_value, read_autofill_dictionary, make_dictioname, edit_reference
 from operations.df_operations import concat_columns, apply_function_to_field_overrule, filter_df_on_bools, get_one_field
 from operations.series_operations import series_swap_index_values
-from parameters.column_names import cycle_col
+from parameters.column_names import cycle_col, date_col
+from web.status import success_response
 
 source = 'date'
 destination = 'cycle'
@@ -51,7 +52,10 @@ def cycle_is_travel(cycle):
     return (len(cycle) != 5) or cycle[:3] not in month_names_3_letters or not cycle[-2:].isnumeric()
 
 
-def cycles_before_after(cycle, exclude=False):
+def cycles_before_after(cycle, exclude=False, long=False):
+    num_life_past = -2 if long else 3
+    num_life_future = 8 if long else 3
+
     cycle = decode_cycle(cycle)
     cycle_names = get_names_cycles_ordered()
     apply_function_to_field_overrule(cycle_names, cycle_col, cycle_is_travel, destination='travel')
@@ -66,7 +70,8 @@ def cycles_before_after(cycle, exclude=False):
         life_past = [u for u in life_cycles if u < index_cycle]
         life_future = [u for u in life_cycles if u >= index_cycle]
 
-        selected_indexes = sorted(travel_past[-2:] + travel_future + life_past[-3:] + life_future[:3])
+        selected_indexes = sorted(
+            travel_past[-2:] + travel_future + life_past[num_life_past:] + life_future[:num_life_future])
         selected_cycles = get_one_field(cycle_names.iloc[selected_indexes], cycle_col).tolist()
         if exclude:
             selected_cycles = [u for u in selected_cycles if u != cycle]
@@ -101,3 +106,9 @@ def cycle_is_finished(cycle):
 def progress(cycle):
     days_in_cycle_overview = nb_days_in_cycle(cycle)
     return cycle_overview_to_cycle_progress(days_in_cycle_overview)
+
+
+def set_dates_to_cycle(dates, cycle):
+    for date in dates:
+        edit_reference(date_col, cycle_col, date, cycle)
+    return success_response()

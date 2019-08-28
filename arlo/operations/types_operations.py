@@ -76,3 +76,7 @@ def clean_parenthesis(name):
 
 def json_to_df(json_input, orient):
     return pd.read_json(json_input, orient=orient)
+
+
+def string_to_bool(b):
+    return b.lower() == 'true'
