@@ -1,3 +1,4 @@
+import pandas as pd
 from flask import json, request, make_response, jsonify
 from flask_restful import Resource
 
@@ -11,7 +12,7 @@ from services.list import all_categories, all_accounts, all_cycles, all_recurrin
     all_recurring_deposit, all_deposit_names, cycle_budgets
 from services.services import force_refresh, get_recap_categories, split_transaction, \
     create_deposit_debit, get_state_deposit, bank_balances, cycle_balances, get_transfers_to_do, delete_deposit_debit, \
-    edit_budgets, cycle_calendar, edit_calendar
+    edit_budgets, cycle_calendar, edit_calendar, input_overview
 from services.set_fields import link_ids_if_possible, unlink_ids_if_possible, edit_transaction
 from tools.cycle_manager import progress
 from tools.logging import warn
@@ -19,6 +20,8 @@ from web.authentication import generate_new_token, login_is_valid, ResourceWithA
 
 
 def make_this_amount_item(series):
+    if type(series) != pd.Series:
+        series = pd.Series(series)
     series = series.rename('amount').rename_axis('description').reset_index()
     return json.loads(series.to_json(orient='records'))
 
@@ -322,3 +325,11 @@ class EditCalendar(ResourceWithAuth):
             edit_calendar(dates, cycle)
         except:
             return failure_response('invalid data')
+
+
+class AmountsInput(ResourceWithAuth):
+
+    @staticmethod
+    def get():
+        cycle = request.args.get('cycle')
+        return make_this_amount_item(input_overview(cycle))

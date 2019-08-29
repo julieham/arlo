@@ -28,6 +28,7 @@ ipa.add_resource(CycleProgress, "/cycle/progress")
 ipa.add_resource(AmountsDeposit, "/amounts/deposit")
 ipa.add_resource(AmountsBank, "/amounts/bank")
 ipa.add_resource(AmountsCycle, "/amounts/cycle")
+ipa.add_resource(AmountsInput, "/amounts/input")
 
 ipa.add_resource(RefreshOperations, "/refresh")
 

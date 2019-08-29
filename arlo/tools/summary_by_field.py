@@ -1,12 +1,14 @@
 from arlo.operations.df_operations import df_is_not_empty, assign_new_column, concat_columns, empty_series, df_is_empty, \
     filter_df_not_these_values, select_columns, concat_lines, filter_df_on_bools, column_is_null, \
-    add_column_with_value, reverse_amount, empty_df, drop_columns
+    add_column_with_value, reverse_amount, empty_df, drop_columns, filter_df_not_this_value, total_amount, \
+    filter_df_one_value
 from arlo.operations.series_operations import positive_part, ceil_series, floor_series
 from arlo.parameters.column_names import category_col, amount_euro_col, cycle_col, deposit_name_col, account_col
 from arlo.parameters.param import no_recap_categories, deposit_account
 from arlo.read_write.select_data import get_data_from_cycle, get_deposit_debits_from_cycle
-from arlo.tools.cycle_manager import decode_cycle, nb_days_in_cycle, cycle_overview_to_cycle_progress
-from read_write.file_manager import read_budgets
+from arlo.tools.cycle_manager import decode_cycle, nb_days_in_cycle, cycle_overview_to_cycle_progress, \
+    filter_df_on_cycle, cycle_is_finished
+from read_write.file_manager import read_budgets, read_data
 
 """
 def get_euro_amount(row, exchange_rate):
@@ -137,3 +139,26 @@ def recap_by_account(cycle):
 
     all_outputs = select_columns(data, selected_columns)
     return group_by_field(all_outputs, field_name).round(decimals=2)
+
+
+def input_recap(cycle):
+    overview = dict()
+    data_this_cycle = filter_df_on_cycle(read_data(), cycle)
+    if cycle_is_finished(cycle):
+        data_this_cycle_spent = filter_df_not_this_value(data_this_cycle, 'category', 'Input')
+        overview['Input goal'] = - round(total_amount(data_this_cycle_spent), 2)
+        overview['(actual) Over'] = overview['Input goal'] - sum(get_budgets(cycle))
+    else:
+        overview['Budgets'] = round(sum(get_budgets(cycle)), 2)
+        overview['Over (so far)'] = round(sum(recap_by_cat(cycle, False)['over']), 2)
+        overview['Input goal'] = overview['Budgets'] + overview['Over (so far)']
+
+    data_this_cycle_input = filter_df_one_value(data_this_cycle, 'category', 'Input')
+    overview['Done'] = total_amount(data_this_cycle_input)
+    remaining = round(overview['Input goal'] - overview['Done'], 2)
+    if remaining > 0:
+        overview['Remaining TO DO'] = remaining
+    elif remaining < 0:
+        overview['Margin'] = - remaining
+
+    return overview

@@ -16,7 +16,7 @@ from tools.cycle_manager import set_dates_to_cycle
 from tools.logging import info, warn
 from tools.merge_data import merge_with_data
 from tools.split import split_transaction_if_possible
-from tools.summary_by_field import group_by_field, recap_by_account, get_category_groups
+from tools.summary_by_field import group_by_field, recap_by_account, get_category_groups, input_recap
 from tools.transfers import balances_to_transfers, get_end_of_cycle_balances
 from web.status import is_successful, merge_status
 
@@ -116,3 +116,7 @@ def cycle_calendar():
 
 def edit_calendar(dates, cycle):
     return set_dates_to_cycle(dates, cycle)
+
+
+def input_overview(cycle):
+    return input_recap(cycle)
