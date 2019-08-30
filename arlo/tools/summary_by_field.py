@@ -1,6 +1,6 @@
 from arlo.operations.df_operations import df_is_not_empty, assign_new_column, concat_columns, empty_series, df_is_empty, \
     filter_df_not_these_values, select_columns, concat_lines, filter_df_on_bools, column_is_null, \
-    add_column_with_value, reverse_amount, empty_df, drop_columns, filter_df_not_this_value, total_amount, \
+    add_column_with_value, reverse_amount, empty_df, drop_columns, total_amount, \
     filter_df_one_value
 from arlo.operations.series_operations import positive_part, ceil_series, floor_series
 from arlo.parameters.column_names import category_col, amount_euro_col, cycle_col, deposit_name_col, account_col
@@ -144,13 +144,13 @@ def recap_by_account(cycle):
 def input_recap(cycle):
     overview = dict()
     data_this_cycle = filter_df_on_cycle(read_data(), cycle)
+    recap_by_category = recap_by_cat(cycle, False)
     if cycle_is_finished(cycle):
-        data_this_cycle_spent = filter_df_not_this_value(data_this_cycle, 'category', 'Input')
-        overview['Input goal'] = - round(total_amount(data_this_cycle_spent), 2)
+        overview['Input goal'] = - round(sum(recap_by_category['amount']), 2)
         overview['(actual) Over'] = overview['Input goal'] - sum(get_budgets(cycle))
     else:
-        overview['Budgets'] = round(sum(get_budgets(cycle)), 2)
-        overview['Over (so far)'] = round(sum(recap_by_cat(cycle, False)['over']), 2)
+        overview['Budgets'] = round(sum(recap_by_category['budget']), 2)
+        overview['Over (so far)'] = - round(sum(recap_by_category['over']), 2)
         overview['Input goal'] = overview['Budgets'] + overview['Over (so far)']
 
     data_this_cycle_input = filter_df_one_value(data_this_cycle, 'category', 'Input')
