@@ -150,7 +150,7 @@ def input_recap(cycle):
         overview['(actual) Over'] = overview['Input goal'] - sum(get_budgets(cycle))
     else:
         overview['Budgets'] = round(sum(recap_by_category['budget']), 2)
-        overview['Over (so far)'] = - round(sum(recap_by_category['over']), 2)
+        overview['Over (so far)'] = round(sum(recap_by_category['over']), 2)
         overview['Input goal'] = overview['Budgets'] + overview['Over (so far)']
 
     data_this_cycle_input = filter_df_one_value(data_this_cycle, 'category', 'Input')
