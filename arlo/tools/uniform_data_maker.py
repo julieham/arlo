@@ -147,7 +147,7 @@ def format_deposit_df(dep_df):
     apply_function_to_field_no_overrule(dep_df, date_col, date_to_cycle, destination=cycle_col)
     apply_function_to_field_overrule(dep_df, name_col, clean_parenthesis, destination=deposit_name_col)
 
-    fill_existing_column_with_autofill(dep_df, name_col, category_col)
+    fill_existing_column_with_autofill(dep_df, deposit_name_col, category_col, default_value='Deposit')
 
     create_id(dep_df)
     return dep_df[deposit_columns_all]

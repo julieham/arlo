@@ -14,7 +14,7 @@ data_columns_all = [name_col, amount_euro_col, category_col, account_col, cycle_
 
 data_columns_front = [id_col, name_col, amount_euro_col, category_col, pending_col, amount_orig_col, account_col,
                       currency_orig_col, payment_method_col, cycle_col, is_linked_col, bank_name_col, date_col,
-                      is_manual_col, type_trans_col]
+                      is_manual_col, type_trans_col, deposit_name_col]
 
 data_columns_to_recover = [name_col, category_col, split_id_col, cycle_col, deposit_name_col]
 
