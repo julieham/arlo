@@ -78,6 +78,15 @@ def set_field_to_value_on_ids(ids, field_name, field_value):
     return success_response()
 
 
+def set_field_to_value_on_ids_deposit_input(ids, field_name, field_value):
+    if field_name == 'id':
+        return failure_response('Impossible to change id')
+    deposit_input = read_deposit_input()
+    change_field_on_several_ids_to_value(deposit_input, ids, field_name, field_value)
+    save_deposit_input(deposit_input)
+    return success_response()
+
+
 def default_value(field):
     if field in default_values:
         return default_values[field]

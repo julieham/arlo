@@ -2,7 +2,7 @@ import pandas as pd
 
 from arlo.operations.types_operations import df_field_to_numeric_with_sign
 from arlo.parameters.param import data_columns_mandatory_fields
-from arlo.read_write.file_manager import read_data
+from arlo.read_write.file_manager import read_data, read_deposit_input
 from operations.df_operations import filter_df_on_id, get_one_field, filter_df_one_value
 from operations.series_operations import get_first_value_from_series
 from parameters.column_names import *
@@ -45,3 +45,8 @@ def missing_mandatory_field(df):
 def get_bank_name_from_id(id):
     transaction = filter_df_on_id(read_data(), id)
     return get_first_value_from_series(get_one_field(transaction, bank_name_col))
+
+
+def get_deposit_name_from_provision_id(id):
+    transaction = filter_df_on_id(read_deposit_input(), id)
+    return get_first_value_from_series(get_one_field(transaction, deposit_name_col))

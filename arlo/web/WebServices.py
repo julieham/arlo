@@ -7,7 +7,8 @@ from parameters.param import deposit_type
 from read_write.select_data import get_deposit_input_and_output
 from services.create_delete import create_manual_transaction, create_single_recurring, \
     create_name_references_if_possible, remove_data_on_id_if_possible, create_several_recurring, \
-    create_transfer_if_possible, create_deposit, remove_deposit_input_on_id_if_possible
+    create_transfer_if_possible, create_deposit, remove_deposit_input_on_id_if_possible, \
+    create_deposit_references_if_possible
 from services.list import all_categories, all_accounts, all_cycles, all_recurring, data, local_cycles, \
     all_recurring_deposit, all_deposit_names, cycle_budgets
 from services.services import force_refresh, get_recap_categories, split_transaction, \
@@ -53,6 +54,14 @@ class AddNameReference(ResourceWithAuth):
         this_name = request.json['name']
         category = request.json['category']
         return create_name_references_if_possible(this_id, this_name, category)
+
+
+class AddDepositReference(ResourceWithAuth):
+    @staticmethod
+    def post():
+        this_id = request.args.get('id')
+        category = request.json['category']
+        return create_deposit_references_if_possible(this_id, category)
 
 
 class CreateManualTransaction(ResourceWithAuth):

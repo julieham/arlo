@@ -91,7 +91,7 @@ def edit_reference(name_source, name_destination, value_source, value_destinatio
 def reference_is_valid(source, destination, dictionary):
     if len(source) * len(destination) == 0:
         return failure_response("impossible to add null reference")
-    if source.upper() in dictionary:
+    if source.title() in dictionary:
         return failure_response(source + 'already present in dictionary')
     return success_response()
 

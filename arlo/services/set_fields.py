@@ -1,7 +1,8 @@
 from operations.df_operations import change_field_on_several_ids_to_value, filter_df_several_values, how_many_rows, \
     result_function_applied_to_field, get_one_field, change_field_on_single_id_to_value, get_this_field_from_this_id
 from operations.formatting import parse_ids
-from read_write.file_manager import read_data, save_data, set_field_to_value_on_ids, default_value
+from read_write.file_manager import read_data, save_data, set_field_to_value_on_ids, default_value, \
+    set_field_to_value_on_ids_deposit_input
 from web.status import success_response, failure_response
 
 
@@ -11,6 +12,10 @@ def rename(transaction_id, transaction_name):
 
 def categorize(transaction_id, category_value):
     return set_field_to_value_on_ids([transaction_id], 'category', category_value)
+
+
+def categorize_deposit_input(transaction_id, category_value):
+    return set_field_to_value_on_ids_deposit_input([transaction_id], 'category', category_value)
 
 
 def present_links_is_not_empty(data):

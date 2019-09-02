@@ -1,10 +1,11 @@
-from operations.data_operations import missing_valid_amount, missing_mandatory_field, get_bank_name_from_id
+from operations.data_operations import missing_valid_amount, missing_mandatory_field, get_bank_name_from_id, \
+    get_deposit_name_from_provision_id
 from operations.df_operations import add_field_with_default_value, reverse_amount
 from operations.types_operations import dict_to_df
-from parameters.param import auto_accounts
+from parameters.param import auto_accounts, deposit_name_col, category_col
 from read_write.file_manager import add_new_data, remove_data_on_id, add_new_deposit, remove_deposit_input_on_id
 from read_write.select_data import get_transaction_with_id
-from services.set_fields import rename, categorize, link_ids_if_possible
+from services.set_fields import rename, categorize, link_ids_if_possible, categorize_deposit_input
 from tools.autofill_manager import add_reference
 from tools.logging import warn, info, info_df
 from tools.recurring_manager import get_possible_recurring
@@ -80,6 +81,20 @@ def create_name_references_if_possible(this_id, name, category):
         return status_category
 
     return merge_status(name_ref_added, cat_ref_added)
+
+
+def create_deposit_references_if_possible(this_id, category):
+    if not category:
+        return failure_response("category cannot be empty")
+    deposit_name = get_deposit_name_from_provision_id(this_id)
+
+    status_category = status_field_not_empty('category', category)
+    if is_successful(status_category):
+        cat_ref_added = add_reference(deposit_name_col, category_col, deposit_name, category)
+        if is_successful(cat_ref_added):
+            categorize_deposit_input(this_id, category)
+        return cat_ref_added
+    return status_category
 
 
 def status_field_not_empty(field_name, field_value):
