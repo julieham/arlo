@@ -1,7 +1,7 @@
 from arlo.parameters.param import *
 from arlo.read_write.file_manager import add_new_data, set_field_to_value_on_ids
 from arlo.tools.clean_lunchr import get_latest_lunchr
-from arlo.tools.refresh import minutes_since_last_update, change_last_update_to_now
+from arlo.tools.refresh import change_last_update_to_now
 from operations.date_operations import get_calendar_around, now
 from operations.df_operations import select_columns, add_column_with_value
 from operations.types_operations import json_to_df
@@ -10,24 +10,15 @@ from read_write.select_data import get_deposit_input_and_output
 from tools.autofill_manager import read_autofill_dictionary, make_dictioname
 from tools.backup_email import save_backup_with_data
 from tools.budgets_manager import edit_budgets_cycle
-from tools.clean_bankin import get_latest_bankin
+from tools.clean_bankin import get_latest_bankin, force_refresh_bankin
 from tools.clean_n26 import get_latest_n26
 from tools.cycle_manager import set_dates_to_cycle
-from tools.logging import info, warn
+from tools.logging import info
 from tools.merge_data import merge_with_data
 from tools.split import split_transaction_if_possible
 from tools.summary_by_field import group_by_field, recap_by_account, get_category_groups, input_recap
 from tools.transfers import balances_to_transfers, get_end_of_cycle_balances
 from web.status import is_successful, merge_status
-
-
-def refresh_data():
-    warn('REFRESHING ? ')
-    if minutes_since_last_update() > delay_refresh_minutes:
-        warn('YES')
-        info(force_refresh())
-    else:
-        warn('NO')
 
 
 def refresh_n26():
@@ -48,6 +39,10 @@ def force_refresh():
     if is_successful(status_n26):
         change_last_update_to_now()
     return status_n26
+
+
+def force_api_refresh():
+    force_refresh_bankin()
 
 
 def get_transfers_to_do(cycle):

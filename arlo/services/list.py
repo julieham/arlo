@@ -6,7 +6,6 @@ from parameters.column_names import deposit_name_col
 from parameters.param import data_columns_front
 from read_write.file_manager import read_recurring_deposit
 from read_write.select_data import get_data_this_cycle_not_deposit, get_deposit_input_and_output
-from services.services import refresh_data
 from tools.autofill_manager import read_autofill_dictionary
 from tools.cycle_manager import cycle_now, cycles_before_after
 from tools.recurring_manager import get_possible_recurring
@@ -40,10 +39,7 @@ def all_recurring():
     return list(get_possible_recurring().index)
 
 
-def data(refresh=None, cycle="now"):
-    if refresh:
-        refresh_data()
-
+def data(cycle="now"):
     this_cycle_data = get_data_this_cycle_not_deposit(cycle)
     format_for_front(this_cycle_data)
 

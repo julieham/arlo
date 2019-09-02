@@ -31,6 +31,7 @@ ipa.add_resource(AmountsCycle, "/amounts/cycle")
 ipa.add_resource(AmountsInput, "/amounts/input")
 
 ipa.add_resource(RefreshOperations, "/refresh")
+ipa.add_resource(ForceApiRefresh, "/force_refresh_api")
 
 ipa.add_resource(Transfers, '/transfers')
 

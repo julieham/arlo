@@ -6,6 +6,7 @@ from operations.data_operations import remove_already_present_id
 from operations.types_operations import layered_dict_to_df
 from parameters.credentials import login_bankin
 from parameters.param import hello_acc_id, hello_fetched_transactions
+from tools.logging import info
 from tools.uniform_data_maker import format_bankin_df
 
 bankin_url = 'https://sync.bankin.com'
@@ -56,3 +57,10 @@ def get_latest_bankin():
     new_transactions = remove_already_present_id(transactions, account)
 
     return new_transactions
+
+
+def force_refresh_bankin():
+    headers = get_bankin_headers_with_token()
+    force_refresh_url = bankin_url + '/v2/items/refresh'
+    response = requests.post(force_refresh_url, headers=headers, params=bankin_params)
+    info('Force refresh bankin : code ' + str(response.status_code))

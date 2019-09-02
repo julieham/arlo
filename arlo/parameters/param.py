@@ -1,7 +1,5 @@
 from parameters.column_names import *
 
-delay_refresh_minutes = 10
-
 ## CATEGORIES
 link_category = 'Link'
 input_category = 'Input'

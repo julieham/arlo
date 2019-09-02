@@ -13,7 +13,7 @@ from services.list import all_categories, all_accounts, all_cycles, all_recurrin
     all_recurring_deposit, all_deposit_names, cycle_budgets
 from services.services import force_refresh, get_recap_categories, split_transaction, \
     create_deposit_debit, get_state_deposit, bank_balances, cycle_balances, get_transfers_to_do, delete_deposit_debit, \
-    edit_budgets, cycle_calendar, edit_calendar, input_overview
+    edit_budgets, cycle_calendar, edit_calendar, input_overview, force_api_refresh
 from services.set_fields import link_ids_if_possible, unlink_ids_if_possible, edit_transaction
 from tools.cycle_manager import progress
 from tools.logging import warn
@@ -119,9 +119,8 @@ class ListOperations (ResourceWithAuth):
 
     @staticmethod
     def get():
-        refresh = request.args.get('refresh')
         cycle = request.args.get('cycle')
-        operations = data(cycle=cycle, refresh=refresh)
+        operations = data(cycle=cycle)
         return json.loads(operations)
 
 
@@ -206,6 +205,14 @@ class RefreshOperations(ResourceWithAuth):
     @staticmethod
     def get():
         result = force_refresh()
+        return {"status": result}
+
+
+class ForceApiRefresh(ResourceWithAuth):
+
+    @staticmethod
+    def post():
+        result = force_api_refresh()
         return {"status": result}
 
 
