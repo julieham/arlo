@@ -3,9 +3,9 @@ from logging import info
 import pandas as pd
 
 # %% PANDAS STUFF
-from operations.series_operations import get_first_value_from_series
-from parameters.column_names import date_col
-from parameters.param import immutable_values
+from arlo.operations.series_operations import get_first_value_from_series
+from arlo.parameters.column_names import date_col
+from arlo.parameters.param import immutable_values
 
 
 def set_pandas_print_parameters():

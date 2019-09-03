@@ -1,11 +1,11 @@
 import pandas as pd
 
+from arlo.operations.df_operations import filter_df_on_id, get_one_field, filter_df_one_value
+from arlo.operations.series_operations import get_first_value_from_series
 from arlo.operations.types_operations import df_field_to_numeric_with_sign
+from arlo.parameters.column_names import *
 from arlo.parameters.param import data_columns_mandatory_fields
 from arlo.read_write.file_manager import read_data, read_deposit_input
-from operations.df_operations import filter_df_on_id, get_one_field, filter_df_one_value
-from operations.series_operations import get_first_value_from_series
-from parameters.column_names import *
 
 
 def set_amounts_to_numeric(df, is_positive=True):

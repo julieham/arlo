@@ -1,9 +1,9 @@
-from operations.df_operations import change_field_on_several_ids_to_value, filter_df_several_values, how_many_rows, \
+from arlo.operations.df_operations import change_field_on_several_ids_to_value, filter_df_several_values, how_many_rows, \
     result_function_applied_to_field, get_one_field, change_field_on_single_id_to_value, get_this_field_from_this_id
-from operations.formatting import parse_ids
-from read_write.file_manager import read_data, save_data, set_field_to_value_on_ids, default_value, \
+from arlo.operations.formatting import parse_ids
+from arlo.read_write.file_manager import read_data, save_data, set_field_to_value_on_ids, default_value, \
     set_field_to_value_on_ids_deposit_input
-from web.status import success_response, failure_response
+from arlo.web.status import success_response, failure_response
 
 
 def rename(transaction_id, transaction_name):

@@ -2,22 +2,22 @@ import pandas as pd
 from flask import json, request, make_response, jsonify
 from flask_restful import Resource
 
-from operations.types_operations import string_to_bool
-from parameters.param import deposit_type
-from read_write.select_data import get_deposit_input_and_output
-from services.create_delete import create_manual_transaction, create_single_recurring, \
+from arlo.operations.types_operations import string_to_bool
+from arlo.parameters.param import deposit_type
+from arlo.read_write.select_data import get_deposit_input_and_output
+from arlo.services.create_delete import create_manual_transaction, create_single_recurring, \
     create_name_references_if_possible, remove_data_on_id_if_possible, create_several_recurring, \
     create_transfer_if_possible, create_deposit, remove_deposit_input_on_id_if_possible, \
     create_deposit_references_if_possible
-from services.list import all_categories, all_accounts, all_cycles, all_recurring, data, local_cycles, \
+from arlo.services.list import all_categories, all_accounts, all_cycles, all_recurring, data, local_cycles, \
     all_recurring_deposit, all_deposit_names, cycle_budgets
-from services.services import force_refresh, get_recap_categories, split_transaction, \
+from arlo.services.services import force_refresh, get_recap_categories, split_transaction, \
     create_deposit_debit, get_state_deposit, bank_balances, cycle_balances, get_transfers_to_do, delete_deposit_debit, \
     edit_budgets, cycle_calendar, edit_calendar, input_overview, force_api_refresh
-from services.set_fields import link_ids_if_possible, unlink_ids_if_possible, edit_transaction
-from tools.cycle_manager import progress
-from tools.logging import warn
-from web.authentication import generate_new_token, login_is_valid, ResourceWithAuth
+from arlo.services.set_fields import link_ids_if_possible, unlink_ids_if_possible, edit_transaction
+from arlo.tools.cycle_manager import progress
+from arlo.tools.logging import warn
+from arlo.web.authentication import generate_new_token, login_is_valid, ResourceWithAuth
 
 
 def make_this_amount_item(series):

@@ -1,16 +1,16 @@
 import json
 
-from operations.df_operations import select_columns
-from operations.series_operations import filter_series_on_value
-from parameters.column_names import deposit_name_col
-from parameters.param import data_columns_front
-from read_write.file_manager import read_recurring_deposit
-from read_write.select_data import get_data_this_cycle_not_deposit, get_deposit_input_and_output
-from tools.autofill_manager import read_autofill_dictionary
-from tools.cycle_manager import cycle_now, cycles_before_after
-from tools.recurring_manager import get_possible_recurring
-from tools.summary_by_field import get_budgets
-from tools.uniform_data_maker import format_for_front
+from arlo.operations.df_operations import select_columns
+from arlo.operations.series_operations import filter_series_on_value
+from arlo.parameters.column_names import deposit_name_col
+from arlo.parameters.param import data_columns_front
+from arlo.read_write.file_manager import read_recurring_deposit
+from arlo.read_write.select_data import get_data_this_cycle_not_deposit, get_deposit_input_and_output
+from arlo.tools.autofill_manager import read_autofill_dictionary
+from arlo.tools.cycle_manager import cycle_now, cycles_before_after
+from arlo.tools.recurring_manager import get_possible_recurring
+from arlo.tools.summary_by_field import get_budgets
+from arlo.tools.uniform_data_maker import format_for_front
 
 
 def all_categories(cycle='all'):

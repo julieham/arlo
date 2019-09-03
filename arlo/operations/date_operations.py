@@ -3,8 +3,8 @@ import time
 
 import pandas as pd
 
-from operations.types_operations import sorted_set
-from parameters.param import view_months_before, view_months_after
+from arlo.operations.types_operations import sorted_set
+from arlo.parameters.param import view_months_before, view_months_after
 
 
 def now():

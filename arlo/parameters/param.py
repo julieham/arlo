@@ -1,4 +1,4 @@
-from parameters.column_names import *
+from arlo.parameters.column_names import *
 
 ## CATEGORIES
 link_category = 'Link'

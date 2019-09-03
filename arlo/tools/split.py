@@ -1,13 +1,13 @@
 from copy import deepcopy
 
-from operations.date_operations import datetime_to_timestamp, get_timestamp_now
-from operations.df_operations import filter_df_on_id, concat_lines, reverse_amount, assign_new_column, \
+from arlo.operations.date_operations import datetime_to_timestamp, get_timestamp_now
+from arlo.operations.df_operations import filter_df_on_id, concat_lines, reverse_amount, assign_new_column, \
     apply_function_to_field_overrule, set_value_to_column, df_is_not_empty
-from operations.series_operations import get_first_value_from_series
-from read_write.file_manager import read_data, add_new_data
-from services.set_fields import link_ids_if_possible
-from tools.uniform_data_maker import create_id
-from web.status import failure_response, success_response
+from arlo.operations.series_operations import get_first_value_from_series
+from arlo.read_write.file_manager import read_data, add_new_data
+from arlo.services.set_fields import link_ids_if_possible
+from arlo.tools.uniform_data_maker import create_id
+from arlo.web.status import failure_response, success_response
 
 
 def make_refund_split_transaction(transaction):

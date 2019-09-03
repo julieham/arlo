@@ -1,17 +1,17 @@
-from operations.data_operations import missing_valid_amount, missing_mandatory_field, get_bank_name_from_id, \
+from arlo.operations.data_operations import missing_valid_amount, missing_mandatory_field, get_bank_name_from_id, \
     get_deposit_name_from_provision_id
-from operations.df_operations import add_field_with_default_value, reverse_amount
-from operations.types_operations import dict_to_df
-from parameters.param import auto_accounts, deposit_name_col, category_col
-from read_write.file_manager import add_new_data, remove_data_on_id, add_new_deposit, remove_deposit_input_on_id
-from read_write.select_data import get_transaction_with_id
-from services.set_fields import rename, categorize, link_ids_if_possible, categorize_deposit_input
-from tools.autofill_manager import add_reference
-from tools.logging import warn, info, info_df
-from tools.recurring_manager import get_possible_recurring
-from tools.uniform_data_maker import format_manual_transaction, format_recurring_transaction, create_id, \
+from arlo.operations.df_operations import add_field_with_default_value, reverse_amount
+from arlo.operations.types_operations import dict_to_df
+from arlo.parameters.param import auto_accounts, deposit_name_col, category_col
+from arlo.read_write.file_manager import add_new_data, remove_data_on_id, add_new_deposit, remove_deposit_input_on_id
+from arlo.read_write.select_data import get_transaction_with_id
+from arlo.services.set_fields import rename, categorize, link_ids_if_possible, categorize_deposit_input
+from arlo.tools.autofill_manager import add_reference
+from arlo.tools.logging import warn, info, info_df
+from arlo.tools.recurring_manager import get_possible_recurring
+from arlo.tools.uniform_data_maker import format_manual_transaction, format_recurring_transaction, create_id, \
     turn_deposit_data_into_df, format_deposit_df
-from web.status import success_response, is_successful, failure_response, merge_status
+from arlo.web.status import success_response, is_successful, failure_response, merge_status
 
 
 def create_manual_transaction(transaction_fields):

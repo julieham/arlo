@@ -1,4 +1,4 @@
-from read_write.permissions import set_file_as_read_write, set_file_as_read_only
+from arlo.read_write.permissions import set_file_as_read_write, set_file_as_read_only
 
 
 def write_df_to_csv(df, filename, sep=';', header=True, index=True):

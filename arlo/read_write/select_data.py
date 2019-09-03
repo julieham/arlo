@@ -1,8 +1,8 @@
-from operations.df_operations import filter_df_not_this_value, column_is_null, filter_df_on_bools, concat_lines, \
+from arlo.operations.df_operations import filter_df_not_this_value, column_is_null, filter_df_on_bools, concat_lines, \
     filter_df_one_value, sort_df_by_descending_date
-from parameters.column_names import deposit_name_col, account_col
-from read_write.file_manager import read_data, read_deposit_input
-from tools.cycle_manager import filter_df_on_cycle
+from arlo.parameters.column_names import deposit_name_col, account_col
+from arlo.read_write.file_manager import read_data, read_deposit_input
+from arlo.tools.cycle_manager import filter_df_on_cycle
 
 
 def get_data_from_cycle(cycle):
