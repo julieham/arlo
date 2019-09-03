@@ -1,4 +1,3 @@
-import pandas as pd
 from flask import json, request, make_response, jsonify
 from flask_restful import Resource
 
@@ -18,16 +17,13 @@ from arlo.services.set_fields import link_ids_if_possible, unlink_ids_if_possibl
 from arlo.tools.cycle_manager import progress
 from arlo.tools.logging import warn
 from arlo.web.authentication import generate_new_token, login_is_valid, ResourceWithAuth
+from arlo.web.status import success_response, failure_response
 
 
-def make_this_amount_item(series):
-    if type(series) != pd.Series:
-        series = pd.Series(series)
-    series = series.rename('amount').rename_axis('description').reset_index()
-    return json.loads(series.to_json(orient='records'))
-
-
-from web.status import success_response, failure_response
+def make_this_amount_item(df):
+    df.index.names = ['description']
+    df.reset_index(inplace=True)
+    return json.loads(df.to_json(orient='records'))
 
 
 # %% LOGIN
@@ -348,4 +344,5 @@ class AmountsInput(ResourceWithAuth):
     @staticmethod
     def get():
         cycle = request.args.get('cycle')
-        return make_this_amount_item(input_overview(cycle))
+        u = input_overview(cycle)
+        return make_this_amount_item(u)

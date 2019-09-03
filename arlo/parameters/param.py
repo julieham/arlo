@@ -85,3 +85,4 @@ bankin_dictionary = dict({'date': date_col,
 auto_accounts = [thomus_account, julie_account, lunchr_account_name]
 no_recap_categories = [link_category, input_category]
 minutes_valid_token = 60
+default_currency = 'EUR'
