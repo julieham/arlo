@@ -90,6 +90,7 @@ def delete_deposit_debit(id_tr):
 def get_state_deposit(filter_null):
     selected_columns = [deposit_name_col, amount_euro_col]
     deposit = select_columns(get_deposit_input_and_output(), selected_columns)
+    add_column_with_value(deposit, currency_col, default_currency)
     deposit_state = group_by_field(deposit, deposit_name_col).round(decimals=2)
     if filter_null:
         deposit_state = deposit_state[deposit_state != 0]
