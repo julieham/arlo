@@ -1,4 +1,5 @@
 from arlo.tools.summary_by_field import recap_by_account
+from parameters.column_names import amount_euro_col
 
 TRANSFER = '>>'
 
@@ -40,6 +41,8 @@ def add_to_balance(balances, name, amount):
 
 
 def not_all_balances_are_zero(balances):
+    print('#not_all_balances')
+    print(balances)
     values = [round(bal, ndigits=2) for bal in balances.values()]
     return set(values) != {0}
 
@@ -67,5 +70,6 @@ def balances_to_transfers(balances):
 def get_end_of_cycle_balances(cycle):
     bilan_this_cycle = recap_by_account(cycle)
     other_accounts = [acc for acc in bilan_this_cycle.index.tolist() if acc.endswith('N26') == False]
-    bilan_this_cycle.at['Hello & Co'] = sum(bilan_this_cycle.loc[other_accounts])
+    bilan_this_cycle.at['Hello & Co', amount_euro_col] = sum(bilan_this_cycle.loc[other_accounts, amount_euro_col])
+    bilan_this_cycle = bilan_this_cycle[amount_euro_col]
     return bilan_this_cycle.drop(labels=other_accounts).to_dict()
