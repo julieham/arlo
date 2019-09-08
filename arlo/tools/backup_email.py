@@ -23,7 +23,7 @@ def send_email_backup_data(body='Hi Arlo, here is your data.', subject=' Refresh
     msg['Subject'] = subject
     msg.attach(MIMEText(body))
 
-    for filename in ['data', 'provisions']:
+    for filename in ['data', 'provisions', 'budgets']:
         attachment = data_directory + filename + '.csv'
         ctype, _ = mimetypes.guess_type(attachment)
         maintype, subtype = ctype.split("/", 1)

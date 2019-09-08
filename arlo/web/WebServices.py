@@ -244,8 +244,6 @@ class EditBudget(ResourceWithAuth):
     def post():
         cycle = request.args.get('cycle')
         budgets = json.dumps(request.json['budgets'])
-        print(budgets)
-        print(cycle)
         edit_budgets(budgets, cycle)
 
 
@@ -316,7 +314,8 @@ class GetBudgets(ResourceWithAuth):
     @staticmethod
     def get():
         cycle = request.args.get('cycle')
-        return make_this_amount_item(cycle_budgets(cycle))
+        budgets = make_this_amount_item(cycle_budgets(cycle))
+        return budgets
 
 
 class GetCyclesCalendar(ResourceWithAuth):

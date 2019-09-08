@@ -47,10 +47,10 @@ def get_budgets(cycle):
         budgets = budgets[budgets[cycle_col] == decode_cycle(cycle)]
 
     if df_is_not_empty(budgets):
-        budgets = budgets.groupby(category_col).apply(sum)[amount_euro_col]
-        return budgets.rename(budgets_col)
+        budgets = budgets.groupby(category_col).apply(sum)[[amount_euro_col, currency_col]]
+        return budgets
 
-    return empty_series().rename(budgets_col)
+    return empty_df(columns=[amount_euro_col, currency_col])
 
 
 """
@@ -84,11 +84,13 @@ def recap_by_cat(cycle, round_it=True):
     if df_is_empty(all_output):
         return empty_df()
 
-    spent = group_by_field(all_output, category_col)
+    spent = group_by_field(all_output, category_col).set_index(currency_col, append=True)
     if df_is_empty(spent):
         return empty_df()
 
-    recap = concat_columns([spent, get_budgets(cycle)], keep_index_name=True).round(2).fillna(0).reset_index()
+    budgets = get_budgets(cycle).set_index(currency_col, append=True).rename(columns={amount_euro_col: budgets_col})
+
+    recap = concat_columns([spent, budgets], keep_index_name=True).round(2).fillna(0).reset_index()
     recap = filter_df_not_these_values(recap, category_col, no_recap_categories)
 
     over = positive_part(- recap[amount_euro_col] - recap[budgets_col])
@@ -156,7 +158,7 @@ def input_recap(cycle):
     recap_by_category = recap_by_cat(cycle, False)
     if cycle_is_finished(cycle):
         overview['Input goal'] = - round(sum(recap_by_category['amount']), 2)
-        overview['(actual) Over'] = overview['Input goal'] - sum(get_budgets(cycle))
+        overview['(actual) Over'] = overview['Input goal'] - sum(get_budgets(cycle)[amount_euro_col])
     else:
         overview['Budgets'] = round(sum(recap_by_category['budget']), 2)
         overview['Over (so far)'] = round(sum(recap_by_category['over']), 2)

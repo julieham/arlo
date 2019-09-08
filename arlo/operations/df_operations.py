@@ -207,8 +207,8 @@ def empty_series():
     return pd.Series()
 
 
-def empty_df():
-    return pd.DataFrame()
+def empty_df(columns=None):
+    return pd.DataFrame(columns=columns)
 
 
 def null_value():

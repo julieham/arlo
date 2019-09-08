@@ -97,7 +97,6 @@ def get_state_deposit(filter_null):
 
 
 def edit_budgets(budgets, cycle):
-    print(budgets)
     budgets_df = json_to_df(budgets, orient='records')
     add_column_with_value(budgets_df, cycle_col, cycle)
     return edit_budgets_cycle(budgets_df)
