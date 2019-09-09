@@ -3,10 +3,10 @@ import pandas as pd
 from arlo.operations.df_operations import df_is_not_empty, assign_new_column, concat_columns, empty_series, df_is_empty, \
     filter_df_not_these_values, select_columns, concat_lines, filter_df_on_bools, column_is_null, \
     add_column_with_value, reverse_amount, empty_df, drop_columns, total_amount, \
-    filter_df_one_value
+    filter_df_one_value, series_is_null, get_one_field, assign_value_to_bool_rows, rename_columns
 from arlo.operations.series_operations import positive_part, ceil_series, floor_series
 from arlo.parameters.column_names import category_col, amount_euro_col, cycle_col, deposit_name_col, account_col, \
-    currency_col
+    currency_col, amount_orig_col, currency_orig_col
 from arlo.parameters.param import no_recap_categories, deposit_account, default_currency
 from arlo.read_write.file_manager import read_budgets, read_data
 from arlo.read_write.select_data import get_data_from_cycle, get_deposit_debits_from_cycle
@@ -88,7 +88,8 @@ def recap_by_cat(cycle, round_it=True):
     if df_is_empty(spent):
         return empty_df()
 
-    budgets = get_budgets(cycle).set_index(currency_col, append=True).rename(columns={amount_euro_col: budgets_col})
+    budgets = get_budgets(cycle).set_index(currency_col, append=True)
+    rename_columns(budgets, {amount_euro_col: budgets_col})
 
     recap = concat_columns([spent, budgets], keep_index_name=True).round(2).fillna(0).reset_index()
     recap = filter_df_not_these_values(recap, category_col, no_recap_categories)
@@ -132,7 +133,7 @@ def recap_by_account(cycle):
 
     cycle = decode_cycle(cycle)
     data = get_data_from_cycle(cycle)
-    add_column_with_value(data, currency_col, default_currency)
+    process_currency_data(data)
 
     if cycle != 'all':
         is_deposit = column_is_null(data, deposit_name_col) == False
@@ -149,7 +150,6 @@ def recap_by_account(cycle):
     all_outputs = select_columns(data, selected_columns)
     recap = group_by_field(all_outputs, field_name).round(decimals=2)
     return recap
-
 
 
 def input_recap(cycle):
@@ -175,3 +175,16 @@ def input_recap(cycle):
     overview = pd.Series(overview).rename('amount', inplace=True).to_frame()
     add_column_with_value(overview, currency_col, default_currency)
     return overview
+
+
+def process_currency_data(df):
+    temp_amount_col, temp_currency_col = 'my_amount', 'my_currency'
+    assign_new_column(df, temp_amount_col, get_one_field(df, amount_orig_col))
+    assign_new_column(df, temp_currency_col, get_one_field(df, currency_orig_col))
+
+    has_euro_amount = series_is_null(get_one_field(df, amount_euro_col)) == False
+
+    assign_value_to_bool_rows(df, has_euro_amount, temp_amount_col, get_one_field(df, amount_euro_col))
+    assign_value_to_bool_rows(df, has_euro_amount, temp_currency_col, default_currency)
+    drop_columns(df, [amount_euro_col, amount_orig_col, currency_orig_col])
+    rename_columns(df, {temp_amount_col: amount_euro_col, temp_currency_col: currency_col})

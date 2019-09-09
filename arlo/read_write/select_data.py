@@ -1,8 +1,9 @@
 from arlo.operations.df_operations import filter_df_not_this_value, column_is_null, filter_df_on_bools, concat_lines, \
-    filter_df_one_value, sort_df_by_descending_date
-from arlo.parameters.column_names import deposit_name_col, account_col
+    filter_df_one_value, sort_df_by_descending_date, add_column_with_value
+from arlo.parameters.column_names import deposit_name_col, account_col, currency_col
 from arlo.read_write.file_manager import read_data, read_deposit_input
 from arlo.tools.cycle_manager import filter_df_on_cycle
+from parameters.param import default_currency
 
 
 def get_data_from_cycle(cycle):
@@ -12,6 +13,7 @@ def get_data_from_cycle(cycle):
 def get_deposit_debits_from_cycle(cycle):
     deposit = filter_df_on_cycle(read_deposit_input(), cycle)
     deposit['amount'] = - deposit['amount']
+    add_column_with_value(deposit, currency_col, default_currency)
     return deposit
 
 

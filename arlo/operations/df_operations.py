@@ -69,6 +69,10 @@ def drop_columns(df, fields):
     enable_chained_assignment_warning()
 
 
+def rename_columns(df, dict_names):
+    df.rename(columns=dict_names, inplace=True)
+
+
 def remove_invalid_ids(df):
     invalid_ids = pd.isnull(df['id'])
     invalid_ids = invalid_ids[invalid_ids == True]

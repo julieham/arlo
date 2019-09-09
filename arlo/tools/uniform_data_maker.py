@@ -8,12 +8,11 @@ from arlo.operations.df_operations import drop_other_columns, remove_invalid_ids
     apply_function_to_field_overrule, add_field_with_default_value, sort_df_by_descending_date, \
     apply_function_to_field_no_overrule, disable_chained_assignment_warning, \
     enable_chained_assignment_warning, assign_value_to_empty_in_existing_column, both_series_are_true, \
-    assign_value_to_loc
+    assign_value_to_loc, rename_columns
 from arlo.operations.df_operations import get_one_field, filter_df_on_bools, reverse_amount, add_prefix_to_column, \
     assign_new_column, concat_lines
 from arlo.operations.formatting import make_bank_name
 from arlo.operations.types_operations import encode_id, clean_parenthesis
-from arlo.parameters.column_names import type_trans_col, category_col, deposit_name_col
 from arlo.parameters.param import *
 from arlo.read_write.file_manager import default_value
 from arlo.tools.autofill_df import add_new_column_autofilled, fill_existing_column_with_autofill
@@ -54,7 +53,7 @@ def lunchr_credit_card_amount(details):
 
 
 def format_lunchr_df(lunchr_df):
-    lunchr_df.rename(columns=lunchr_dictionary, inplace=True)
+    rename_columns(lunchr_df, lunchr_dictionary)
 
     apply_function_to_field_overrule(lunchr_df, 'lunchr_details', lunchr_credit_card_amount,
                                      destination='credit_card_amount')
@@ -253,7 +252,7 @@ def clean_bankin_name(name):
 
 
 def format_bankin_df(bankin_df):
-    bankin_df.rename(columns=bankin_dictionary, inplace=True)
+    rename_columns(bankin_df, bankin_dictionary)
 
     apply_function_to_field_overrule(bankin_df, bank_name_col, bankin_name_to_type, destination='type')
 
