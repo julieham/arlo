@@ -2,7 +2,7 @@ import hashlib
 
 import pandas as pd
 
-from arlo.operations.df_operations import concat_lines
+from arlo.operations.df_operations import concat_lines, new_dataframe
 
 
 def string_to_float(string):
@@ -22,7 +22,7 @@ def string_is_AA(string):
 
 def dict_to_df(dictionary):
     dictionary = dict_to_dfreadable_dict(dictionary)
-    df = pd.DataFrame(dictionary)
+    df = new_dataframe(dictionary)
     return df.mask(df == '')
 
 
@@ -80,3 +80,7 @@ def json_to_df(json_input, orient):
 
 def string_to_bool(b):
     return b.lower() == 'true'
+
+
+def value_is_nan(value):
+    return pd.isnull(value)

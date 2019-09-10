@@ -1,4 +1,3 @@
-import pandas as pd
 from numpy import NaN
 
 from arlo.operations.data_operations import set_amounts_to_numeric
@@ -8,7 +7,7 @@ from arlo.operations.df_operations import drop_other_columns, remove_invalid_ids
     apply_function_to_field_overrule, add_field_with_default_value, sort_df_by_descending_date, \
     apply_function_to_field_no_overrule, disable_chained_assignment_warning, \
     enable_chained_assignment_warning, assign_value_to_empty_in_existing_column, both_series_are_true, \
-    assign_value_to_loc, rename_columns
+    assign_value_to_loc, rename_columns, not_series, new_dataframe
 from arlo.operations.df_operations import get_one_field, filter_df_on_bools, reverse_amount, add_prefix_to_column, \
     assign_new_column, concat_lines
 from arlo.operations.formatting import make_bank_name
@@ -170,7 +169,7 @@ def _calculate_pending_column(data):
 
 
 def _calculate_manual_column(data):
-    return data[account_col].isin(auto_accounts) == False
+    return not_series(get_one_field(data, account_col).isin(auto_accounts))
 
 
 def _calculate_refund_column(data):
@@ -210,7 +209,7 @@ def turn_deposit_data_into_df(deposit_data):
                 actives[key_id] = item
             else:
                 amounts[key_id] = item
-    deposit_df = pd.DataFrame({amount_euro_col: amounts, name_col: names, 'angular_date': ang_date})
+    deposit_df = new_dataframe({amount_euro_col: amounts, name_col: names, 'angular_date': ang_date})
     return deposit_df[actives]
 
 

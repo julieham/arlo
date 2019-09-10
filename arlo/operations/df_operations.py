@@ -74,7 +74,7 @@ def rename_columns(df, dict_names):
 
 
 def remove_invalid_ids(df):
-    invalid_ids = pd.isnull(df['id'])
+    invalid_ids = series_is_null(df['id'])
     invalid_ids = invalid_ids[invalid_ids == True]
     df.drop(list(invalid_ids.index), inplace=True)
 
@@ -136,13 +136,13 @@ def assign_new_column(df, column_name, column_content):
 
 def assign_content_to_existing_column(df, column_name, column_content, overrule=False):
     disable_chained_assignment_warning()
-    indexes = df.index if overrule else pd.isnull(df[column_name])
+    indexes = df.index if overrule else series_is_null(get_one_field(df, column_name))
     df.loc[indexes, column_name] = column_content[indexes]
 
 
 def assign_value_to_empty_in_existing_column(df, column_name, column_value):
     disable_chained_assignment_warning()
-    indexes = pd.isnull(df[column_name])
+    indexes = series_is_null(get_one_field(df, column_name))
     df.loc[indexes, column_name] = column_value
     enable_chained_assignment_warning()
 
@@ -223,6 +223,10 @@ def series_is_null(series):
     return pd.isnull(series)
 
 
+def not_series(series):
+    return series == False
+
+
 def filter_df_on_id(data, id):
     return filter_df_one_value(data, 'id', id)
 
@@ -301,5 +305,13 @@ def df_is_empty(df):
     return df.shape[0] == 0
 
 
+def sum_no_skip_na(x):
+    return x.sum(skipna=False)
+
+
 def total_amount(df):
-    return sum(df['amount'])
+    return sum_no_skip_na(df['amount'])
+
+
+def new_dataframe(dictionary):
+    return pd.DataFrame(dictionary)
