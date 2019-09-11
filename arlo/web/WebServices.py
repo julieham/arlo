@@ -153,7 +153,7 @@ class GetRecurring(ResourceWithAuth):
         return all_recurring()
 
 
-class GetAllCycles(ResourceWithAuth):
+class GetAllCycles(Resource):
     @staticmethod
     def get():
         return json.loads(all_cycles())
