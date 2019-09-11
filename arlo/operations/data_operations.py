@@ -33,9 +33,10 @@ def remove_already_present_id(df, account, limit=None):
 def missing_valid_amount(df):
     try:
         valid_amount = not_series(series_is_null(df[amount_euro_col]))
-        # valid_original = not_series(series_is_null(get_one_field(df, amount_orig_col))) & not_series(series_is_null(get_one_field(df, currency_orig_col)))
-        # amounts = new_dataframe({'valid_amount': valid_amount, 'valid_original': valid_original})
-        return not valid_amount.any(axis=None)  # amounts.any(axis=None)
+        valid_original = not_series(series_is_null(get_one_field(df, amount_orig_col))) & not_series(
+            series_is_null(get_one_field(df, currency_orig_col)))
+        amounts = new_dataframe({'valid_amount': valid_amount, 'valid_original': valid_original})
+        return not amounts.any(axis=None)
     except KeyError:
         return True
 

@@ -9,7 +9,7 @@ from arlo.services.create_delete import create_manual_transaction, create_single
     create_transfer_if_possible, create_deposit, remove_deposit_input_on_id_if_possible, \
     create_deposit_references_if_possible
 from arlo.services.list import all_categories, all_accounts, all_cycles, all_recurring, data, local_cycles, \
-    all_recurring_deposit, all_deposit_names, cycle_budgets
+    all_recurring_deposit, all_deposit_names, cycle_budgets, all_currencies
 from arlo.services.services import force_refresh, get_recap_categories, split_transaction, \
     create_deposit_debit, get_state_deposit, bank_balances, cycle_balances, get_transfers_to_do, delete_deposit_debit, \
     edit_budgets, cycle_calendar, edit_calendar, input_overview, force_api_refresh
@@ -65,6 +65,7 @@ class CreateManualTransaction(ResourceWithAuth):
     @staticmethod
     def post():
         json_input = request.json
+        print(json_input)
         response = create_manual_transaction(json_input)
         return response
 
@@ -168,6 +169,12 @@ class GetAccounts(ResourceWithAuth):
     @staticmethod
     def get():
         return json.loads(all_accounts())
+
+
+class GetCurrencies(ResourceWithAuth):
+    @staticmethod
+    def get():
+        return json.loads(all_currencies())
 
 
 class GetCategories(ResourceWithAuth):

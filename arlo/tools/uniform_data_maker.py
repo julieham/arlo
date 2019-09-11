@@ -303,3 +303,14 @@ def process_lunchr_cb_transaction(lunchr_df):
     assign_new_column(actual_transactions, deposit_name_col, 'Lunchr Buffer')
 
     return concat_lines([refunds_transactions, split_transactions, actual_transactions, regular_transactions])
+
+
+def format_manual_amount(transaction_fields):
+    if transaction_fields[currency_col] == default_currency:
+        transaction_fields[currency_orig_col] = NaN
+        transaction_fields[amount_orig_col] = NaN
+        return transaction_fields
+    transaction_fields[currency_orig_col] = transaction_fields[currency_col]
+    transaction_fields[amount_orig_col] = transaction_fields[amount_euro_col]
+    transaction_fields[amount_euro_col] = NaN
+    return transaction_fields

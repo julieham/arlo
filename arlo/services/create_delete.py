@@ -10,12 +10,13 @@ from arlo.tools.autofill_manager import add_reference
 from arlo.tools.logging import warn, info, info_df
 from arlo.tools.recurring_manager import get_possible_recurring
 from arlo.tools.uniform_data_maker import format_manual_transaction, format_recurring_transaction, create_id, \
-    turn_deposit_data_into_df, format_deposit_df
+    turn_deposit_data_into_df, format_deposit_df, format_manual_amount
 from arlo.web.status import success_response, is_successful, failure_response, merge_status
 
 
 def create_manual_transaction(transaction_fields):
     warn('#create_manual ---------------')
+    format_manual_amount(transaction_fields)
     df = dict_to_df(transaction_fields)
     info_df(df)
     valid_response = is_valid_transaction_df(df)
@@ -51,6 +52,8 @@ def create_several_recurring(how_many_recurring):
 
 
 def is_valid_transaction_df(df):
+    print('#is_valid_transaction')
+    print(df)
     if missing_valid_amount(df):
         return failure_response('no valid amount')
 

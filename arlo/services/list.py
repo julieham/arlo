@@ -23,6 +23,11 @@ def all_accounts():
     return json.dumps(list(accounts.index))
 
 
+def all_currencies():
+    currencies = filter_series_on_value(read_autofill_dictionary('currency-to-active'), True)
+    return json.dumps(list(currencies.index))
+
+
 def all_cycles():
     cycle_today = cycle_now()
     surrounding_cycles = cycles_before_after(cycle_today)
