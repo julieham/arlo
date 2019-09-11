@@ -65,6 +65,7 @@ def get_exchange_rate(data):
 
 
 def recap_by_cat(cycle, round_it=True):
+    output_columns = ['category', 'currency', 'spent', 'remaining', 'spent_from_budget', 'amount', 'budget', 'over']
     data = get_data_from_cycle(cycle)
     deposit = get_deposit_debits_from_cycle(cycle)
 
@@ -79,11 +80,11 @@ def recap_by_cat(cycle, round_it=True):
 
     all_output = concat_lines([data, deposit])
     if df_is_empty(all_output):
-        return empty_df()
+        return empty_df(columns=output_columns)
 
     spent = group_by_field(all_output, category_col).set_index(currency_col, append=True)
     if df_is_empty(spent):
-        return empty_df()
+        return empty_df(columns=output_columns)
 
     budgets = get_budgets(cycle).set_index(currency_col, append=True)
     rename_columns(budgets, {amount_euro_col: budgets_col})

@@ -128,10 +128,12 @@ def extract_line_from_df(index, df):
 
 
 def assign_new_column(df, column_name, column_content):
+    disable_chained_assignment_warning()
     if df_is_not_empty(df):
-        disable_chained_assignment_warning()
         df.loc[:, column_name] = column_content[:]
-        enable_chained_assignment_warning()
+    else:
+        df.assign(column_name=None)
+    enable_chained_assignment_warning()
 
 
 def assign_content_to_existing_column(df, column_name, column_content, overrule=False):
@@ -149,7 +151,10 @@ def assign_value_to_empty_in_existing_column(df, column_name, column_value):
 
 def assign_value_to_bool_rows(df, bool_series, column_name, value):
     disable_chained_assignment_warning()
-    df.loc[bool_series, column_name] = value
+    if df_is_empty(df):
+        df.assign(column_name=None)
+    else:
+        df.loc[bool_series, column_name] = value
     enable_chained_assignment_warning()
 
 
@@ -266,7 +271,8 @@ def remove_immutable_indexes(df, indexes, field_name):
 
 
 def reverse_amount(df):
-    assign_new_column(df, 'amount', - df['amount'])
+    if df_is_not_empty(df):
+        assign_new_column(df, 'amount', - df['amount'])
 
 
 def set_value_to_column(df, column_name, column_value):

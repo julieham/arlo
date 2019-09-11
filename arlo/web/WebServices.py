@@ -18,11 +18,13 @@ from arlo.tools.cycle_manager import progress
 from arlo.tools.logging import warn
 from arlo.web.authentication import generate_new_token, login_is_valid, ResourceWithAuth
 from arlo.web.status import success_response, failure_response
+from operations.df_operations import df_is_not_empty
 
 
 def make_this_amount_item(df):
-    df.index.names = ['description']
-    df.reset_index(inplace=True)
+    if df_is_not_empty(df):
+        df.index.names = ['description']
+        df.reset_index(inplace=True)
     return json.loads(df.to_json(orient='records'))
 
 
