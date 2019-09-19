@@ -23,9 +23,15 @@ def is_fail(response):
     return response['status'] == fail_value
 
 
-def merge_status(response1, response2):
-    if is_successful(response1):
-        return response2
-    if is_fail(response1) and is_fail(response2):
-        return failure_response(response1['message'] + ' ; ' + response2['message'])
-    return response1
+def merge_status(responses):
+    if len(responses) == 0:
+        return success_response()
+    if len(responses) == 1:
+        return responses[0]
+    current_status = responses.pop(0)
+    other_statuses = merge_status(responses)
+    if is_successful(current_status):
+        return other_statuses
+    if is_fail(current_status) and is_fail(other_statuses):
+        return failure_response(current_status['message'] + ' ; ' + other_statuses['message'])
+    return current_status

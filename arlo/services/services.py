@@ -27,7 +27,7 @@ def refresh_n26():
         status, latest_data = get_latest_n26(account)
         merge_with_data(latest_data, account)
         all_status.append(status)
-    return merge_status(all_status[0], all_status[1])
+    return merge_status(all_status)
 
 
 def force_refresh():

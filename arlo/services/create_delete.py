@@ -83,7 +83,7 @@ def create_name_references_if_possible(this_id, name, category):
     else:
         return status_category
 
-    return merge_status(name_ref_added, cat_ref_added)
+    return merge_status([name_ref_added, cat_ref_added])
 
 
 def create_deposit_references_if_possible(this_id, category):

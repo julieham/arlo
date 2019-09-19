@@ -16,6 +16,7 @@ from arlo.parameters.param import *
 from arlo.read_write.file_manager import default_value
 from arlo.tools.autofill_df import add_new_column_autofilled, fill_existing_column_with_autofill
 from arlo.tools.cycle_manager import date_to_cycle
+from read_write.reader import empty_data_dataframe
 
 
 def create_id(df):
@@ -81,6 +82,8 @@ def format_lunchr_df(lunchr_df):
 
 
 def format_n26_df(n26_df, account):
+    if 'status' in n26_df.columns:
+        return empty_data_dataframe()
     n26_df[bank_name_col] = n26_df.replace(NaN, '').apply(lambda row: make_bank_name(row), axis=1)
 
     _remove_original_amount_when_euro(n26_df)
