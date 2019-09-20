@@ -2,8 +2,8 @@ import pandas as pd
 
 from arlo.operations.df_operations import df_is_not_empty, assign_new_column, concat_columns, empty_series, df_is_empty, \
     filter_df_not_these_values, select_columns, concat_lines, filter_df_on_bools, column_is_null, \
-    add_column_with_value, reverse_amount, empty_df, drop_columns, total_amount, \
-    filter_df_one_value, rename_columns, sum_no_skip_na
+    add_column_with_value, reverse_amount, empty_df, drop_columns, filter_df_one_value, rename_columns, sum_no_skip_na, \
+    total_euro_amount
 from arlo.operations.series_operations import positive_part, ceil_series, floor_series
 from arlo.parameters.column_names import category_col, amount_euro_col, cycle_col, deposit_name_col, account_col, \
     currency_col
@@ -163,7 +163,7 @@ def input_recap(cycle):
         overview['Input goal'] = overview['Budgets'] + overview['Over (so far)']
 
     data_this_cycle_input = filter_df_one_value(data_this_cycle, 'category', 'Input')
-    overview['Done'] = total_amount(data_this_cycle_input)
+    overview['Done'] = total_euro_amount(data_this_cycle_input)
     remaining = round(overview['Input goal'] - overview['Done'], 2)
     if remaining > 0:
         overview['Remaining TO DO'] = remaining

@@ -4,7 +4,7 @@ import pandas as pd
 
 # %% PANDAS STUFF
 from arlo.operations.series_operations import get_first_value_from_series
-from arlo.parameters.column_names import date_col
+from arlo.parameters.column_names import date_col, amount_euro_col
 from arlo.parameters.param import immutable_values
 
 
@@ -316,7 +316,11 @@ def sum_no_skip_na(x):
 
 
 def total_amount(df):
-    return sum_no_skip_na(df['amount'])
+    return sum_no_skip_na(df[amount_euro_col])
+
+
+def total_euro_amount(df):
+    return (df[amount_euro_col]).sum(skipna=True)
 
 
 def new_dataframe(dictionary):
