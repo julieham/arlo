@@ -1,11 +1,10 @@
 from arlo.operations.df_operations import change_field_on_several_ids_to_value, filter_df_several_values, how_many_rows, \
-    result_function_applied_to_field, get_one_field, change_field_on_single_id_to_value, get_this_field_from_this_id, \
-    sum_no_skip_na
+    result_function_applied_to_field, get_one_field, change_field_on_single_id_to_value, get_this_field_from_this_id
 from arlo.operations.formatting import parse_ids
 from arlo.read_write.file_manager import read_data, save_data, set_field_to_value_on_ids, default_value, \
     set_field_to_value_on_ids_deposit_input
 from arlo.web.status import success_response, failure_response
-from parameters.column_names import amount_euro_col, amount_orig_col, currency_orig_col
+from parameters.column_names import amount_euro_col
 
 
 def rename(transaction_id, transaction_name):
@@ -39,12 +38,7 @@ def link_ids_if_possible(ids):
     if how_many_rows(data_ids) != len(ids):
         return failure_response('at least one transaction missing')
 
-    default_currrency_total = round(result_function_applied_to_field(data_ids, amount_euro_col, sum_no_skip_na), 2)
-    original_currency_total = round(result_function_applied_to_field(data_ids, amount_orig_col, sum_no_skip_na), 2)
-    all_orig_currency = set(get_one_field(data_ids, currency_orig_col))
-    orig_currency_diff = len(all_orig_currency) != 1 | original_currency_total != 0
-
-    if default_currrency_total != 0 & orig_currency_diff:
+    if round(result_function_applied_to_field(data_ids, amount_euro_col, sum), 2) != 0:
         return failure_response('transactions do not cancel each other out')
 
     if present_links_is_not_empty(data_ids):
