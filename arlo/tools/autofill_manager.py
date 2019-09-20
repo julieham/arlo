@@ -2,8 +2,8 @@ from arlo.parameters.param import data_directory
 from arlo.read_write.file_manager import read_series, write_dictionary_to_file
 from web.status import is_fail, success_response, is_successful, failure_response
 
-star_fill_characters = '**'
-nb_char_star_fill = len(star_fill_characters)
+# TODO remove this
+nb_char_former_star_fill = 2
 
 
 def make_dictioname(source, destination):
@@ -11,8 +11,9 @@ def make_dictioname(source, destination):
 
 
 def remove_star_fill(name):
-    if (name[:nb_char_star_fill] == name[-nb_char_star_fill:] == star_fill_characters) and len(name) > 2*nb_char_star_fill:
-        return name[nb_char_star_fill:-nb_char_star_fill]
+    if (name[:nb_char_former_star_fill] == name[-nb_char_former_star_fill:] == '**') and len(
+            name) > 2 * nb_char_former_star_fill:
+        return name[nb_char_former_star_fill:-nb_char_former_star_fill]
     return name
 
 
@@ -30,15 +31,15 @@ def read_autofill_dictionary(dictioname):
     return read_series(_autofill_directory(dictioname))
 
 
-def autofill_series_with_series(source, dictionary, star_fill=False, default_value='-'):
+def autofill_series_with_series(source, dictionary, keep_initial=False, default_value='-'):
     dictionary.index = dictionary.index.str.upper()
-    default_fill = '**' + source.str.title() + star_fill_characters if star_fill else default_value
+    default_fill = source.str.title() if keep_initial else default_value
     return source.str.upper().map(dictionary).fillna(default_fill)
 
 
-def _autofill_series(series, dictioname, star_fill=False, default_value='-'):
+def _autofill_series(series, dictioname, keep_initial=False, default_value='-'):
     dictionary = read_autofill_dictionary(dictioname)
-    return autofill_series_with_series(series, dictionary, star_fill=star_fill, default_value=default_value)
+    return autofill_series_with_series(series, dictionary, keep_initial=keep_initial, default_value=default_value)
 
 
 def _clean_dictionary(dictionary):
