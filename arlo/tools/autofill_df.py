@@ -7,6 +7,7 @@ def fill_missing_with_autofill_dict(data, column_from, dictionary):
     assign_content_to_existing_column(data, dictionary.name, column_content)
 
 
+# TODO remove star fill everywhere
 def add_new_column_autofilled(data, column_from, column_to, star_fill=False, default_value='-'):
     dictioname = make_dictioname(column_from, column_to)
     column_content = _autofill_series(data[column_from], dictioname, star_fill, default_value=default_value)

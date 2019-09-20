@@ -73,9 +73,9 @@ def format_lunchr_df(lunchr_df):
     add_field_with_default_value(lunchr_df, amount_orig_col, '')
     add_field_with_default_value(lunchr_df, currency_orig_col, '')
 
-    add_new_column_autofilled(lunchr_df, bank_name_col, name_col, star_fill=True)
+    add_new_column_autofilled(lunchr_df, bank_name_col, name_col)
     add_new_column_autofilled(lunchr_df, name_col, category_col)
-    add_new_column_autofilled(lunchr_df, 'lunchr_type', 'type', star_fill=True)
+    add_new_column_autofilled(lunchr_df, 'lunchr_type', 'type')
 
     sort_df_by_descending_date(lunchr_df)
     drop_other_columns(lunchr_df, data_columns_all + ['credit_card_amount'])
@@ -96,7 +96,7 @@ def format_n26_df(n26_df, account):
 
     fill_columns_with_default_values(n26_df)
 
-    add_new_column_autofilled(n26_df, bank_name_col, name_col, star_fill=True)
+    add_new_column_autofilled(n26_df, bank_name_col, name_col)
     add_new_column_autofilled(n26_df, name_col, category_col)
     add_new_column_autofilled(n26_df, name_col, deposit_name_col, default_value=NaN)
 
@@ -275,7 +275,7 @@ def format_bankin_df(bankin_df):
     add_field_with_default_value(bankin_df, amount_orig_col, '')
     add_field_with_default_value(bankin_df, currency_orig_col, '')
 
-    add_new_column_autofilled(bankin_df, bank_name_col, name_col, star_fill=True)
+    add_new_column_autofilled(bankin_df, bank_name_col, name_col)
     add_new_column_autofilled(bankin_df, name_col, category_col)
 
     sort_df_by_descending_date(bankin_df)
