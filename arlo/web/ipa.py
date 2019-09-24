@@ -9,6 +9,7 @@ CORS(app)
 ipa = Api(app)
 
 ipa.add_resource(Login, "/login")
+ipa.add_resource(SetUpN26, "/set_up/n26")
 
 ipa.add_resource(GetRecurring, "/list/recurring")
 ipa.add_resource(GetAllCycles, "/list/cycle")
