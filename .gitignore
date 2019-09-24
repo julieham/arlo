@@ -8,6 +8,7 @@ arlo/log
 *.pyc
 .DS_Store
 arlo/data/backup
+arlo/data/tokens
 last_update.txt
 arlo_venv/*
 .environnement

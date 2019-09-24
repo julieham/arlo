@@ -36,6 +36,7 @@ view_months_after = 4
 directory = '/Users/julie/PycharmProjects/arlo/arlo/'
 data_directory = directory + 'data/'
 log_directory = directory + 'log/'
+directory_tokens = data_directory + 'tokens/'
 
 budgets_filename = data_directory + 'budgets.csv'
 
