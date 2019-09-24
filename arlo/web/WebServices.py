@@ -19,6 +19,7 @@ from arlo.tools.logging import warn
 from arlo.web.authentication import generate_new_token, login_is_valid, ResourceWithAuth
 from arlo.web.status import success_response, failure_response
 from operations.df_operations import df_is_not_empty
+from tools.clean_n26 import setup_2fa_for_all_accounts
 
 
 def make_this_amount_item(df):
@@ -40,6 +41,12 @@ class Login(Resource):
             token = generate_new_token()
             return json.loads(json.dumps({'username': user, 'token': token}))
         return make_response(jsonify({'message': ' - authentication failed'}), 400)
+
+
+class SetUpN26(ResourceWithAuth):
+    @staticmethod
+    def get():
+        setup_2fa_for_all_accounts()
 
 
 # %% CREATE

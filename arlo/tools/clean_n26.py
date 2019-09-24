@@ -98,6 +98,11 @@ def get_initial_2fa_token(name):
         return False, ''
 
 
+def setup_2fa_for_all_accounts():
+    for account in login_N26:
+        get_initial_2fa_token(account)
+
+
 def get_balance(name):
     if name not in login_N26:
         return False
