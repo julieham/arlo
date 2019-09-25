@@ -3,6 +3,8 @@ from flask_cors import CORS
 from flask_restful import Api
 
 from arlo.web.WebServices import *
+from tools.clean_n26 import refresh_all_tokens
+from tools.scheduler import start_scheduler
 
 app = Flask(__name__)
 CORS(app)
@@ -59,3 +61,4 @@ ipa.add_resource(EditCalendar, "/edit/calendar")
 
 if __name__ == '__main__':
     app.run(debug=True)
+    start_scheduler(refresh_all_tokens)

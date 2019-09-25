@@ -15,11 +15,12 @@ from arlo.services.services import force_refresh, get_recap_categories, split_tr
     edit_budgets, cycle_calendar, edit_calendar, input_overview, force_api_refresh
 from arlo.services.set_fields import link_ids_if_possible, unlink_ids_if_possible, edit_transaction
 from arlo.tools.cycle_manager import progress
-from arlo.tools.logging import warn
+from arlo.tools.logging import warn, error
 from arlo.web.authentication import generate_new_token, login_is_valid, ResourceWithAuth
 from arlo.web.status import success_response, failure_response
 from operations.df_operations import df_is_not_empty
 from tools.clean_n26 import setup_2fa_for_all_accounts
+from tools.errors import TwoFactorsAuthError
 
 
 def make_this_amount_item(df):
@@ -46,7 +47,10 @@ class Login(Resource):
 class SetUpN26(ResourceWithAuth):
     @staticmethod
     def get():
-        setup_2fa_for_all_accounts()
+        try:
+            setup_2fa_for_all_accounts()
+        except TwoFactorsAuthError as e:
+            error(e)
 
 
 # %% CREATE

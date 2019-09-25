@@ -9,7 +9,9 @@ from arlo.parameters.param import n26_url, directory_tokens
 from parameters.credentials import login_N26
 from parameters.param import n26_fetched_transactions
 from read_write.reader import empty_data_dataframe
+from tools.errors import TwoFactorsAuthError
 from tools.logging import error, info
+from tools.scheduler import resume_scheduler, pause_scheduler
 from tools.uniform_data_maker import format_n26_df
 from web.status import failure_response, success_response
 
@@ -99,8 +101,11 @@ def get_initial_2fa_token(name):
 
 
 def setup_2fa_for_all_accounts():
-    for account in login_N26:
-        get_initial_2fa_token(account)
+    for name in login_N26:
+        valid_token, _ = get_initial_2fa_token(name)
+        if not valid_token:
+            raise TwoFactorsAuthError('TwoFactorsAuthError for ' + name)
+    resume_scheduler()
 
 
 def get_balance(name):
@@ -128,6 +133,16 @@ def get_access_token_from_refresh_token(name):
     except KeyError:
         error('Refresh token failed for ' + name)
         return False, ''
+
+
+def refresh_all_tokens():
+    info('Refreshing all tokens')
+    for name in login_N26:
+        is_refreshed, _ = get_access_token_from_refresh_token(name)
+        if not is_refreshed:
+            error('Refresh failed for ' + name)
+            pause_scheduler()
+            return
 
 
 def get_latest_n26(name, limit=n26_fetched_transactions):
