@@ -136,7 +136,6 @@ def get_access_token_from_refresh_token(name):
 
 
 def refresh_all_tokens():
-    info('Refreshing all tokens')
     for name in login_N26:
         is_refreshed, _ = get_access_token_from_refresh_token(name)
         if not is_refreshed:

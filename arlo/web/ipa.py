@@ -58,7 +58,7 @@ ipa.add_resource(TransferTransaction, "/edit/transfer")
 ipa.add_resource(EditBudget, "/edit/budget")
 ipa.add_resource(EditCalendar, "/edit/calendar")
 
+start_scheduler(refresh_all_tokens)
 
 if __name__ == '__main__':
     app.run(debug=True)
-    start_scheduler(refresh_all_tokens)
