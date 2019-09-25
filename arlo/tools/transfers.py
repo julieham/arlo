@@ -1,5 +1,7 @@
 from arlo.tools.summary_by_field import recap_by_account
-from parameters.column_names import amount_euro_col
+from operations.df_operations import filter_df_one_value
+from parameters.column_names import amount_euro_col, currency_col
+from parameters.param import default_currency
 
 TRANSFER = '>>'
 
@@ -68,7 +70,7 @@ def balances_to_transfers(balances):
 
 
 def get_end_of_cycle_balances(cycle):
-    bilan_this_cycle = recap_by_account(cycle)
+    bilan_this_cycle = filter_df_one_value(recap_by_account(cycle), currency_col, default_currency)
     other_accounts = [acc for acc in bilan_this_cycle.index.tolist() if acc.endswith('N26') == False]
     bilan_this_cycle.at['Hello & Co', amount_euro_col] = sum(bilan_this_cycle.loc[other_accounts, amount_euro_col])
     bilan_this_cycle = bilan_this_cycle[amount_euro_col]
