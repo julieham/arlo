@@ -3,6 +3,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 from tools.logging import info
 
+RUNNING = 1
+
 _scheduler = BackgroundScheduler()
 
 
@@ -22,3 +24,7 @@ def pause_scheduler():
 
 def resume_scheduler():
     _scheduler.resume()
+
+
+def is_running():
+    return _scheduler.state == RUNNING

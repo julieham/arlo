@@ -53,6 +53,13 @@ class SetUpN26(ResourceWithAuth):
             error(e)
 
 
+class N26State(ResourceWithAuth):
+    @staticmethod
+    def get():
+        from tools.scheduler import is_running
+        state = is_running()
+        return json.loads(json.dumps({'is_connected': state}))
+
 # %% CREATE
 
 
