@@ -15,7 +15,8 @@ def has_default_fields(name):
 def get_default_fields(name):
     default = get_default_recurring()
     if name in default.index:
-        return dict({'amount': default.at[name, 'amount'], 'account': default.at[name, 'account']})
+        return dict({column_name: default.at[name, column_name] for column_name in default.columns})
+        # return dict({'amount': default.at[name, 'amount'], 'account': default.at[name, 'account']})
 
 
 def get_possible_recurring():

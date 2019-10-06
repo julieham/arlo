@@ -1,4 +1,5 @@
 import pandas as pd
+from numpy import NaN
 
 from arlo.operations.df_operations import df_is_not_empty, assign_new_column, concat_columns, empty_series, df_is_empty, \
     filter_df_not_these_values, select_columns, concat_lines, filter_df_on_bools, column_is_null, \
@@ -113,7 +114,7 @@ def get_category_groups(cycle):
     if df_is_empty(recap):
         return recap
 
-    recap['progress'] = (- 100 * recap['amount']).div(recap['budget'])  # prog.clip(upper=100, lower=0)
+    recap['progress'] = (- 100 * recap['amount']).div(recap['budget']).replace(NaN, 0)  # prog.clip(upper=100, lower=0)
     recap['authorized'] = recap['budget'] * this_cycle_progress / 100
     recap['delta_money'] = ceil_series(- recap['amount'] - recap['authorized']).astype(int)
     recap['delta_days'] = (recap['progress'] - this_cycle_progress) * nb_days_this_cycle / 100

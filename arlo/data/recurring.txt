@@ -1,5 +1,5 @@
-name;amount;account
-Washer;4;Cash
-Dryer;1;Cash
-Weekly Parking;9;HB
-Daily Parking;1.5;HB
+name;amount;currency;account
+Washer;4;EUR;Cash
+Dryer;1;EUR;Cash
+Weekly Parking;9;EUR;HB
+Daily Parking;1.5;EUR;HB
