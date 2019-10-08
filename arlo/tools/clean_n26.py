@@ -6,6 +6,7 @@ import requests
 
 from arlo.operations.types_operations import list_of_dict_to_df
 from arlo.parameters.param import n26_url, directory_tokens
+from operations.date_operations import now
 from parameters.credentials import login_N26
 from parameters.param import n26_fetched_transactions
 from read_write.reader import empty_data_dataframe
@@ -131,7 +132,7 @@ def get_access_token_from_refresh_token(name):
         save_refresh_token(name, refresh_token)
         return True, access_token
     except KeyError:
-        error('Refresh token failed for ' + name)
+        error(str(now()) + ' : Refresh token failed for ' + name)
         return False, ''
 
 
@@ -139,7 +140,7 @@ def refresh_all_tokens():
     for name in login_N26:
         is_refreshed, _ = get_access_token_from_refresh_token(name)
         if not is_refreshed:
-            error('Refresh failed for ' + name)
+            error(str(now()) + ' : Refresh failed for ' + name)
             pause_scheduler()
             return
 
