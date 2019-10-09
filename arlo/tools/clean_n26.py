@@ -133,6 +133,7 @@ def get_access_token_from_refresh_token(name):
         return True, access_token
     except KeyError:
         error(str(now()) + ' : Refresh token failed for ' + name)
+        info(response)
         return False, ''
 
 
