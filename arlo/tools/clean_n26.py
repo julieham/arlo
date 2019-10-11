@@ -154,9 +154,11 @@ def refresh_all_tokens():
 
 def get_latest_n26(name, limit=n26_fetched_transactions):
     if name not in login_N26:
+        error('#get_latest_n26 Invalid name to log in to N26 : ' + name)
         return failure_response('Invalid name to log in to N26'), empty_data_dataframe()
     access_token = get_access_token_from_refresh_token(name)
     if access_token.is_invalid:
+        error('#get_latest_n26 Invalid N26 token : ' + name)
         return failure_response('Invalid N26 token'), empty_data_dataframe()
 
     headers = {'Authorization': 'bearer' + str(access_token.value)}
