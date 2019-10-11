@@ -1,5 +1,5 @@
 from arlo.operations.df_operations import filter_df_not_this_value, column_is_null, filter_df_on_bools, concat_lines, \
-    filter_df_one_value, sort_df_by_descending_date, add_column_with_value
+    filter_df_one_value, sort_df_by_descending_date, add_column_with_value, set_pandas_print_parameters
 from arlo.parameters.column_names import deposit_name_col, account_col, currency_col
 from arlo.read_write.file_manager import read_data, read_deposit_input
 from arlo.tools.cycle_manager import filter_df_on_cycle
@@ -41,6 +41,8 @@ def get_deposit_input_and_output():
     deposit_input = read_deposit_input()
     deposit_output = get_deposit_output()
     all_deposit = concat_lines([deposit_input, deposit_output], join='inner')
+    set_pandas_print_parameters()
+    print(all_deposit)
     sort_df_by_descending_date(all_deposit)
     return all_deposit
 

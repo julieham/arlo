@@ -73,8 +73,11 @@ def set_field_to_value_on_ids(ids, field_name, field_value):
     if field_name == 'id':
         return failure_response('Impossible to change id')
     data = read_data()
+    deposit = read_deposit_input()
     change_field_on_several_ids_to_value(data, ids, field_name, field_value)
+    change_field_on_several_ids_to_value(deposit, ids, field_name, field_value)
     save_data(data)
+    save_deposit_input(deposit)
     return success_response()
 
 
