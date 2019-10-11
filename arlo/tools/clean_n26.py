@@ -75,12 +75,14 @@ def get_initial_2fa_token(name):
 
     try:
         url = urllib.request.urlopen(req)
+        error('#get_initial_2fa_token URL opened for some reason - ' + name)
         return InvalidToken()
     except urllib.error.HTTPError as e:
         body = json.load(e)
         if body.get("error", "") == "mfa_required":
             mfa_token = body["mfaToken"]
         else:
+            error('get_initial_2fa_token no mfa token - ' + name)
             return InvalidToken()
 
     authorize_mfa(mfa_token)
@@ -99,6 +101,7 @@ def get_initial_2fa_token(name):
         save_refresh_token(name, body["refresh_token"])
         return ValidToken(access_token)
     except urllib.error.HTTPError:
+        error('get_initial_2fa_token http Error')
         return InvalidToken()
 
 
