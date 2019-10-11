@@ -6,7 +6,7 @@ import requests
 
 from arlo.operations.types_operations import list_of_dict_to_df
 from arlo.parameters.param import n26_url, directory_tokens
-from objects.token import Token, InvalidToken, ValidToken
+from objects.token import Token, InvalidToken
 from operations.date_operations import now
 from parameters.credentials import login_N26
 from parameters.param import n26_fetched_transactions
@@ -99,7 +99,7 @@ def get_initial_2fa_token(name):
         url.close()
         access_token = body["access_token"]
         save_refresh_token(name, body["refresh_token"])
-        return ValidToken(access_token)
+        return Token(access_token)
     except urllib.error.HTTPError:
         error('get_initial_2fa_token http Error')
         return InvalidToken()
@@ -108,7 +108,7 @@ def get_initial_2fa_token(name):
 def setup_2fa_for_all_accounts():
     for name in login_N26:
         access_token = get_initial_2fa_token(name)
-        if access_token.is_invalid:
+        if access_token.is_invalid():
             raise TwoFactorsAuthError('TwoFactorsAuthError for ' + name)
     resume_scheduler()
 
@@ -126,8 +126,7 @@ def get_balance(name):
 
 def get_access_token_from_refresh_token(name):
     refresh_token = read_refresh_token(name)
-    if refresh_token.is_invalid:
-        print('INVALID REFRESH TOKEN')
+    if refresh_token.is_invalid():
         return InvalidToken()
     refresh_url = n26_url + '/oauth/token'
 
@@ -139,7 +138,7 @@ def get_access_token_from_refresh_token(name):
         refresh_token = response['refresh_token']
         access_token = response['access_token']
         save_refresh_token(name, refresh_token)
-        return ValidToken(access_token)
+        return Token(access_token)
     except KeyError:
         error(str(now()) + ' : Refresh token failed for ' + name)
         info(response)
@@ -149,7 +148,7 @@ def get_access_token_from_refresh_token(name):
 def refresh_all_tokens():
     for name in login_N26:
         access_token = get_access_token_from_refresh_token(name)
-        if access_token.is_invalid:
+        if access_token.is_invalid():
             error(str(now()) + ' : Refresh failed for ' + name)
             pause_scheduler()
             return
@@ -160,7 +159,7 @@ def get_latest_n26(name, limit=n26_fetched_transactions):
         error('#get_latest_n26 Invalid name to log in to N26 : ' + name)
         return failure_response('Invalid name to log in to N26'), empty_data_dataframe()
     access_token = get_access_token_from_refresh_token(name)
-    if access_token.is_invalid:
+    if access_token.is_invalid():
         error('#get_latest_n26 Invalid N26 token : ' + name)
         return failure_response('Invalid N26 token'), empty_data_dataframe()
 

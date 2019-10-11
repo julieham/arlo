@@ -6,13 +6,8 @@ class Token:
     def __init__(self, value):
         self.value = value
 
-    @staticmethod
     def is_invalid(self):
-        return self.value is invalid_token
-
-
-class ValidToken(Token):
-    pass
+        return self.value == invalid_token
 
 
 class InvalidToken(Token):
