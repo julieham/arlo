@@ -58,7 +58,7 @@ def authorize_mfa(mfa_token):
         url = urllib.request.urlopen(req)
     except urllib.error.HTTPError as e:
         body = json.load(e)
-        error('Error in askking mfa challenge')
+        error('Error in asking mfa challenge')
         info(body)
 
 
@@ -112,7 +112,6 @@ def setup_2fa_for_all_accounts():
             raise TwoFactorsAuthError('TwoFactorsAuthError for ' + name)
     resume_scheduler()
 
-
 """
 def get_balance(name):
     if name not in login_N26:
@@ -130,7 +129,7 @@ def get_access_token_from_refresh_token(name):
         return InvalidToken()
     refresh_url = n26_url + '/oauth/token'
 
-    values_token = {"grant_type": "refresh_token", 'refresh_token': refresh_token
+    values_token = {"grant_type": "refresh_token", 'refresh_token': refresh_token.value
         , 'username': login_N26[name].username, 'password': login_N26[name].password}
     headers_token = {'Authorization': 'Basic bXktdHJ1c3RlZC13ZHBDbGllbnQ6c2VjcmV0'}
     response = json.loads(requests.post(refresh_url, data=values_token, headers=headers_token).content)
