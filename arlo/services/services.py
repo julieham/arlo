@@ -12,21 +12,25 @@ from arlo.tools.clean_bankin import get_latest_bankin, force_refresh_bankin
 from arlo.tools.clean_lunchr import get_latest_lunchr
 from arlo.tools.clean_n26 import get_latest_n26
 from arlo.tools.cycle_manager import set_dates_to_cycle
-from arlo.tools.logging import info
+from arlo.tools.logging import info, error
 from arlo.tools.merge_data import merge_with_data
 from arlo.tools.refresh import change_last_update_to_now
 from arlo.tools.split import split_transaction_if_possible
 from arlo.tools.summary_by_field import group_by_field, recap_by_account, get_category_groups, input_recap
 from arlo.tools.transfers import balances_to_transfers, get_end_of_cycle_balances
 from arlo.web.status import is_successful, merge_status
+from tools.errors import N26TokenError
 
 
 def refresh_n26():
     all_status = []
-    for account in login_N26:
-        status, latest_data = get_latest_n26(account)
-        merge_with_data(latest_data, account)
-        all_status.append(status)
+    for name in login_N26:
+        try:
+            latest_data = get_latest_n26(name)
+            merge_with_data(latest_data, name)
+        except ValueError:
+            print('youpla')
+            error('Could not refresh ' + name)
     return merge_status(all_status)
 
 
@@ -77,7 +81,7 @@ def split_transaction(fields):
 
 
 def create_deposit_debit(id_tr, deposit_name):
-    # TODO Take into account category input deposit fluff
+    # TODO Take into account category input deposit fluff ?????
     set_field_to_value_on_ids([id_tr], deposit_name_col, deposit_name)
     set_field_to_value_on_ids([id_tr], category_col, deposit_name_col.title())
 

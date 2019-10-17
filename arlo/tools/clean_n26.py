@@ -1,20 +1,17 @@
 import json
-import urllib
-from time import sleep
 
 import requests
-
+from tenacity import sleep
 from arlo.operations.types_operations import list_of_dict_to_df
-from arlo.parameters.param import n26_url, directory_tokens
-from objects.token import Token, InvalidToken
-from operations.date_operations import now
-from parameters.credentials import login_N26
-from parameters.param import n26_fetched_transactions
+from arlo.parameters.param import n26_url, directory_tokens, n26_auth_url, n26_auth_header
+from arlo.objects.token import Token, InvalidToken, N26_Token, EmptyN26Token, get_token
+from arlo.parameters.credentials import login_N26
+from arlo.parameters.param import n26_fetched_transactions
+from arlo.tools.errors import TwoFactorsAuthError
+from arlo.tools.logging import error, info
+from arlo.tools.scheduler import resume_scheduler
+from arlo.tools.uniform_data_maker import format_n26_df
 from read_write.reader import empty_data_dataframe
-from tools.errors import TwoFactorsAuthError
-from tools.logging import error, info
-from tools.scheduler import resume_scheduler, pause_scheduler
-from tools.uniform_data_maker import format_n26_df
 from web.status import failure_response, success_response
 
 
@@ -31,15 +28,6 @@ def save_refresh_token(name, token):
     with open(directory_tokens + name + '.txt', mode='w') as file:
         file.write(token)
 
-"""def get_token(name):
-    values_token = {'grant_type': 'password', 'username': login_N26[name].username, 'password': login_N26[name].password}
-    headers_token = {'Authorization': 'Basic YW5kcm9pZDpzZWNyZXQ='}
-    response_token = requests.post(n26_url + '/oauth/token', data=values_token, headers=headers_token)
-    token_info = response_token.json()
-    # if 'access_token' not in token_info:
-    #     return False, ''
-    # return True, token_info['access_token']
-"""
 
 USER_AGENT = ("Mozilla/5.0 (X11; Linux x86_64) "
               "AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -47,89 +35,89 @@ USER_AGENT = ("Mozilla/5.0 (X11; Linux x86_64) "
 
 
 def authorize_mfa(mfa_token):
-    req = urllib.request.Request(n26_url + "/api/mfa/challenge",
-                                 data=json.dumps({"challengeType": "oob", "mfaToken": mfa_token}).encode("utf-8"))
-    req.add_header("Authorization",
-                   "Basic bXktdHJ1c3RlZC13ZHBDbGllbnQ6c2VjcmV0")
-    req.add_header("User-Agent", USER_AGENT)
-    req.add_header('Content-Type', 'application/json')
+    response = requests.post(
+        n26_url + "/api/mfa/challenge",
+        json={"challengeType": "oob", "mfaToken": mfa_token},
+        headers={**n26_auth_header, "User-Agent": USER_AGENT, "Content-Type": "application/json"})
+    response.raise_for_status()
 
+
+def get_mfa_token(name):
+    values_token = {"grant_type": 'password', "username": login_N26[name].username,
+                    "password": login_N26[name].password}
+    response = requests.post(n26_auth_url, data=values_token, headers=n26_auth_header)
+    if response.status_code == 429:
+        error('Too many login attempts')
+        raise ValueError("impossible to get MFA token")
+    if response.status_code != 403:
+        error('unexpected response ' + str(response.status_code))
+        raise ValueError("get_initial_2fa_token no mfa token - " + name)
+    response_data = response.json()
+    if response_data.get("error", "") == "mfa_required":
+        return response_data["mfaToken"]
+    else:
+        raise ValueError("get_initial_2fa_token no mfa token - " + name)
+
+
+def complete_2FA_authentication(name, mfa_token):
+    mfa_response_data = {"grant_type": "mfa_oob", "mfaToken": mfa_token}
+    response = requests.post(n26_auth_url, data=mfa_response_data, headers=n26_auth_header)
+    print('#complete_2FA_authentication')
+    print(response)
+    print(response.content)
+    response.raise_for_status()
+    return N26_Token(response.json(), name)
+
+
+def get_2fa_token(name):
     try:
-        url = urllib.request.urlopen(req)
-    except urllib.error.HTTPError as e:
-        body = json.load(e)
-        error('Error in asking mfa challenge')
-        info(body)
-
-
-def get_initial_2fa_token(name):
-    data = [("username", login_N26[name].username), ("password", login_N26[name].password),
-            ("grant_type", "password")]
-    "Return the bearer."
-    encoded_data = urllib.parse.urlencode(data).encode("utf-8")
-    req = urllib.request.Request(n26_url + "/oauth/token",
-                                 data=encoded_data)
-    req.add_header("Authorization",
-                   "Basic bXktdHJ1c3RlZC13ZHBDbGllbnQ6c2VjcmV0")
-    req.add_header("User-Agent", USER_AGENT)
-
-    try:
-        url = urllib.request.urlopen(req)
-        error('#get_initial_2fa_token URL opened for some reason - ' + name)
-        return InvalidToken()
-    except urllib.error.HTTPError as e:
-        body = json.load(e)
-        if body.get("error", "") == "mfa_required":
-            mfa_token = body["mfaToken"]
-        else:
-            error('get_initial_2fa_token no mfa token - ' + name)
-            return InvalidToken()
-
-    authorize_mfa(mfa_token)
-    sleep(30)
-    encoded_data = urllib.parse.urlencode([("grant_type", "mfa_oob"), ("mfaToken", mfa_token)]).encode("utf-8")
-    req = urllib.request.Request(n26_url + "/oauth/token",
-                                 data=encoded_data)
-    req.add_header("Authorization",
-                   "Basic bXktdHJ1c3RlZC13ZHBDbGllbnQ6c2VjcmV0")
-    req.add_header("User-Agent", USER_AGENT)
-    try:
-        url = urllib.request.urlopen(req)
-        body = json.loads(url.read().decode("utf-8"))
-        url.close()
-        access_token = body["access_token"]
-        save_refresh_token(name, body["refresh_token"])
-        return Token(access_token)
-    except urllib.error.HTTPError:
-        error('get_initial_2fa_token http Error')
-        return InvalidToken()
+        mfa_token = get_mfa_token(name)
+        authorize_mfa(mfa_token)
+        sleep(30)
+        token = complete_2FA_authentication(name, mfa_token)
+        token.save()
+        return token
+    except ValueError as e:
+        error(e)
+        return EmptyN26Token()
+    except requests.HTTPError:
+        return EmptyN26Token()
 
 
 def setup_2fa_for_all_accounts():
     for name in login_N26:
-        access_token = get_initial_2fa_token(name)
+        access_token = get_2fa_token(name)
         if access_token.is_invalid():
             raise TwoFactorsAuthError('TwoFactorsAuthError for ' + name)
     resume_scheduler()
 
-"""
-def get_balance(name):
-    if name not in login_N26:
-        return False
-    valid_token, access_token = get_initial_2fa_token(name)
-    headers = {'Authorization': 'bearer' + str(access_token)}
-    req_balance = requests.get(n26_url + '/api/accounts', headers=headers)
-    return req_balance.json()
-"""
+
+def refresh_all_tokens():
+    for name in login_N26:
+        get_token(name)
+
+
+def get_latest_n26(name, limit=n26_fetched_transactions):
+    token = get_token(name)
+    if token.is_invalid:
+        error('#get_latest_n26 Invalid N26 token : ' + name)
+        raise ValueError('Invalid N26 token')
+
+    headers = {'Authorization': 'bearer' + str(token.access_token)}
+    response = requests.get(n26_url + '/api/smrt/transactions?limit=' + str(limit), headers=headers)
+    print(response.content)
+    if response.status_code == 401:
+        raise ValueError('Invalid token to get n26 data')
+    if response.status_code == 429:
+        raise ValueError('Too many log-in attempts')
+    return format_n26_df(list_of_dict_to_df(response.json()), name)
 
 
 def get_access_token_from_refresh_token(name):
-    refresh_token = read_refresh_token(name)
-    if refresh_token.is_invalid():
-        return InvalidToken()
+    refresh_token = 'd49e5647-2dc1-406a-ba16-d464aefe6028'
     refresh_url = n26_url + '/oauth/token'
 
-    values_token = {"grant_type": "refresh_token", 'refresh_token': refresh_token.value
+    values_token = {"grant_type": "refresh_token", 'refresh_token': refresh_token
         , 'username': login_N26[name].username, 'password': login_N26[name].password}
     headers_token = {'Authorization': 'Basic bXktdHJ1c3RlZC13ZHBDbGllbnQ6c2VjcmV0'}
     response = json.loads(requests.post(refresh_url, data=values_token, headers=headers_token).content)
@@ -137,32 +125,22 @@ def get_access_token_from_refresh_token(name):
         refresh_token = response['refresh_token']
         access_token = response['access_token']
         save_refresh_token(name, refresh_token)
-        return Token(access_token)
+        return access_token
     except KeyError:
-        error(str(now()) + ' : Refresh token failed for ' + name)
+        error('Refresh token failed for ' + name)
         info(response)
-        return InvalidToken()
+        return ''
 
 
-def refresh_all_tokens():
-    for name in login_N26:
-        access_token = get_access_token_from_refresh_token(name)
-        if access_token.is_invalid():
-            error(str(now()) + ' : Refresh failed for ' + name)
-            pause_scheduler()
-            return
-
-
-def get_latest_n26(name, limit=n26_fetched_transactions):
-    if name not in login_N26:
-        error('#get_latest_n26 Invalid name to log in to N26 : ' + name)
-        return failure_response('Invalid name to log in to N26'), empty_data_dataframe()
+def old_get_latest_n26(name, limit=n26_fetched_transactions):
     access_token = get_access_token_from_refresh_token(name)
-    if access_token.is_invalid():
+    if access_token == '':
         error('#get_latest_n26 Invalid N26 token : ' + name)
         return failure_response('Invalid N26 token'), empty_data_dataframe()
 
-    headers = {'Authorization': 'bearer' + str(access_token.value)}
+    headers = {'Authorization': 'bearer' + str(access_token)}
     req_transactions = requests.get(n26_url + '/api/smrt/transactions?limit=' + str(limit), headers=headers)
+
     data = req_transactions.json()
+    print(data)
     return success_response(), format_n26_df(list_of_dict_to_df(data), name)

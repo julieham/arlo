@@ -1,3 +1,5 @@
+from tools.logging import error
+
 success_value = 'SUCCESS'
 fail_value = 'FAIL'
 
@@ -12,6 +14,7 @@ def success_response():
 
 
 def failure_response(message):
+    error('FAILURE RESPONSE : ' + message)
     return _my_response(False, message)
 
 

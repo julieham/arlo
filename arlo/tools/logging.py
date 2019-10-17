@@ -1,6 +1,6 @@
 import logging
 
-from operations.date_operations import now
+from operations.date_operations import now, now_str
 from operations.df_operations import set_pandas_print_parameters
 from parameters.param import log_directory
 
@@ -22,6 +22,7 @@ def info_df(df):
 
 def warn(text):
     logging.basicConfig(filename=logging_filename(), level=logging.DEBUG)
+    logging.info(now_str())
     logging.warning(text)
 
 
@@ -32,6 +33,7 @@ def debug(text):
 
 def error(text):
     logging.basicConfig(filename=logging_filename(), level=logging.DEBUG)
+    logging.info(now_str())
     logging.error(text)
 
 

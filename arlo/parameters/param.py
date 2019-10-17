@@ -50,7 +50,9 @@ deposit_type = "DEP_" + deposit_account
 julie_account = 'J_N26'
 thomus_account = 'T_N26'
 
+n26_auth_header = {"Authorization": 'Basic bXktdHJ1c3RlZC13ZHBDbGllbnQ6c2VjcmV0'}
 n26_url = 'https://api.tech26.de'
+n26_auth_url = n26_url + '/oauth/token'
 n26_fetched_transactions = 200
 
 

@@ -1,7 +1,7 @@
-from apscheduler.schedulers import SchedulerAlreadyRunningError
+from apscheduler.schedulers import SchedulerAlreadyRunningError, SchedulerNotRunningError
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from tools.logging import info
+from tools.logging import info, error
 
 RUNNING = 1
 
@@ -19,7 +19,10 @@ def start_scheduler(job):
 
 
 def pause_scheduler():
-    _scheduler.pause()
+    try:
+        _scheduler.pause()
+    except SchedulerNotRunningError as e:
+        error(e)
 
 
 def resume_scheduler():
