@@ -9,7 +9,7 @@ from arlo.operations.series_operations import positive_part, ceil_series, floor_
 from arlo.parameters.column_names import category_col, amount_euro_col, cycle_col, deposit_name_col, account_col, \
     currency_col
 from arlo.parameters.param import no_recap_categories, deposit_account, default_currency
-from arlo.read_write.file_manager import read_budgets, read_data
+from arlo.read_write.file_manager import read_budgets, read_data, read_deposit_input
 from arlo.read_write.select_data import get_data_from_cycle, get_deposit_debits_from_cycle
 from arlo.tools.cycle_manager import decode_cycle, nb_days_in_cycle, cycle_overview_to_cycle_progress, \
     filter_df_on_cycle, cycle_is_finished
@@ -154,6 +154,7 @@ def recap_by_account(cycle):
 def input_recap(cycle):
     overview = dict()
     data_this_cycle = filter_df_on_cycle(read_data(), cycle)
+    provisions_this_cycle = filter_df_on_cycle(read_deposit_input(), cycle)
     recap_by_category = recap_by_cat(cycle, False)
     if cycle_is_finished(cycle):
         overview['Input goal'] = - round(sum(recap_by_category['amount']), 2)
@@ -164,7 +165,8 @@ def input_recap(cycle):
         overview['Input goal'] = overview['Budgets'] + overview['Over (so far)']
 
     data_this_cycle_input = filter_df_one_value(data_this_cycle, 'category', 'Input')
-    overview['Done'] = total_euro_amount(data_this_cycle_input)
+    provisions_this_cycle_input = filter_df_one_value(provisions_this_cycle, 'category', 'Input')
+    overview['Done'] = total_euro_amount(data_this_cycle_input) - total_euro_amount(provisions_this_cycle_input)
     remaining = round(overview['Input goal'] - overview['Done'], 2)
     if remaining > 0:
         overview['Remaining TO DO'] = remaining
