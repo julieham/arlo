@@ -162,7 +162,7 @@ def get_latest_n26(name, limit=n26_fetched_transactions):
         error('#get_latest_n26 Invalid N26 token : ' + name)
         return failure_response('Invalid N26 token'), empty_data_dataframe()
 
-    headers = {'Authorization': 'bearer' + str(access_token.value)}
+    headers = {'Authorization': 'bearer ' + str(access_token.value)}
     req_transactions = requests.get(n26_url + '/api/smrt/transactions?limit=' + str(limit), headers=headers)
     data = req_transactions.json()
     return success_response(), format_n26_df(list_of_dict_to_df(data), name)
