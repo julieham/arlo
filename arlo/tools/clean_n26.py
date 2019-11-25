@@ -112,6 +112,7 @@ def setup_2fa_for_all_accounts():
             raise TwoFactorsAuthError('TwoFactorsAuthError for ' + name)
     resume_scheduler()
 
+
 """
 def get_balance(name):
     if name not in login_N26:

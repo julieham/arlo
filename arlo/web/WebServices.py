@@ -49,6 +49,7 @@ class SetUpN26(ResourceWithAuth):
     def get():
         try:
             setup_2fa_for_all_accounts()
+            force_refresh()
         except TwoFactorsAuthError as e:
             error(e)
 
