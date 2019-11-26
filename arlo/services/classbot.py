@@ -5,4 +5,4 @@ def get_classbot_last():
     filename = '/home/arlo/classbot/output.txt'
     info(filename)
     with open(filename, 'r') as f:
-        return f.read()
+        return '\n'.join(f.readlines())
