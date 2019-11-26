@@ -1,8 +1,7 @@
-from tools.logging import info
+from parameters.param import classbot_directory
 
 
 def get_classbot_last():
-    filename = '/home/arlo/classbot/output.txt'
-    info(filename)
-    with open(filename, 'r') as f:
-        return '\n'.join(f.readlines())
+    filename = classbot_directory + 'output.txt'
+    text = '<br>'.join(open(filename, 'r').readlines())
+    return text

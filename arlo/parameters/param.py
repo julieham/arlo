@@ -34,6 +34,7 @@ view_months_after = 4
 # %% FILES
 
 directory = '/Users/julie/PycharmProjects/arlo/arlo/'
+classbot_directory = '/Users/julie/PycharmProjects/arlo/classbot/'
 data_directory = directory + 'data/'
 log_directory = directory + 'log/'
 directory_tokens = data_directory + 'tokens/'
