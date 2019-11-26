@@ -60,6 +60,8 @@ ipa.add_resource(TransferTransaction, "/edit/transfer")
 ipa.add_resource(EditBudget, "/edit/budget")
 ipa.add_resource(EditCalendar, "/edit/calendar")
 
+ipa.add_resource(Classbot, "/classbot")
+
 start_scheduler(refresh_all_tokens)
 
 if __name__ == '__main__':

@@ -19,6 +19,7 @@ from arlo.tools.logging import warn, error
 from arlo.web.authentication import generate_new_token, login_is_valid, ResourceWithAuth
 from arlo.web.status import success_response, failure_response
 from operations.df_operations import df_is_not_empty
+from services.classbot import get_classbot_last
 from tools.clean_n26 import setup_2fa_for_all_accounts
 from tools.errors import TwoFactorsAuthError
 
@@ -373,3 +374,9 @@ class AmountsInput(ResourceWithAuth):
         cycle = request.args.get('cycle')
         u = input_overview(cycle)
         return make_this_amount_item(u)
+
+
+class Classbot(Resource):
+    @staticmethod
+    def get():
+        return get_classbot_last()
