@@ -80,11 +80,14 @@ bankin_dictionary = dict({'date': date_col,
                           'id': id_col,
                           'amount': amount_euro_col})
 
-
-
 # %% VALUES
 
 auto_accounts = [thomus_account, julie_account, lunchr_account_name]
 no_recap_categories = [link_category, input_category]
 minutes_valid_token = 60
 default_currency = 'EUR'
+
+# %% CLASSPASS
+
+classpass_url = "https://classpass.com/_api"
+classpass_delta_seconds = 3600

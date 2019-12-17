@@ -3,6 +3,8 @@ from flask_cors import CORS
 from flask_restful import Api
 
 from arlo.web.WebServices import *
+from classbot.WebServices import GetClassbotVenues, GetClassbotUsers, LoginClasspassUser, GetClasspassSchedule, \
+    ClassPassBookNow, ClassPassBookLater
 from tools.clean_n26 import refresh_all_tokens
 from tools.scheduler import start_scheduler
 
@@ -61,6 +63,13 @@ ipa.add_resource(EditBudget, "/edit/budget")
 ipa.add_resource(EditCalendar, "/edit/calendar")
 
 ipa.add_resource(Classbot, "/classbot")
+
+ipa.add_resource(GetClassbotVenues, "/classbot/venues")
+ipa.add_resource(GetClassbotUsers, "/classbot/users")
+ipa.add_resource(LoginClasspassUser, "/classbot/login")
+ipa.add_resource(GetClasspassSchedule, "/classbot/schedule")
+ipa.add_resource(ClassPassBookNow, "/classbot/book_now")
+ipa.add_resource(ClassPassBookLater, "/classbot/book_later")
 
 start_scheduler(refresh_all_tokens)
 
