@@ -2,7 +2,7 @@ from flask import json, request
 from flask_restful import Resource
 
 from classbot.book import book_class_with_info, plan_booking
-from classbot.schedule import get_classes
+from classbot.schedule import get_calendar_classes
 from classbot.users import get_users, get_token
 from classbot.venues import get_venues_for_front
 
@@ -27,12 +27,12 @@ class LoginClasspassUser(Resource):
         return get_token(name)
 
 
-class GetClasspassSchedule(Resource):
+class GetClasspassCalendar(Resource):
     @staticmethod
     def get():
         venue_id = request.args.get('venue_id')
         name = request.args.get('name')
-        return json.loads(json.dumps(get_classes(name, venue_id)))
+        return json.loads(json.dumps(get_calendar_classes(name, venue_id)))
 
 
 class ClassPassBookNow(Resource):

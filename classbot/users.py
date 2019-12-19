@@ -36,11 +36,6 @@ def make_header_token(token):
     return {'CP-Authorization': "Token " + token}
 
 
-def check_token_is_valid(token):
-    header_token = make_header_token(token)
-    return requests.get(classpass_url + '/v2/campaign/announcements/list', headers=header_token).status_code == 200
-
-
 token_file = classbot_directory + 'tokens.csv'
 
 
