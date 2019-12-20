@@ -70,8 +70,10 @@ def get_dates(today, long=False):
 def get_calendar_classes(name, venue_id, start_date=now(), long=False):
     dates = get_dates(start_date, long=long)
     classes = get_classes(name, venue_id, start_date=start_date)
+    if long:
+        classes = classes + get_classes(name, venue_id, pd.datetime.strptime(dates[14], '%Y-%m-%d'))
     class_calendar = dict({date: [] for date in dates})
     for classe in classes:
         class_calendar[format_date_for_classpass(classe['datetime'])].append(classe)
     class_calendar_array = [{'date': date, 'classes': class_calendar[date]} for date in dates]
-    return class_calendar_array[:14]
+    return class_calendar_array[:(14 + 14 * long)]

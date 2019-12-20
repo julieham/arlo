@@ -32,7 +32,10 @@ class GetClasspassCalendar(Resource):
     def get():
         venue_id = request.args.get('venue_id')
         name = request.args.get('name')
-        return json.loads(json.dumps(get_calendar_classes(name, venue_id)))
+        long = request.args.get('view_more') == 'true'
+        print('get calendar')
+        print(name, venue_id, long, type(long))
+        return json.loads(json.dumps(get_calendar_classes(name, venue_id, long=long)))
 
 
 class ClassPassBookNow(Resource):
