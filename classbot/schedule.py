@@ -54,8 +54,10 @@ def get_classes(name, venue_id, start_date=now()):
     request_url = classpass_url + '/v1/venues/' + str(venue_id) + '/schedules?date=' + format_date_for_classpass(
         start_date) + '&upcoming=true'
     header_token = {'CP-Authorization': "Token " + get_token(name)}
-    classes = json.loads(requests.get(request_url, headers=header_token).content)
-    return [Classe(c) for c in classes['schedules']]
+    classes = requests.get(request_url, headers=header_token)
+    if classes.status_code == 504:
+        return []
+    return [Classe(c) for c in json.loads(classes.content)['schedules']]
 
 
 def get_dates(today, long=False):
