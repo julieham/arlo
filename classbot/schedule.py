@@ -25,12 +25,12 @@ class Classe(dict):
         self['name'] = classe['class']['name']
         self['cp_status'] = 'available' if classe['availability']['status'] == "available" else classe['availability'][
             'reason']
-        if self['id'] in scheduled_classes:
+        if self['cp_status'] == 'reserved':
+            self['my_status'] = 'booked'
+        elif self['id'] in scheduled_classes:
             self['my_status'] = 'scheduled'
         elif self['cp_status'] == 'available':
             self['my_status'] = 'available_now'
-        elif self['cp_status'] == 'reserved':
-            self['my_status'] = 'booked'
         elif classe['availability']['reason'] == "before_opening_window":
             self['my_status'] = 'available_later'
         elif self['cp_status'] == 'top_up':
