@@ -6,6 +6,11 @@ from crontab import CronTab
 
 from classbot.users import get_token, get_user_id, make_header_token
 from parameters.param import classpass_url
+from tools.logging import info
+
+
+def now():
+    return datetime.now()
 
 
 def book_class_with_info(user, class_id, class_credits):
@@ -38,3 +43,26 @@ def create_cronjob(booking_date, job_name):
     job.day.on(booking_date.day)
     job.month.on(booking_date.month)
     user_cron.write()
+
+
+def get_scheduled_classes(user):
+    user_cron = CronTab(user=True)
+    scheduled_classes = [str(job).split()[6:8] for job in user_cron]
+    return [int(classe) for username, classe in scheduled_classes if username == user]
+
+
+def clean_cron():
+    user_cron = CronTab(user=True)
+    write = False
+    for job in user_cron:
+        today = now()
+        values = str(job).split()
+        month, day = int(values[2]), int(values[3])
+        passed = (today.month - 6 < month < today.month) | ((day < today.day) & (month == today.month)) | (
+                    today.month < 7 & month > 7)
+        if passed:
+            info('removing cron job : ' + str(job))
+            user_cron.remove(job)
+            write = True
+    if write:
+        user_cron.write()

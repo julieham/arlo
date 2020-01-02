@@ -58,3 +58,11 @@ def get_token(name):
     if valid_tokens.shape[0] > 0:
         return valid_tokens['token'].iloc[0]
     return get_new_token(tokens, name)
+
+
+def get_credits(name):
+    header_token = make_header_token(get_token(name))
+    url_request = classpass_url + '/v1/lifecycle/user/' + get_user_id(name) + '/balance'
+    credits = json.loads(requests.get(url_request, headers=header_token).content)['data']['credit_balance'][
+        'credits_remaining']
+    return credits

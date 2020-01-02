@@ -63,7 +63,6 @@ ipa.add_resource(EditBudget, "/edit/budget")
 ipa.add_resource(EditCalendar, "/edit/calendar")
 
 
-ipa.add_resource(Classbot, "/classbot")
 ipa.add_resource(GetClassbotVenues, "/classbot/venues")
 ipa.add_resource(GetClassbotUsers, "/classbot/users")
 ipa.add_resource(LoginClasspassUser, "/classbot/login")

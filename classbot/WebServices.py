@@ -3,7 +3,7 @@ from flask_restful import Resource
 
 from classbot.book import book_class_with_info, plan_booking
 from classbot.schedule import get_calendar_classes
-from classbot.users import get_users, get_token
+from classbot.users import get_users, get_credits
 from classbot.venues import get_venues_for_front
 
 
@@ -24,7 +24,7 @@ class LoginClasspassUser(Resource):
     @staticmethod
     def get():
         name = request.args.get('name')
-        return get_token(name)
+        return get_credits(name)
 
 
 class GetClasspassCalendar(Resource):
