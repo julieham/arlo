@@ -4,7 +4,8 @@ from datetime import timedelta
 import pandas as pd
 import requests
 
-from classbot.book import get_scheduled_classes
+from classbot.book import get_scheduled_classes_ids
+from classbot.calendar import get_dates, put_classes_in_calendar, now, format_date_for_classpass
 from classbot.users import get_token
 from parameters.param import classpass_url, classpass_delta_seconds
 
@@ -46,16 +47,8 @@ class Classe(dict):
         self['bookable'] = self['my_status'] in ['available_now', 'available_later']
 
 
-def format_date_for_classpass(date):
-    return date.strftime(format='%Y-%m-%d')
-
-
 def timestamp_to_datetime(timestamp):
     return pd.datetime.fromtimestamp(int(timestamp))
-
-
-def now():
-    return pd.datetime.now()
 
 
 def get_classes(name, venue_id, start_date):
@@ -65,17 +58,8 @@ def get_classes(name, venue_id, start_date):
     classes = requests.get(request_url, headers=header_token)
     if classes.status_code == 504:
         return []
-    scheduled_classes = get_scheduled_classes(name)
+    scheduled_classes = get_scheduled_classes_ids(name)
     return [Classe(c, scheduled_classes) for c in json.loads(classes.content)['schedules']]
-
-
-def get_dates(start_date, long=False):
-    nb_days = 14 + 14 * long
-    date_now = start_date.date()
-    last_monday = date_now - timedelta(days=date_now.weekday())
-    range_length = nb_days + 7 * (last_monday != date_now)
-    dates = [last_monday + timedelta(days=i) for i in range(range_length)]
-    return [format_date_for_classpass(date) for date in dates]
 
 
 def get_calendar_classes(name, venue_id, long=False):
@@ -84,8 +68,4 @@ def get_calendar_classes(name, venue_id, long=False):
     classes = get_classes(name, venue_id, start_date)
     if long:
         classes += get_classes(name, venue_id, start_date + timedelta(days=14))
-    class_calendar = dict({date: [] for date in dates})
-    for classe in classes:
-        class_calendar[format_date_for_classpass(classe['datetime'])].append(classe)
-    class_calendar_array = [{'date': date, 'classes': class_calendar[date]} for date in dates]
-    return class_calendar_array[:(14 + 14 * long)]
+    return put_classes_in_calendar(classes, dates)

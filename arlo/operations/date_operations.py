@@ -72,8 +72,7 @@ def first_day_of_the_display(date, month_before):
     year, month = date.year, date.month - month_before
     if month < 1:
         year += (month - 1) // 12
-        month = month % 12
-    month += 12 * (month == 0)
+        month = (month - 1) % 12 + 1
     return date_to_string_short(datetime.datetime(year=year, month=month, day=1))
 
 

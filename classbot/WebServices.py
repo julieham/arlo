@@ -2,6 +2,7 @@ from flask import json, request
 from flask_restful import Resource
 
 from classbot.book import book_class_with_info, plan_booking
+from classbot.reservations import get_calendar_upcoming
 from classbot.schedule import get_calendar_classes
 from classbot.users import get_users, get_credits
 from classbot.venues import get_venues_for_front
@@ -34,6 +35,14 @@ class GetClasspassCalendar(Resource):
         name = request.args.get('name')
         long = request.args.get('view_more') == 'true'
         return json.loads(json.dumps(get_calendar_classes(name, venue_id, long=long)))
+
+
+class GetClasspassUpcoming(Resource):
+    @staticmethod
+    def get():
+        name = request.args.get('name')
+        mobile = request.args.get('mobile')
+        return json.loads(json.dumps(get_calendar_upcoming(name, mobile)))
 
 
 class ClassPassBookNow(Resource):
