@@ -28,7 +28,14 @@ def get_classe_from_id(name, classe_id):
 
 
 def get_scheduled_classes(name):
-    return [get_classe_from_id(name, classe_id) for classe_id in get_scheduled_classes_ids(name)]
+    scheduled_not_booked = []
+    for classe_id in get_scheduled_classes_ids(name):
+        classe = get_classe_from_id(name, classe_id)
+        if classe['my_status'] == 'scheduled':
+            scheduled_not_booked.append(classe)
+        else:
+            print('already booked')
+    return scheduled_not_booked
 
 
 def get_calendar_upcoming(name, mobile=False):
