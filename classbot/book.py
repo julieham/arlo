@@ -7,6 +7,7 @@ from crontab import CronTab
 from classbot.users import get_token, get_user_id, make_header_token
 from parameters.param import classpass_url
 
+book_later_job_name = '/home/arlo/classbot/book.sh'
 
 def book_class_with_info(user, class_id, class_credits):
     header_token = make_header_token(get_token(user))
@@ -26,7 +27,7 @@ def first_booking(class_datetime):
 def plan_booking(class_id, name, class_date):
     class_date = datetime.strptime(class_date, '%Y-%m-%d')
     booking_date = first_booking(class_date)
-    job_name = '/home/arlo/classbot/book.sh ' + name + ' ' + str(class_id)
+    job_name = book_later_job_name + ' ' + name + ' ' + str(class_id)
     create_cronjob(booking_date, job_name)
 
 
@@ -42,5 +43,6 @@ def create_cronjob(booking_date, job_name):
 
 def get_scheduled_classes_ids(user):
     user_cron = CronTab(user=True)
-    scheduled_classes = [str(job).split()[6:8] for job in user_cron]
+    jobs = [str(job).split()[5:] for job in user_cron]
+    scheduled_classes = [job[1:3] for job in jobs if job[0] == book_later_job_name]
     return [int(classe) for username, classe in scheduled_classes if username == user]
