@@ -11,7 +11,7 @@ def get_dates(start_date, long=False):
     nb_days = 14 + 14 * long
     date_now = start_date.date()
     last_monday = date_now - timedelta(days=date_now.weekday())
-    range_length = nb_days + 7 * (last_monday != date_now)
+    range_length = nb_days + 7
     dates = [last_monday + timedelta(days=i) for i in range(range_length)]
     return [format_date_for_classpass(date) for date in dates]
 
