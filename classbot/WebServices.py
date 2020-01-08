@@ -1,7 +1,7 @@
 from flask import json, request
 from flask_restful import Resource
 
-from classbot.book import book_class_with_info, plan_booking
+from classbot.book import book_class_with_info, plan_booking, cancel_booked_class
 from classbot.reservations import get_calendar_upcoming
 from classbot.schedule import get_calendar_classes
 from classbot.users import get_users, get_credits
@@ -62,4 +62,14 @@ class ClassPassBookLater(Resource):
         class_date = request.args.get('class_date')
         plan_booking(classe_id, user, class_date)
         print('book later', classe_id, user)
+        return True
+
+
+class ClassPassCancelBooked(Resource):
+    @staticmethod
+    def post():
+        classe_id = request.args.get('class_id')
+        user = request.args.get('user')
+        print(classe_id, user, user == 'julie')
+        cancel_booked_class(user, classe_id)
         return True

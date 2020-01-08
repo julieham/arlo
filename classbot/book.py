@@ -46,3 +46,11 @@ def get_scheduled_classes_ids(user):
     jobs = [str(job).split()[5:] for job in user_cron]
     scheduled_classes = [job[1:3] for job in jobs if job[0] == book_later_job_name]
     return [int(classe) for username, classe in scheduled_classes if username == user]
+
+
+def cancel_booked_class(name, classe_id):
+    url = classpass_url + '/v1/users/' + get_user_id(name) + '/reservations/' + str(classe_id)
+    header = make_header_token(get_token(name))
+    header['Content-Type'] = 'application/json'
+    cancel_dict = {"state": "cancel"}
+    return requests.patch(url, headers=header, json=cancel_dict)
