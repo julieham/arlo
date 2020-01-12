@@ -41,6 +41,20 @@ def create_cronjob(booking_date, job_name):
     user_cron.write()
 
 
+def cancel_scheduled_class(name, classe_id):
+    user_cron = CronTab(user=True)
+    write = 0
+    for job in user_cron:
+        job_fields = str(job).split()
+        job_username, job_classe_id = job_fields[-2:]
+        if (job_username == name) & (job_classe_id == classe_id):
+            user_cron.remove(job)
+            write += 1
+    if write > 0:
+        user_cron.write()
+    return write > 0
+
+
 def get_scheduled_classes_ids(user):
     user_cron = CronTab(user=True)
     jobs = [str(job).split()[5:] for job in user_cron]
