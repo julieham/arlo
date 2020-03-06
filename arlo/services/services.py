@@ -33,7 +33,7 @@ def refresh_n26():
 def force_refresh():
     info('Refreshing')
     save_backup_with_data()
-    refresh_lunchr()
+    #refresh_lunchr()
     refresh_bankin()
     status_n26 = refresh_n26()
     if is_successful(status_n26):
