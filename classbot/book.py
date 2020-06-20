@@ -56,7 +56,7 @@ def cancel_scheduled_class(name, classe_id):
 
 
 def get_scheduled_classes_ids(user):
-    user_cron = CronTab(user=True)
+    user_cron = CronTab()
     jobs = [str(job).split()[5:] for job in user_cron]
     scheduled_classes = [job[1:3] for job in jobs if job[0] == book_later_job_name]
     return [int(classe) for username, classe in scheduled_classes if username == user]

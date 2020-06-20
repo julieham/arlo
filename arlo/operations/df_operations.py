@@ -1,5 +1,6 @@
 from logging import info
 
+import numpy as np
 import pandas as pd
 
 # %% PANDAS STUFF
@@ -10,7 +11,7 @@ from arlo.parameters.param import immutable_values
 
 def set_pandas_print_parameters():
     desired_width = 100000
-    pd.np.set_printoptions(linewidth=desired_width)
+    np.set_printoptions(linewidth=desired_width)
     pd.set_option("display.max_columns", 100)
     pd.set_option('display.width', 2000)
 

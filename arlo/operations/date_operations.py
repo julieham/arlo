@@ -1,4 +1,5 @@
 import datetime
+import datetime as dt
 import time
 
 import pandas as pd
@@ -8,20 +9,24 @@ from arlo.parameters.param import view_months_before, view_months_after
 
 
 def now():
-    return pd.datetime.now()
+    return dt.datetime.now()
+
+
+def timedelta_minutes(minutes):
+    return dt.timedelta(seconds=60 * minutes)
 
 
 def date_parser_for_reading(date):
-    return pd.to_datetime(date, format='%Y-%m-%d %H:%M:%S.%f', errors='coerce')
+    return dt.datetime.strptime(date, '%Y-%m-%d %H:%M:%S.%f')
 
 
 def string_to_datetime(date):
     date = date.replace(date[10], ' ')
-    return pd.datetime.strptime(date[:19], '%Y-%m-%d %H:%M:%S')
+    return dt.datetime.strptime(date[:19], '%Y-%m-%d %H:%M:%S')
 
 
 def short_string_to_datetime(date):
-    return pd.datetime.strptime(date, '%Y-%m-%d')
+    return dt.datetime.strptime(date, '%Y-%m-%d')
 
 
 def angular_string_to_timestamp(date):

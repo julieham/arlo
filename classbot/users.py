@@ -3,6 +3,7 @@ import json
 import pandas as pd
 import requests
 
+from operations.date_operations import now, timedelta_minutes
 from parameters.credentials import classpass_login
 from parameters.param import classpass_url, classbot_directory
 
@@ -45,7 +46,7 @@ def get_tokens():
 
 def get_new_token(tokens, name):
     token = _request_token(name)
-    time_now = pd.datetime.now()
+    time_now = now()
     tokens = tokens.append({'name': name, 'token': token, 'issue_date': time_now}, ignore_index=True)
     tokens.to_csv(token_file, index=False)
     return token
@@ -53,7 +54,7 @@ def get_new_token(tokens, name):
 
 def get_token(name):
     tokens = get_tokens()
-    tokens = tokens[tokens['issue_date'] > pd.datetime.now() - pd.Timedelta('55 min')]
+    tokens = tokens[tokens['issue_date'] > now() - timedelta_minutes(55)]
     valid_tokens = tokens[tokens['name'] == name]
     if valid_tokens.shape[0] > 0:
         return valid_tokens['token'].iloc[0]

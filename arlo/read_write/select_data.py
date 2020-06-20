@@ -42,7 +42,6 @@ def get_deposit_input_and_output():
     deposit_output = get_deposit_output()
     all_deposit = concat_lines([deposit_input, deposit_output], join='inner')
     set_pandas_print_parameters()
-    print(all_deposit)
     sort_df_by_descending_date(all_deposit)
     return all_deposit
 
