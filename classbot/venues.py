@@ -1,26 +1,24 @@
-import numpy as np
-import pandas as pd
+import json
 
-from parameters.param import classbot_directory
+import requests
 
-venues_filename = classbot_directory + 'venues.npy'
-
-
-def get_venues():
-    return np.load(venues_filename, allow_pickle='TRUE').item()
+from classbot.users import get_token
+from parameters.credentials import classpass_login
+from parameters.param import classpass_url
 
 
-def add_venue(venue_name, venue_id):
-    venues = get_venues()
-    venues[venue_name] = str(venue_id)
-    np.save(venues_filename, venues)
+def get_user_bookmarks(name):
+    user_id = classpass_login[name]['user_id']
+    request_url = classpass_url + '/v1/users/' + user_id + '/bookmarks'
+    header_token = {'CP-Authorization': "Token " + get_token(name)}
+    header_token['Content-Type'] = 'application/json'
+    result = requests.get(request_url, headers=header_token)
 
-
-def remove_venue(venue_name):
-    venues = get_venues()
-    venues.pop(venue_name, None)
-    np.save(venues_filename, venues)
-
-
-def get_venues_for_front():
-    return pd.Series(get_venues()).rename('id').rename_axis('name').reset_index().to_json(orient="records")
+    my_venues = []
+    for venue in result.json()['bookmarks']:
+        name = venue['venue']['name']
+        if 'subtitle' in venue['venue'].keys():
+            subtitle = venue['venue']['subtitle']
+            name += (' • ' + subtitle) * (subtitle != '')
+        my_venues.append(dict({"name": name, "id": venue['venue']['id']}))
+    return json.dumps(my_venues)

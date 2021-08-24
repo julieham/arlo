@@ -5,13 +5,14 @@ from classbot.book import book_class_with_info, plan_booking, cancel_booked_clas
 from classbot.reservations import get_calendar_upcoming
 from classbot.schedule import get_calendar_classes
 from classbot.users import get_users, get_credits
-from classbot.venues import get_venues_for_front
+from classbot.venues import get_user_bookmarks
 
 
 class GetClassbotVenues(Resource):
     @staticmethod
     def get():
-        venues = get_venues_for_front()
+        name = request.args.get('name')
+        venues = get_user_bookmarks(name)
         return json.loads(venues)
 
 
