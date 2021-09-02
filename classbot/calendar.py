@@ -1,6 +1,4 @@
-from datetime import timedelta
-
-from dateutil.utils import today
+from datetime import timedelta, datetime
 
 
 def format_date_for_classpass(date):
@@ -25,7 +23,7 @@ def put_classes_in_calendar(classes, dates):
 
 
 def now():
-    return today()
+    return datetime.now()
 
 
 def remove_empty_dates(calendar):

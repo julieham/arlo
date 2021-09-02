@@ -79,6 +79,8 @@ def json_to_df(json_input, orient):
 
 
 def string_to_bool(b):
+    if type(b) is not str:
+        return False
     return b.lower() == 'true'
 
 

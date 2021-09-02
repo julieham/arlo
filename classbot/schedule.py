@@ -1,10 +1,9 @@
 import json
-from datetime import timedelta
+from datetime import timedelta, datetime
 
-import pandas as pd
 import requests
 
-from classbot.book import get_scheduled_classes_ids
+from classbot.book import get_scheduled_classes_ids, book_class_with_info
 from classbot.calendar import get_dates, put_classes_in_calendar, now, format_date_for_classpass
 from classbot.users import get_token
 from parameters.param import classpass_url, classpass_delta_seconds
@@ -48,12 +47,12 @@ class Classe(dict):
 
 
 def timestamp_to_datetime(timestamp):
-    return pd.datetime.fromtimestamp(int(timestamp))
+    return datetime.fromtimestamp(int(timestamp))
 
 
-def get_classes(name, venue_id, start_date):
+def get_classes(name, venue_id, start_date, upcoming=True):
     request_url = classpass_url + '/v1/venues/' + str(venue_id) + '/schedules?date=' + format_date_for_classpass(
-        start_date) + '&upcoming=true'
+        start_date) + '&upcoming=' + str(upcoming).lower()
     header_token = {'CP-Authorization': "Token " + get_token(name)}
     classes = requests.get(request_url, headers=header_token)
     if classes.status_code == 504:
@@ -69,3 +68,25 @@ def get_calendar_classes(name, venue_id, long=False):
     if long:
         classes += get_classes(name, venue_id, start_date + timedelta(days=14))
     return put_classes_in_calendar(classes, dates)
+
+
+def find_class_id(name, venue_id, my_date, class_name, class_hour):
+    classes = get_classes(name, venue_id, my_date, upcoming=False)
+    matching_classes = [u for u in classes if ((u['name'] == class_name) and (u['datetime'].hour == class_hour))]
+    if len(matching_classes) > 0:
+        the_class = matching_classes[0]
+        if the_class['bookable'] == True:
+            return the_class['id'], the_class['credits']
+        else:
+            return 'not available', 0
+    return 'no matching class found', 0
+
+
+def book_class_without_id(name, venue_id, class_date, class_name, class_hour):
+    class_id, class_credits = find_class_id(name, venue_id, class_date, class_name, class_hour)
+    if int(class_credits) > 0:
+        print(class_id, class_credits)
+        return book_class_with_info(name, class_id, class_credits)
+    else:
+        print(class_id)
+        return False

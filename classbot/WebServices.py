@@ -1,6 +1,6 @@
 from flask import json, request
-from flask_restful import Resource
 
+from arlo.web.authentication import ResourceWithAuth
 from classbot.book import book_class_with_info, plan_booking, cancel_booked_class, cancel_scheduled_class
 from classbot.reservations import get_calendar_upcoming
 from classbot.schedule import get_calendar_classes
@@ -8,7 +8,7 @@ from classbot.users import get_users, get_credits
 from classbot.venues import get_user_bookmarks
 
 
-class GetClassbotVenues(Resource):
+class GetClassbotVenues(ResourceWithAuth):
     @staticmethod
     def get():
         name = request.args.get('name')
@@ -16,20 +16,20 @@ class GetClassbotVenues(Resource):
         return json.loads(venues)
 
 
-class GetClassbotUsers(Resource):
+class GetClassbotUsers(ResourceWithAuth):
     @staticmethod
     def get():
         return get_users()
 
 
-class LoginClasspassUser(Resource):
+class LoginClasspassUser(ResourceWithAuth):
     @staticmethod
     def get():
         name = request.args.get('name')
         return get_credits(name)
 
 
-class GetClasspassCalendar(Resource):
+class GetClasspassCalendar(ResourceWithAuth):
     @staticmethod
     def get():
         venue_id = request.args.get('venue_id')
@@ -38,7 +38,7 @@ class GetClasspassCalendar(Resource):
         return json.loads(json.dumps(get_calendar_classes(name, venue_id, long=long)))
 
 
-class GetClasspassUpcoming(Resource):
+class GetClasspassUpcoming(ResourceWithAuth):
     @staticmethod
     def get():
         name = request.args.get('name')
@@ -46,7 +46,7 @@ class GetClasspassUpcoming(Resource):
         return json.loads(json.dumps(get_calendar_upcoming(name, mobile)))
 
 
-class ClassPassBookNow(Resource):
+class ClassPassBookNow(ResourceWithAuth):
     @staticmethod
     def post():
         class_id = request.args.get('class_id')
@@ -55,7 +55,7 @@ class ClassPassBookNow(Resource):
         return book_class_with_info(user, class_id, class_credits)
 
 
-class ClassPassBookLater(Resource):
+class ClassPassBookLater(ResourceWithAuth):
     @staticmethod
     def post():
         classe_id = request.args.get('class_id')
@@ -66,7 +66,7 @@ class ClassPassBookLater(Resource):
         return True
 
 
-class ClassPassCancelBooked(Resource):
+class ClassPassCancelBooked(ResourceWithAuth):
     @staticmethod
     def post():
         classe_id = request.args.get('class_id')
@@ -74,7 +74,7 @@ class ClassPassCancelBooked(Resource):
         return cancel_booked_class(user, classe_id).status_code == 200
 
 
-class ClassPassCancelScheduled(Resource):
+class ClassPassCancelScheduled(ResourceWithAuth):
     @staticmethod
     def post():
         classe_id = request.args.get('class_id')

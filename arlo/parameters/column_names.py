@@ -17,5 +17,7 @@ payment_method_col = 'method'
 is_linked_col = 'linked'
 is_manual_col = 'manual'
 deposit_name_col = 'deposit'
+
 token_issue_date_col = 'issue_date'
 token_col = 'token'
+token_user_col = 'user'

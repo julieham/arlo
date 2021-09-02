@@ -9,8 +9,8 @@ from flask_restful import Resource
 from arlo.operations.date_operations import minutes_since, now
 from arlo.operations.df_operations import apply_function_to_field_overrule, filter_df_one_value, get_one_field, \
     df_is_empty
-from arlo.parameters.column_names import token_col, token_issue_date_col
-from arlo.parameters.credentials import arlo_user, arlo_password
+from arlo.parameters.column_names import token_col, token_issue_date_col, token_user_col
+from arlo.parameters.credentials import arlo_logins, arlo_admins
 from arlo.parameters.param import minutes_valid_token
 from arlo.read_write.file_manager import tokens_file
 from arlo.read_write.reader import read_df_file
@@ -34,24 +34,51 @@ def token_is_still_valid(date):
     return minutes_since(date) < minutes_valid_token
 
 
-def get_valid_token():
+def _get_all_valid_tokens():
     token_data = read_df_file(tokens_file, parse_dates=[token_issue_date_col])
     if df_is_empty(token_data):
         return set()
     apply_function_to_field_overrule(token_data, 'issue_date', token_is_still_valid, destination='is_valid')
-    return set(get_one_field(filter_df_one_value(token_data, 'is_valid', True), token_col))
+    return filter_df_one_value(token_data, 'is_valid', True)
 
 
-def generate_new_token():
+def get_valid_token():
+    return set(get_one_field(_get_all_valid_tokens(), token_col))
+
+
+def generate_new_token(user):
     token_data = read_df_file(tokens_file, parse_dates=[token_issue_date_col])
     new_token = secrets.token_hex(20)
-    write_df_to_csv(token_data.append(pd.DataFrame([[new_token, now()]], columns=[token_col, token_issue_date_col])), tokens_file, index=False)
+    write_df_to_csv(token_data.append(
+        pd.DataFrame([[new_token, now(), user]], columns=[token_col, token_issue_date_col, token_user_col])),
+                    tokens_file, index=False)
     return new_token
 
 
 def login_is_valid(user, password):
-    return user == arlo_user and checkpw(password.encode(),arlo_password.encode())
+    if user not in arlo_logins.keys():
+        return False
+    return checkpw(password.encode(), arlo_logins[user].encode())
+
+
+def token_is_admin(token):
+    valid_tokens = _get_all_valid_tokens()
+    return valid_tokens[(valid_tokens['token'] == token) & (valid_tokens['user'].isin(arlo_admins))].shape[0] > 0
 
 
 class ResourceWithAuth(Resource):
     decorators = [auth.login_required]
+
+
+def admin_required(f):
+    def decorated(*args, **kwargs):
+        if token_is_admin(auth.get_auth()['token']):
+            return f(*args, **kwargs)
+        else:
+            return auth.auth_error_callback()
+
+    return decorated
+
+
+class ResourceWithAuthAdmin(Resource):
+    decorators = [auth.login_required, admin_required]

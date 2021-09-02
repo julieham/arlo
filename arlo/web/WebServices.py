@@ -16,7 +16,7 @@ from arlo.services.services import force_refresh, get_recap_categories, split_tr
 from arlo.services.set_fields import link_ids_if_possible, unlink_ids_if_possible, edit_transaction
 from arlo.tools.cycle_manager import progress
 from arlo.tools.logging import warn, error
-from arlo.web.authentication import generate_new_token, login_is_valid, ResourceWithAuth
+from arlo.web.authentication import generate_new_token, login_is_valid, ResourceWithAuthAdmin
 from arlo.web.status import success_response, failure_response
 from operations.df_operations import df_is_not_empty
 from tools.clean_n26 import setup_2fa_for_all_accounts
@@ -39,12 +39,12 @@ class Login(Resource):
         user = request.json['username']
         password = request.json['password']
         if login_is_valid(user, password):
-            token = generate_new_token()
+            token = generate_new_token(user)
             return json.loads(json.dumps({'username': user, 'token': token}))
         return make_response(jsonify({'message': ' - authentication failed'}), 400)
 
 
-class SetUpN26(ResourceWithAuth):
+class SetUpN26(ResourceWithAuthAdmin):
     @staticmethod
     def get():
         try:
@@ -54,7 +54,7 @@ class SetUpN26(ResourceWithAuth):
             error(e)
 
 
-class N26State(ResourceWithAuth):
+class N26State(ResourceWithAuthAdmin):
     @staticmethod
     def get():
         from tools.scheduler import is_running
@@ -64,7 +64,7 @@ class N26State(ResourceWithAuth):
 # %% CREATE
 
 
-class AddNameReference(ResourceWithAuth):
+class AddNameReference(ResourceWithAuthAdmin):
     @staticmethod
     def post():
         this_id = request.args.get('id')
@@ -73,7 +73,7 @@ class AddNameReference(ResourceWithAuth):
         return create_name_references_if_possible(this_id, this_name, category)
 
 
-class AddDepositReference(ResourceWithAuth):
+class AddDepositReference(ResourceWithAuthAdmin):
     @staticmethod
     def post():
         this_id = request.args.get('id')
@@ -81,7 +81,7 @@ class AddDepositReference(ResourceWithAuth):
         return create_deposit_references_if_possible(this_id, category)
 
 
-class CreateManualTransaction(ResourceWithAuth):
+class CreateManualTransaction(ResourceWithAuthAdmin):
 
     @staticmethod
     def post():
@@ -91,7 +91,7 @@ class CreateManualTransaction(ResourceWithAuth):
         return response
 
 
-class CreateSingleRecurring(ResourceWithAuth):
+class CreateSingleRecurring(ResourceWithAuthAdmin):
     @staticmethod
     def post():
         this_name = request.json['name']
@@ -99,14 +99,14 @@ class CreateSingleRecurring(ResourceWithAuth):
         return response
 
 
-class CreateSeveralRecurring(ResourceWithAuth):
+class CreateSeveralRecurring(ResourceWithAuthAdmin):
     @staticmethod
     def post():
         response = create_several_recurring(request.json)
         return response
 
 
-class CreateDeposit(ResourceWithAuth):
+class CreateDeposit(ResourceWithAuthAdmin):
     @staticmethod
     def post():
         deposit_data = request.json
@@ -114,7 +114,7 @@ class CreateDeposit(ResourceWithAuth):
         return create_deposit(deposit_data)
 
 
-class CreateDepositDebit(ResourceWithAuth):
+class CreateDepositDebit(ResourceWithAuthAdmin):
     @staticmethod
     def post():
         the_id = request.args.get('id')
@@ -123,7 +123,7 @@ class CreateDepositDebit(ResourceWithAuth):
         return success_response()
 
 
-class DeleteDepositDebit(ResourceWithAuth):
+class DeleteDepositDebit(ResourceWithAuthAdmin):
     @staticmethod
     def post():
         the_id = request.args.get('id')
@@ -133,7 +133,7 @@ class DeleteDepositDebit(ResourceWithAuth):
 
 #%% LIST
 
-class ListOperations (ResourceWithAuth):
+class ListOperations(ResourceWithAuthAdmin):
 
     @staticmethod
     def get():
@@ -142,7 +142,7 @@ class ListOperations (ResourceWithAuth):
         return json.loads(operations)
 
 
-class AmountsDeposit(ResourceWithAuth):
+class AmountsDeposit(ResourceWithAuthAdmin):
 
     @staticmethod
     def get():
@@ -150,7 +150,7 @@ class AmountsDeposit(ResourceWithAuth):
         return make_this_amount_item(get_state_deposit(filter_null=filter_null))
 
 
-class AmountsBank(ResourceWithAuth):
+class AmountsBank(ResourceWithAuthAdmin):
 
     @staticmethod
     def get():
@@ -158,7 +158,7 @@ class AmountsBank(ResourceWithAuth):
         return make_this_amount_item(bank_balances(cycle))
 
 
-class AmountsCycle(ResourceWithAuth):
+class AmountsCycle(ResourceWithAuthAdmin):
 
     @staticmethod
     def get():
@@ -166,7 +166,7 @@ class AmountsCycle(ResourceWithAuth):
         return make_this_amount_item(cycle_balances(cycle))
 
 
-class GetRecurring(ResourceWithAuth):
+class GetRecurring(ResourceWithAuthAdmin):
     @staticmethod
     def get():
         return all_recurring()
@@ -178,45 +178,45 @@ class GetAllCycles(Resource):
         return json.loads(all_cycles())
 
 
-class GetLocalCycles(ResourceWithAuth):
+class GetLocalCycles(ResourceWithAuthAdmin):
     @staticmethod
     def get():
         long = request.args.get('long')
         cycle = request.args.get('cycle')
-        return json.loads(local_cycles(cycle, long=string_to_bool(long) if long != None else False))
+        return json.loads(local_cycles(cycle, long=string_to_bool(long)))
 
 
-class GetAccounts(ResourceWithAuth):
+class GetAccounts(ResourceWithAuthAdmin):
     @staticmethod
     def get():
         return json.loads(all_accounts())
 
 
-class GetCurrencies(ResourceWithAuth):
+class GetCurrencies(ResourceWithAuthAdmin):
     @staticmethod
     def get():
         return json.loads(all_currencies())
 
 
-class GetCategories(ResourceWithAuth):
+class GetCategories(ResourceWithAuthAdmin):
     @staticmethod
     def get():
         return json.loads(all_categories())
 
 
-class GetRecurringDeposit(ResourceWithAuth):
+class GetRecurringDeposit(ResourceWithAuthAdmin):
     @staticmethod
     def get():
         return json.loads(all_recurring_deposit())
 
 
-class GetDepositNames(ResourceWithAuth):
+class GetDepositNames(ResourceWithAuthAdmin):
     @staticmethod
     def get():
         return all_deposit_names()
 
 
-class GetDepositTransactions(ResourceWithAuth):
+class GetDepositTransactions(ResourceWithAuthAdmin):
     @staticmethod
     def get():
         return json.loads(get_deposit_input_and_output().to_json(orient="records"))
@@ -224,7 +224,7 @@ class GetDepositTransactions(ResourceWithAuth):
 
 #%% SERVICE
 
-class RefreshOperations(ResourceWithAuth):
+class RefreshOperations(ResourceWithAuthAdmin):
 
     @staticmethod
     def get():
@@ -232,7 +232,7 @@ class RefreshOperations(ResourceWithAuth):
         return {"status": result}
 
 
-class ForceApiRefresh(ResourceWithAuth):
+class ForceApiRefresh(ResourceWithAuthAdmin):
 
     @staticmethod
     def post():
@@ -240,14 +240,14 @@ class ForceApiRefresh(ResourceWithAuth):
         return {"status": result}
 
 
-class Transfers(ResourceWithAuth):
+class Transfers(ResourceWithAuthAdmin):
     @staticmethod
     def get():
         cycle = request.args.get('cycle')
         return json.loads(json.dumps(get_transfers_to_do(cycle)))
 
 
-class GetRecap(ResourceWithAuth):
+class GetRecap(ResourceWithAuthAdmin):
 
     @staticmethod
     def get():
@@ -256,7 +256,7 @@ class GetRecap(ResourceWithAuth):
         return json.loads(recap)
 
 
-class TransferTransaction(ResourceWithAuth):
+class TransferTransaction(ResourceWithAuthAdmin):
 
     @staticmethod
     def post():
@@ -266,7 +266,7 @@ class TransferTransaction(ResourceWithAuth):
         return success_response()
 
 
-class EditBudget(ResourceWithAuth):
+class EditBudget(ResourceWithAuthAdmin):
 
     @staticmethod
     def post():
@@ -278,7 +278,7 @@ class EditBudget(ResourceWithAuth):
 #%% SET FIELDS
 
 
-class LinkTransactions(ResourceWithAuth):
+class LinkTransactions(ResourceWithAuthAdmin):
 
     @staticmethod
     def post():
@@ -287,7 +287,7 @@ class LinkTransactions(ResourceWithAuth):
         return {"status": result}
 
 
-class UnlinkTransactions(ResourceWithAuth):
+class UnlinkTransactions(ResourceWithAuthAdmin):
 
     @staticmethod
     def post():
@@ -298,7 +298,7 @@ class UnlinkTransactions(ResourceWithAuth):
 
 # %% EDIT
 
-class EditTransaction(ResourceWithAuth):
+class EditTransaction(ResourceWithAuthAdmin):
     @staticmethod
     def post():
         json_input = request.json
@@ -307,7 +307,7 @@ class EditTransaction(ResourceWithAuth):
         return result
 
 
-class SplitTransaction(ResourceWithAuth):
+class SplitTransaction(ResourceWithAuthAdmin):
     @staticmethod
     def post():
         json_input = request.json
@@ -315,7 +315,7 @@ class SplitTransaction(ResourceWithAuth):
         return result
 
 
-class DeleteTransaction(ResourceWithAuth):
+class DeleteTransaction(ResourceWithAuthAdmin):
 
     @staticmethod
     def post():
@@ -329,7 +329,7 @@ class DeleteTransaction(ResourceWithAuth):
         return {"status": result}
 
 
-class CycleProgress(ResourceWithAuth):
+class CycleProgress(ResourceWithAuthAdmin):
 
     @staticmethod
     def get():
@@ -337,7 +337,7 @@ class CycleProgress(ResourceWithAuth):
         return progress(cycle)
 
 
-class GetBudgets(ResourceWithAuth):
+class GetBudgets(ResourceWithAuthAdmin):
 
     @staticmethod
     def get():
@@ -346,14 +346,14 @@ class GetBudgets(ResourceWithAuth):
         return budgets
 
 
-class GetCyclesCalendar(ResourceWithAuth):
+class GetCyclesCalendar(ResourceWithAuthAdmin):
 
     @staticmethod
     def get():
         return json.loads(json.dumps(cycle_calendar()))
 
 
-class EditCalendar(ResourceWithAuth):
+class EditCalendar(ResourceWithAuthAdmin):
 
     @staticmethod
     def post():
@@ -366,7 +366,7 @@ class EditCalendar(ResourceWithAuth):
             return failure_response('invalid data')
 
 
-class AmountsInput(ResourceWithAuth):
+class AmountsInput(ResourceWithAuthAdmin):
 
     @staticmethod
     def get():

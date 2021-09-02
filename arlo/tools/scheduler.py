@@ -8,8 +8,8 @@ RUNNING = 1
 _scheduler = BackgroundScheduler()
 
 
-def start_scheduler(job):
-    _scheduler.add_job(job, trigger='interval', seconds=3600)
+def start_scheduler(job, seconds):
+    _scheduler.add_job(job, trigger='interval', seconds=seconds)
 
     try:
         _scheduler.start()

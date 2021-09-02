@@ -90,4 +90,4 @@ default_currency = 'EUR'
 # %% CLASSPASS
 
 classpass_url = "https://classpass.com/_api"
-classpass_delta_seconds = 3600
+classpass_delta_seconds = 7200  # 3600
