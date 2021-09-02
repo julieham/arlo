@@ -57,9 +57,7 @@ def generate_new_token(user):
 
 def login_is_valid(user, password):
     if user not in arlo_logins.keys():
-        print('user not found in user_list')
         return False
-    print('checking password')
     return checkpw(password.encode(), arlo_logins[user].encode())
 
 
